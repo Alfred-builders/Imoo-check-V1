@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark } from 'lucide-react'
+import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus } from 'lucide-react'
 import { Input } from 'src/components/ui/input'
 import { Badge } from 'src/components/ui/badge'
+import { Button } from 'src/components/ui/button'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { useBatiments, useBatimentLots } from '../api'
 import { formatDate } from '../../../lib/formatters'
 import { useNavigate } from 'react-router-dom'
+import { CreateBuildingModal } from './create-building-modal'
+import { CreateLotModal } from './create-lot-modal'
+import { PatrimoineMap } from './patrimoine-map'
 import type { Batiment, Lot } from '../types'
 
 const typeIcons: Record<string, typeof Building2> = {
@@ -38,13 +42,29 @@ function useDebounce(value: string, delay: number) {
 export function PatrimoinePage() {
   const [search, setSearch] = useState('')
   const [view, setView] = useState<'table' | 'carte'>('table')
+  const [showCreateBuilding, setShowCreateBuilding] = useState(false)
+  const [showCreateLot, setShowCreateLot] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
+  const navigate = useNavigate()
 
   const { data, isLoading } = useBatiments({ search: debouncedSearch || undefined })
   const batiments = data?.data ?? []
 
   return (
     <div className="p-6 space-y-4">
+      {/* Modals */}
+      <CreateBuildingModal
+        open={showCreateBuilding}
+        onOpenChange={setShowCreateBuilding}
+        onCreated={(id) => navigate(`/app/patrimoine/batiments/${id}`)}
+      />
+      <CreateLotModal
+        open={showCreateLot}
+        onOpenChange={setShowCreateLot}
+        onCreated={(id) => navigate(`/app/patrimoine/lots/${id}`)}
+        onCreateBatiment={() => { setShowCreateLot(false); setShowCreateBuilding(true) }}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -54,6 +74,9 @@ export function PatrimoinePage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button size="sm" onClick={() => setShowCreateLot(true)}>
+            <Plus className="h-4 w-4 mr-1" /> Nouveau lot
+          </Button>
           <button
             onClick={() => setView('table')}
             className={`p-2 rounded-lg transition-colors ${view === 'table' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'}`}
@@ -122,15 +145,8 @@ export function PatrimoinePage() {
         </div>
       )}
 
-      {/* Map placeholder */}
-      {view === 'carte' && (
-        <div className="border border-border rounded-lg h-[500px] flex items-center justify-center text-muted-foreground">
-          <div className="text-center">
-            <Map className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p>Vue carte — bientôt disponible</p>
-          </div>
-        </div>
-      )}
+      {/* Map view */}
+      {view === 'carte' && <PatrimoineMap batiments={batiments} />}
     </div>
   )
 }

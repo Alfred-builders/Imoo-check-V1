@@ -1,15 +1,18 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, Pencil, Archive, ArchiveRestore } from 'lucide-react'
+import { ArrowLeft, MapPin, Pencil, Archive, ArchiveRestore, Plus } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Card } from 'src/components/ui/card'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { useBatimentDetail, useBatimentLots, useUpdateBatiment } from '../api'
+import { CreateLotModal } from './create-lot-modal'
 import { formatDate } from '../../../lib/formatters'
 
 export function BuildingDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [showCreateLot, setShowCreateLot] = useState(false)
   const { data: batiment, isLoading } = useBatimentDetail(id)
   const { data: lots } = useBatimentLots(id)
   const updateMutation = useUpdateBatiment()
@@ -140,11 +143,24 @@ export function BuildingDetailPage() {
         </Card>
       </div>
 
+      {/* Create lot modal */}
+      <CreateLotModal
+        open={showCreateLot}
+        onOpenChange={setShowCreateLot}
+        preselectedBatimentId={id}
+        onCreated={(lotId) => navigate(`/app/patrimoine/lots/${lotId}`)}
+      />
+
       {/* Lots table */}
       <Card className="p-5">
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
-          Lots ({lots?.length ?? 0})
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+            Lots ({lots?.length ?? 0})
+          </h2>
+          <Button size="sm" variant="outline" onClick={() => setShowCreateLot(true)}>
+            <Plus className="h-4 w-4 mr-1" /> Ajouter un lot
+          </Button>
+        </div>
         {lots && lots.length > 0 ? (
           <div className="border border-border rounded-lg overflow-hidden">
             <div className="grid grid-cols-[1fr_100px_80px_80px_80px_150px] gap-3 px-4 py-2 bg-muted/50 text-xs text-muted-foreground uppercase tracking-wider">
