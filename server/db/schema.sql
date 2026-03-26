@@ -370,6 +370,7 @@ CREATE TABLE IF NOT EXISTS valeur_referentiel (
   valeur VARCHAR(255) NOT NULL,
   source VARCHAR(15) NOT NULL DEFAULT 'plateforme' CHECK (source IN ('plateforme', 'workspace', 'terrain')),
   est_archive BOOLEAN NOT NULL DEFAULT false,
+  ordre_affichage INT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

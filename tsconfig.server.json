@@ -4,6 +4,8 @@
     "outDir": "dist-server",
     "rootDir": "server",
     "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "rewriteRelativeImportExtensions": true,
     "declaration": false,
     "sourceMap": true
   },
