@@ -10,7 +10,21 @@ import { useNavigate } from 'react-router-dom'
 import { CreateBuildingModal } from './create-building-modal'
 import { CreateLotModal } from './create-lot-modal'
 import { PatrimoineMap } from './patrimoine-map'
+import { ColumnConfig, useColumnPreferences, type ColumnDef } from '../../../components/shared/column-config'
 import type { Batiment, Lot } from '../types'
+
+const BATIMENT_COLUMNS: ColumnDef[] = [
+  { id: 'designation', label: 'Designation', defaultVisible: true },
+  { id: 'type', label: 'Type', defaultVisible: true },
+  { id: 'adresse', label: 'Adresse', defaultVisible: true },
+  { id: 'nb_lots', label: 'Lots', defaultVisible: true },
+  { id: 'derniere_mission', label: 'Derniere mission', defaultVisible: true },
+  { id: 'missions_a_venir', label: 'A venir', defaultVisible: true },
+  { id: 'annee_construction', label: 'Annee construction', defaultVisible: false },
+  { id: 'nb_etages', label: 'Etages', defaultVisible: false },
+  { id: 'num_batiment', label: 'N batiment', defaultVisible: false },
+  { id: 'created_at', label: 'Cree le', defaultVisible: false },
+]
 
 const typeIcons: Record<string, typeof Building2> = {
   immeuble: Building2,
@@ -46,9 +60,12 @@ export function PatrimoinePage() {
   const [showCreateLot, setShowCreateLot] = useState(false)
   const debouncedSearch = useDebounce(search, 300)
   const navigate = useNavigate()
+  const { visible: visibleCols, setVisible: setVisibleCols } = useColumnPreferences('patrimoine_batiments', BATIMENT_COLUMNS)
 
   const { data, isLoading } = useBatiments({ search: debouncedSearch || undefined })
   const batiments = data?.data ?? []
+
+  const isColVisible = (id: string) => visibleCols.includes(id)
 
   return (
     <div className="p-6 space-y-4">
@@ -74,9 +91,15 @@ export function PatrimoinePage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={() => setShowCreateLot(true)}>
+          <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-amber-600 hover:bg-amber-700 text-white">
             <Plus className="h-4 w-4 mr-1" /> Nouveau lot
           </Button>
+          <ColumnConfig
+            page="patrimoine_batiments"
+            columns={BATIMENT_COLUMNS}
+            visibleColumns={visibleCols}
+            onColumnsChange={setVisibleCols}
+          />
           <button
             onClick={() => setView('table')}
             className={`p-2 rounded-lg transition-colors ${view === 'table' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent'}`}

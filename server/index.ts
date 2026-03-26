@@ -7,6 +7,7 @@ import dotenv from 'dotenv'
 import authRoutes from './routes/auth.js'
 import batimentRoutes from './routes/batiments.js'
 import lotRoutes from './routes/lots.js'
+import preferenceRoutes from './routes/preferences.js'
 import { AppError } from './utils/errors.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -34,6 +35,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/batiments', batimentRoutes)
 app.use('/api/lots', lotRoutes)
+app.use('/api/preferences', preferenceRoutes)
 
 // Global error handler
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

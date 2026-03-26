@@ -5,6 +5,7 @@ import { Input } from 'src/components/ui/input'
 import { Label } from 'src/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
 import { Textarea } from 'src/components/ui/textarea'
+import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
 import { useCreateBatiment } from '../api'
 import { toast } from 'sonner'
 
@@ -21,6 +22,8 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated }: Props) {
   const [codePostal, setCodePostal] = useState('')
   const [ville, setVille] = useState('')
   const [complement, setComplement] = useState('')
+  const [latitude, setLatitude] = useState<number | undefined>()
+  const [longitude, setLongitude] = useState<number | undefined>()
   const [nbEtages, setNbEtages] = useState('')
   const [anneeConstruction, setAnneeConstruction] = useState('')
   const [commentaire, setCommentaire] = useState('')
@@ -54,6 +57,8 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated }: Props) {
           complement: complement || undefined,
           code_postal: codePostal,
           ville,
+          latitude,
+          longitude,
         }],
       })
       toast.success(`Bâtiment "${designation}" créé`)
@@ -100,12 +105,23 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated }: Props) {
             <p className="text-sm font-medium mb-3">Adresse principale</p>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label>Rue *</Label>
-                <Input value={rue} onChange={(e) => setRue(e.target.value)} placeholder="12 Rue des Lilas" required />
+                <Label>Adresse *</Label>
+                <AddressAutocomplete
+                  onChange={(addr) => {
+                    if (addr) {
+                      setRue(addr.rue)
+                      setCodePostal(addr.code_postal)
+                      setVille(addr.ville)
+                      setLatitude(addr.latitude)
+                      setLongitude(addr.longitude)
+                    }
+                  }}
+                  placeholder="Rechercher une adresse..."
+                />
               </div>
               <div className="space-y-2">
-                <Label>Complément</Label>
-                <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Bât. A, Entrée 2" />
+                <Label>Complement</Label>
+                <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Bat. A, Entree 2" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
