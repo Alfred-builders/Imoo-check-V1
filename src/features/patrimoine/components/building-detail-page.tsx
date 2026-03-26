@@ -160,38 +160,42 @@ export function BuildingDetailPage() {
 
         {/* Lots tab */}
         <TabsContent value="lots" className="mt-4">
-          <Card className="shadow-sm border-gray-200">
-            <CardHeader className="pb-3 flex-row items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-gray-700">Lots</CardTitle>
+          <Card className="shadow-sm border-gray-200 overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4 text-gray-400" />
+                <h3 className="text-sm font-semibold text-gray-900">Lots</h3>
+                <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{lots?.length ?? 0}</Badge>
+              </div>
               <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-amber-600 hover:bg-amber-700 text-white h-8 text-xs">
                 <Plus className="h-3.5 w-3.5 mr-1" /> Ajouter un lot
               </Button>
-            </CardHeader>
-            <CardContent className="p-0">
+            </div>
+            <div>
               {lots && lots.length > 0 ? (
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-gray-50/80 hover:bg-gray-50/80">
-                      <TableHead className="text-xs font-semibold text-gray-500">Designation</TableHead>
-                      <TableHead className="text-xs font-semibold text-gray-500">Type</TableHead>
-                      <TableHead className="text-xs font-semibold text-gray-500">Etage</TableHead>
-                      <TableHead className="text-xs font-semibold text-gray-500">Surface</TableHead>
-                      <TableHead className="text-xs font-semibold text-gray-500">Meuble</TableHead>
-                      <TableHead className="text-xs font-semibold text-gray-500">Proprietaire</TableHead>
-                      <TableHead className="w-10" />
+                    <TableRow className="bg-gray-50 hover:bg-gray-50">
+                      <TableHead className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Designation</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Type</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Etage</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Surface</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Meuble</TableHead>
+                      <TableHead className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Proprietaire</TableHead>
+                      <TableHead className="w-8" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {lots.map((lot) => {
                       const propLabel = lot.proprietaires?.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom).join(', ') || '—'
                       return (
-                        <TableRow key={lot.id} className="cursor-pointer hover:bg-amber-50/50" onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}>
-                          <TableCell className="font-medium text-gray-900">{lot.designation}</TableCell>
-                          <TableCell className="text-gray-500 capitalize text-xs">{lot.type_bien.replace('_', ' ')}</TableCell>
-                          <TableCell className="text-gray-500 text-xs">{lot.etage || '—'}</TableCell>
-                          <TableCell className="text-gray-500 text-xs">{lot.surface ? `${lot.surface} m²` : '—'}</TableCell>
-                          <TableCell>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Oui</Badge> : <span className="text-gray-400 text-xs">Non</span>}</TableCell>
-                          <TableCell className="text-gray-500 text-xs truncate max-w-[150px]">{propLabel}</TableCell>
+                        <TableRow key={lot.id} className="cursor-pointer hover:bg-amber-50/40 transition-colors" onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}>
+                          <TableCell className="font-medium text-gray-900 text-sm">{lot.designation}</TableCell>
+                          <TableCell><Badge variant="outline" className="text-[10px] capitalize font-normal">{lot.type_bien.replace('_', ' ')}</Badge></TableCell>
+                          <TableCell className="text-gray-600 text-sm">{lot.etage || '—'}</TableCell>
+                          <TableCell className="text-gray-600 text-sm">{lot.surface ? `${lot.surface} m²` : '—'}</TableCell>
+                          <TableCell>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Meuble</Badge> : <span className="text-gray-400 text-xs">Non</span>}</TableCell>
+                          <TableCell className="text-gray-600 text-sm truncate max-w-[160px]">{propLabel}</TableCell>
                           <TableCell><ExternalLink className="h-3.5 w-3.5 text-gray-300" /></TableCell>
                         </TableRow>
                       )
@@ -201,7 +205,7 @@ export function BuildingDetailPage() {
               ) : (
                 <div className="py-10 text-center text-gray-400 text-sm">Aucun lot dans ce batiment</div>
               )}
-            </CardContent>
+            </div>
           </Card>
         </TabsContent>
       </Tabs>

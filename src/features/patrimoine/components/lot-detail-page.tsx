@@ -49,12 +49,18 @@ export function LotDetailPage() {
     try { await updateMutation.mutateAsync({ id, est_archive: !lot!.est_archive }) } catch {}
   }
 
+  const propLabel = proprietaires.length > 0
+    ? proprietaires.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom).join(', ')
+    : null
+
   const quickStats = [
-    lot.etage ? { icon: Home, text: `Etage ${lot.etage}` } : { icon: Home, text: 'RDC' },
-    lot.surface ? { icon: Ruler, text: `${lot.surface} m²` } : null,
-    lot.nb_pieces ? { icon: BedDouble, text: lot.nb_pieces } : null,
-    lot.dpe_classe ? { icon: Zap, text: `DPE ${lot.dpe_classe}` } : null,
-  ].filter(Boolean) as { icon: typeof Home; text: string }[]
+    { icon: Home, text: lot.etage ? `Etage ${lot.etage}` : 'RDC', show: true },
+    { icon: Ruler, text: `${lot.surface} m²`, show: !!lot.surface },
+    { icon: BedDouble, text: lot.nb_pieces || '', show: !!lot.nb_pieces },
+    { icon: Building2, text: typeBienLabels[lot.type_bien] || lot.type_bien, show: true },
+    { icon: Zap, text: `DPE ${lot.dpe_classe}`, show: !!lot.dpe_classe },
+    { icon: User, text: propLabel || '', show: !!propLabel },
+  ].filter(s => s.show) as { icon: typeof Home; text: string; show: boolean }[]
 
   return (
     <div className="p-6 space-y-6 max-w-6xl mx-auto">
@@ -88,23 +94,28 @@ export function LotDetailPage() {
       </div>
 
       {/* Quick stats bar */}
-      {quickStats.length > 0 && (
-        <Card className="shadow-sm border-gray-200">
-          <CardContent className="p-0">
-            <div className="flex items-center divide-x divide-gray-100">
-              {quickStats.map(({ icon: Icon, text }, i) => (
-                <div key={i} className="flex items-center gap-2 px-5 py-3 text-sm">
-                  <Icon className="h-4 w-4 text-gray-400" />
-                  <span className="font-medium text-gray-700">{text}</span>
+      <div className="grid grid-cols-6 gap-3">
+        {[
+          { icon: Home, label: 'Etage', value: lot.etage || 'RDC', bg: 'bg-blue-50', color: 'text-blue-600' },
+          { icon: Building2, label: 'Type', value: typeBienLabels[lot.type_bien] || lot.type_bien, bg: 'bg-amber-50', color: 'text-amber-600' },
+          { icon: Ruler, label: 'Surface', value: lot.surface ? `${lot.surface} m²` : '—', bg: 'bg-emerald-50', color: 'text-emerald-600' },
+          { icon: BedDouble, label: 'Pieces', value: lot.nb_pieces || '—', bg: 'bg-violet-50', color: 'text-violet-600' },
+          { icon: Zap, label: 'DPE', value: lot.dpe_classe || '—', bg: 'bg-orange-50', color: 'text-orange-600' },
+          { icon: User, label: 'Proprietaire', value: propLabel || '—', bg: 'bg-rose-50', color: 'text-rose-600' },
+        ].map(({ icon: Icon, label, value, bg, color }) => (
+          <Card key={label} className="shadow-sm border-gray-200">
+            <CardContent className="p-3">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className={`h-6 w-6 rounded flex items-center justify-center ${bg}`}>
+                  <Icon className={`h-3.5 w-3.5 ${color}`} />
                 </div>
-              ))}
-              {lot.emplacement_palier && (
-                <div className="px-5 py-3 text-sm text-gray-500">{lot.emplacement_palier}</div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">{label}</span>
+              </div>
+              <p className="text-sm font-semibold text-gray-900 truncate">{value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Tabs */}
       <Tabs defaultValue="infos" className="w-full">
