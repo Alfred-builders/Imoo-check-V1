@@ -5,37 +5,38 @@
   --font-body: 'Satoshi', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
-  --color-card: #0a0a0c;
-  --color-card-foreground: #fafafa;
-  --color-popover: #0a0a0c;
-  --color-popover-foreground: #fafafa;
-  --color-primary: #f5a623;
-  --color-primary-foreground: #09090b;
-  --color-secondary: #1c1c22;
-  --color-secondary-foreground: #fafafa;
-  --color-muted: #18181b;
-  --color-muted-foreground: #a1a1aa;
-  --color-accent: #1c1c22;
-  --color-accent-foreground: #fafafa;
+  /* Light mode */
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0f172a;
+  --color-primary: #f59e0b;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #334155;
+  --color-muted: #f8fafc;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f172a;
   --color-destructive: #ef4444;
-  --color-destructive-foreground: #fafafa;
-  --color-border: #27272a;
-  --color-input: #27272a;
-  --color-ring: #f5a623;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #f59e0b;
 
   /* Status colors */
-  --color-status-planifiee: #93c5fd;
-  --color-status-assignee: #fde68a;
-  --color-status-terminee: #86efac;
-  --color-status-annulee: #fca5a5;
-  --color-status-infructueux: #d4d4d8;
+  --color-status-planifiee: #dbeafe;
+  --color-status-assignee: #fef3c7;
+  --color-status-terminee: #dcfce7;
+  --color-status-annulee: #fee2e2;
+  --color-status-infructueux: #f1f5f9;
 
   /* Map colors */
   --color-map-upcoming: #3b82f6;
   --color-map-recent: #22c55e;
-  --color-map-inactive: #71717a;
+  --color-map-inactive: #94a3b8;
 
   --radius-sm: 0.5rem;
   --radius-md: 0.625rem;
