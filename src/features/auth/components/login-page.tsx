@@ -36,15 +36,21 @@ export function LoginPage() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div>
+      <div className="mb-8">
+        <h2 className="text-xl font-display font-bold text-gray-900">Connexion</h2>
+        <p className="text-sm text-gray-500 mt-1">Accédez à votre espace de travail</p>
+      </div>
+
       {error && (
-        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+        <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
           {error}
         </div>
       )}
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-1.5">
+          <Label htmlFor="email" className="text-gray-700 text-sm font-medium">Email</Label>
           <Input
             id="email"
             type="email"
@@ -53,10 +59,11 @@ export function LoginPage() {
             placeholder="admin@flatchecker.fr"
             required
             autoFocus
+            className="h-10"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Mot de passe</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="password" className="text-gray-700 text-sm font-medium">Mot de passe</Label>
           <Input
             id="password"
             type="password"
@@ -64,15 +71,17 @@ export function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
+            className="h-10"
           />
         </div>
-      </div>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Connexion...' : 'Se connecter'}
-      </Button>
-      <p className="text-center text-sm text-muted-foreground">
-        Pas de compte ? Contactez votre administrateur.
+        <Button type="submit" className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white font-medium" disabled={loading}>
+          {loading ? 'Connexion...' : 'Se connecter'}
+        </Button>
+      </form>
+
+      <p className="text-center text-xs text-gray-400 mt-6">
+        Pas de compte ? Contactez votre administrateur pour une invitation.
       </p>
-    </form>
+    </div>
   )
 }

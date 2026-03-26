@@ -105,9 +105,9 @@ export function PatrimoinePage() {
 
       {/* Table view */}
       {view === 'table' && (
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
           {/* Header row */}
-          <div className="grid grid-cols-[1fr_120px_200px_80px_120px_100px] gap-4 px-4 py-3 bg-muted/50 text-xs font-medium text-muted-foreground uppercase tracking-wider border-b border-border">
+          <div className="grid grid-cols-[1fr_120px_200px_80px_120px_100px] gap-4 px-4 py-2.5 bg-gray-50 text-[11px] font-semibold text-gray-500 uppercase tracking-wider border-b border-border">
             <div>Désignation</div>
             <div>Type</div>
             <div>Adresse</div>
