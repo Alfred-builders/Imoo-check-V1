@@ -19,22 +19,31 @@ class ApiClientError extends Error {
   }
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (response.status === 401) {
-    // Try silent refresh
-    const refreshResponse = await fetch(`${API_BASE}/auth/refresh`, {
-      method: 'POST',
-      credentials: 'include',
-    })
+let isRefreshing = false
 
-    if (refreshResponse.ok) {
-      // Retry original request — caller must handle this
-      throw new ApiClientError('Token refreshed, retry', 'TOKEN_REFRESHED', 401)
+async function handleResponse<T>(response: Response, skipAuthRedirect: boolean): Promise<T> {
+  if (response.status === 401 && !skipAuthRedirect) {
+    if (!isRefreshing) {
+      isRefreshing = true
+      try {
+        const refreshResponse = await fetch(`${API_BASE}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        })
+        if (refreshResponse.ok) {
+          isRefreshing = false
+          throw new ApiClientError('Token refreshed, retry', 'TOKEN_REFRESHED', 401)
+        }
+      } finally {
+        isRefreshing = false
+      }
     }
-
-    // Refresh failed — redirect to login
-    window.location.href = '/login'
+    // Refresh failed — don't hard redirect, throw so caller handles it
     throw new ApiClientError('Session expired', 'SESSION_EXPIRED', 401)
+  }
+
+  if (response.status === 401 && skipAuthRedirect) {
+    throw new ApiClientError('Non authentifié', 'UNAUTHORIZED', 401)
   }
 
   if (!response.ok) {
@@ -54,9 +63,9 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 export async function api<T>(
   path: string,
-  options?: RequestInit & { retry?: boolean }
+  options?: RequestInit & { retry?: boolean; skipAuthRedirect?: boolean }
 ): Promise<T> {
-  const { retry = true, ...fetchOptions } = options ?? {}
+  const { retry = true, skipAuthRedirect = false, ...fetchOptions } = options ?? {}
 
   try {
     const response = await fetch(`${API_BASE}${path}`, {
@@ -68,10 +77,9 @@ export async function api<T>(
       },
     })
 
-    return await handleResponse<T>(response)
+    return await handleResponse<T>(response, skipAuthRedirect)
   } catch (error) {
     if (error instanceof ApiClientError && error.code === 'TOKEN_REFRESHED' && retry) {
-      // Retry once after refresh
       const response = await fetch(`${API_BASE}${path}`, {
         ...fetchOptions,
         credentials: 'include',
@@ -80,7 +88,7 @@ export async function api<T>(
           ...fetchOptions?.headers,
         },
       })
-      return await handleResponse<T>(response)
+      return await handleResponse<T>(response, skipAuthRedirect)
     }
     throw error
   }

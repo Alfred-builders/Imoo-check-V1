@@ -47,9 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   })
   const queryClient = useQueryClient()
 
-  // Check auth on mount
+  // Check auth on mount — skipAuthRedirect to avoid infinite reload loop
   useEffect(() => {
-    api<{ id: string; email: string; nom: string; prenom: string; workspace: Workspace; role: string }>('/auth/me')
+    api<{ id: string; email: string; nom: string; prenom: string; workspace: Workspace; role: string }>(
+      '/auth/me',
+      { skipAuthRedirect: true }
+    )
       .then((data) => {
         setState({
           user: { id: data.id, email: data.email, nom: data.nom, prenom: data.prenom },
