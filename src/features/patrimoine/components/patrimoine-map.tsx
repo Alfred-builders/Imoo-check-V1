@@ -5,7 +5,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import type { Batiment } from '../types'
 
 // Token set via env or fallback to public demo token
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiaW1tb2NoZWNrZXIiLCJhIjoiY200OHh4MXdsMDB5OTJqcTFwNHRqZjdzYSJ9.placeholder'
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || ''
 
 function getMarkerColor(bat: Batiment): string {
   if (bat.missions_a_venir > 0) return '#3b82f6' // blue - upcoming
@@ -29,6 +29,7 @@ export function PatrimoineMap({ batiments }: Props) {
   // Initialize map
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
+    if (!mapboxgl.accessToken) return // No token — map won't render
 
     const map = new mapboxgl.Map({
       container: mapContainer.current,
