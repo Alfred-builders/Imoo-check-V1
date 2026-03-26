@@ -7,3 +7,6 @@ dist-server/
 .vite/
 *.local
 core.*
+
+# AI chat uploads
+.uploads/

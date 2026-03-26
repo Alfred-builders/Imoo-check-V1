@@ -82,8 +82,8 @@ export function MainLayout() {
                   return item.disabled ? (
                     <div
                       key={item.href}
-                      className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] cursor-not-allowed opacity-30"
-                      style={{ color: 'var(--color-sidebar-muted)' }}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] cursor-not-allowed opacity-50"
+                      style={{ color: '#9ca3af' }}
                       title="Bientôt disponible"
                     >
                       <item.icon className="h-[18px] w-[18px]" />
