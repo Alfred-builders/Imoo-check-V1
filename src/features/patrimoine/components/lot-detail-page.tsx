@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, Pencil, AlertTriangle, Thermometer, Car, Warehouse, Plus, X, Search } from 'lucide-react'
+import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, ChevronDown, Pencil, AlertTriangle, Thermometer, Car, Warehouse, Plus, X, Search, Flame, Droplets } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
@@ -180,21 +180,7 @@ export function LotDetailPage() {
 
               {/* Energie + Annexes */}
               <div className="space-y-4">
-                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Energie</h2>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
-                      <Zap className="h-4 w-4 text-orange-500" />
-                      <span className="text-xs text-gray-500 flex-1">DPE</span>
-                      <span className="text-sm font-bold text-gray-900">{lot.dpe_classe || '—'}</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
-                      <Thermometer className="h-4 w-4 text-rose-500" />
-                      <span className="text-xs text-gray-500 flex-1">GES</span>
-                      <span className="text-sm font-bold text-gray-900">{lot.ges_classe || '—'}</span>
-                    </div>
-                  </div>
-                </div>
+                <EnergieSection lot={lot} />
                 <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                   <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Annexes</h2>
                   <div className="space-y-2">
@@ -263,6 +249,57 @@ export function LotDetailPage() {
             </div>
           </TabsContent>
         </Tabs>
+      )}
+    </div>
+  )
+}
+
+// Collapsible Energie section
+function EnergieSection({ lot }: { lot: any }) {
+  const [open, setOpen] = useState(true)
+
+  const energyLabels: Record<string, string> = {
+    individuelle: 'Individuelle', collective: 'Collective', aucun: 'Aucun', autre: 'Autre',
+    individuel: 'Individuel', collectif: 'Collectif',
+    gaz: 'Gaz', electrique: 'Electrique', fioul: 'Fioul',
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50/50 transition-colors"
+      >
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Energie</h2>
+        {open ? <ChevronDown className="h-4 w-4 text-gray-300" /> : <ChevronRight className="h-4 w-4 text-gray-300" />}
+      </button>
+      {open && (
+        <div className="px-5 pb-5 space-y-2">
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+            <Zap className="h-4 w-4 text-orange-500" />
+            <span className="text-xs text-gray-500 flex-1">DPE</span>
+            <span className="text-sm font-bold text-gray-900">{lot.dpe_classe || '—'}</span>
+          </div>
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+            <Thermometer className="h-4 w-4 text-rose-500" />
+            <span className="text-xs text-gray-500 flex-1">GES</span>
+            <span className="text-sm font-bold text-gray-900">{lot.ges_classe || '—'}</span>
+          </div>
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+            <Droplets className="h-4 w-4 text-blue-500" />
+            <span className="text-xs text-gray-500 flex-1">Eau chaude</span>
+            <span className="text-sm font-medium text-gray-900">
+              {lot.eau_chaude_type ? `${energyLabels[lot.eau_chaude_type] || lot.eau_chaude_type}${lot.eau_chaude_mode ? ` (${energyLabels[lot.eau_chaude_mode] || lot.eau_chaude_mode})` : ''}` : '—'}
+            </span>
+          </div>
+          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+            <Flame className="h-4 w-4 text-red-500" />
+            <span className="text-xs text-gray-500 flex-1">Chauffage</span>
+            <span className="text-sm font-medium text-gray-900">
+              {lot.chauffage_type ? `${energyLabels[lot.chauffage_type] || lot.chauffage_type}${lot.chauffage_mode ? ` (${energyLabels[lot.chauffage_mode] || lot.chauffage_mode})` : ''}` : '—'}
+            </span>
+          </div>
+        </div>
       )}
     </div>
   )

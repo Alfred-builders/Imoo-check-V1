@@ -66,6 +66,10 @@ export interface LotDetail extends Lot {
   batiment?: { id: string; designation: string; type: string }
   dpe_classe?: string | null
   ges_classe?: string | null
+  eau_chaude_type?: string | null
+  eau_chaude_mode?: string | null
+  chauffage_type?: string | null
+  chauffage_mode?: string | null
   num_cave?: string | null
   num_parking?: string | null
   commentaire?: string | null
