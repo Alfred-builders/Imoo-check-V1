@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, Pencil, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, Pencil, AlertTriangle, Thermometer, Car, Warehouse } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
@@ -17,11 +17,11 @@ const typeBienLabels: Record<string, string> = {
   local_commercial: 'Local commercial', parking: 'Parking', cave: 'Cave', autre: 'Autre',
 }
 
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+function InfoItem({ label, value, className }: { label: string; value: React.ReactNode; className?: string }) {
   return (
-    <div className="flex items-center justify-between py-2">
-      <dt className="text-sm text-gray-500">{label}</dt>
-      <dd className="text-sm font-medium text-gray-900">{value || '—'}</dd>
+    <div className={`flex items-center justify-between py-2 ${className ?? ''}`}>
+      <span className="text-xs text-gray-400">{label}</span>
+      <span className="text-sm font-medium text-gray-800">{value || '—'}</span>
     </div>
   )
 }
@@ -35,10 +35,10 @@ export function LotDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6 max-w-6xl mx-auto">
+      <div className="p-6 space-y-5 max-w-6xl mx-auto">
         <Skeleton className="h-10 w-72" />
-        <Skeleton className="h-14 w-full rounded-xl" />
-        <div className="grid grid-cols-5 gap-5"><Skeleton className="col-span-3 h-72 rounded-xl" /><Skeleton className="col-span-2 h-72 rounded-xl" /></div>
+        <Skeleton className="h-16 w-full rounded-xl" />
+        <div className="grid grid-cols-3 gap-4"><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-64 rounded-xl" /></div>
       </div>
     )
   }
@@ -50,99 +50,87 @@ export function LotDetailPage() {
 
   async function handleArchive() {
     if (!id) return
-    try { await updateMutation.mutateAsync({ id, est_archive: !lot!.est_archive }) } catch {}
+    try {
+      await updateMutation.mutateAsync({ id, est_archive: !lot!.est_archive })
+      toast.success(lot!.est_archive ? 'Lot restaure' : 'Lot archive')
+    } catch (err: any) {
+      toast.error(err.message || 'Erreur')
+    }
   }
 
-  const propLabel = proprietaires.length > 0
-    ? proprietaires.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom).join(', ')
-    : null
-
-  const quickStats = [
-    { icon: Home, text: lot.etage ? `Etage ${lot.etage}` : 'RDC', show: true },
-    { icon: Ruler, text: `${lot.surface} m²`, show: !!lot.surface },
-    { icon: BedDouble, text: lot.nb_pieces || '', show: !!lot.nb_pieces },
-    { icon: Building2, text: typeBienLabels[lot.type_bien] || lot.type_bien, show: true },
-    { icon: Zap, text: `DPE ${lot.dpe_classe}`, show: !!lot.dpe_classe },
-    { icon: User, text: propLabel || '', show: !!propLabel },
-  ].filter(s => s.show) as { icon: typeof Home; text: string; show: boolean }[]
-
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="p-6 space-y-5 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-start gap-4">
-        <Button variant="ghost" size="icon" className="mt-0.5 shrink-0 h-9 w-9" onClick={() => navigate(-1)}>
+      <div className="flex items-start gap-3">
+        <Button variant="ghost" size="icon" className="mt-0.5 shrink-0 h-8 w-8" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h1 className="text-2xl font-display font-bold text-gray-900">{lot.designation}</h1>
-            <Badge variant="outline" className="font-medium text-xs">{typeBienLabels[lot.type_bien] || lot.type_bien}</Badge>
-            {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-xs">Meuble</Badge>}
-            {lot.est_archive && <Badge variant="destructive" className="text-xs">Archive</Badge>}
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-xl font-display font-bold text-gray-900">{lot.designation}</h1>
+            <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] font-medium">
+              {typeBienLabels[lot.type_bien] || lot.type_bien}
+            </Badge>
+            {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Meuble</Badge>}
+            {lot.est_archive && <Badge variant="destructive" className="text-[10px]">Archive</Badge>}
           </div>
           {lot.batiment && (
             <button
-              className="text-[13px] text-gray-500 mt-1 flex items-center gap-1 hover:text-amber-600 transition-colors group"
+              className="text-xs text-gray-400 mt-0.5 flex items-center gap-1 hover:text-amber-600 transition-colors group"
               onClick={() => navigate(`/app/patrimoine/batiments/${lot.batiment!.id}`)}
             >
-              <Building2 className="h-3.5 w-3.5" />
+              <Building2 className="h-3 w-3" />
               {lot.batiment.designation}
-              <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <ChevronRight className="h-2.5 w-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           {!lot.est_archive && (
-            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-              <Pencil className="h-3.5 w-3.5 mr-1.5" /> Modifier
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setEditing(!editing)}>
+              <Pencil className="h-3 w-3 mr-1" /> {editing ? 'Annuler' : 'Modifier'}
             </Button>
           )}
-          <Button variant="outline" size="sm" onClick={handleArchive}>
-            {lot.est_archive ? <ArchiveRestore className="h-3.5 w-3.5 mr-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleArchive}>
+            {lot.est_archive ? <ArchiveRestore className="h-3 w-3 mr-1" /> : <Archive className="h-3 w-3 mr-1" />}
             {lot.est_archive ? 'Restaurer' : 'Archiver'}
           </Button>
         </div>
       </div>
 
-      {/* Archive banner */}
       {lot.est_archive && (
-        <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          Ce lot est archive. Les modifications et la creation de missions sont desactivees.
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          Ce lot est archive. Les modifications sont desactivees.
         </div>
       )}
 
-      {/* Quick stats bar */}
-      <div className="grid grid-cols-6 gap-3">
+      {/* Quick stats band */}
+      <div className="flex items-center gap-0 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden divide-x divide-gray-100">
         {[
-          { icon: Home, label: 'Etage', value: lot.etage || 'RDC', bg: 'bg-blue-50', color: 'text-blue-600' },
-          { icon: Building2, label: 'Type', value: typeBienLabels[lot.type_bien] || lot.type_bien, bg: 'bg-amber-50', color: 'text-amber-600' },
-          { icon: Ruler, label: 'Surface', value: lot.surface ? `${lot.surface} m²` : '—', bg: 'bg-emerald-50', color: 'text-emerald-600' },
-          { icon: BedDouble, label: 'Pieces', value: lot.nb_pieces || '—', bg: 'bg-violet-50', color: 'text-violet-600' },
-          { icon: Zap, label: 'DPE', value: lot.dpe_classe || '—', bg: 'bg-orange-50', color: 'text-orange-600' },
-          { icon: User, label: 'Proprietaire', value: propLabel || '—', bg: 'bg-rose-50', color: 'text-rose-600' },
-        ].map(({ icon: Icon, label, value, bg, color }) => (
-          <Card key={label} className="shadow-sm border-gray-200">
-            <CardContent className="p-3">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className={`h-6 w-6 rounded flex items-center justify-center ${bg}`}>
-                  <Icon className={`h-3.5 w-3.5 ${color}`} />
-                </div>
-                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">{label}</span>
-              </div>
-              <p className="text-sm font-semibold text-gray-900 truncate">{value}</p>
-            </CardContent>
-          </Card>
+          { icon: Home, label: 'Etage', value: lot.etage || 'RDC', bg: 'bg-blue-500' },
+          { icon: Building2, label: 'Type', value: typeBienLabels[lot.type_bien], bg: 'bg-amber-500' },
+          { icon: Ruler, label: 'Surface', value: lot.surface ? `${lot.surface} m²` : '—', bg: 'bg-emerald-500' },
+          { icon: BedDouble, label: 'Pieces', value: lot.nb_pieces || '—', bg: 'bg-violet-500' },
+          { icon: Zap, label: 'DPE', value: lot.dpe_classe || '—', bg: 'bg-orange-500' },
+          { icon: Thermometer, label: 'GES', value: lot.ges_classe || '—', bg: 'bg-rose-500' },
+        ].map(({ icon: Icon, label, value, bg }) => (
+          <div key={label} className="flex-1 flex items-center gap-2.5 px-4 py-3">
+            <div className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 ${bg}`}>
+              <Icon className="h-3.5 w-3.5 text-white" />
+            </div>
+            <div>
+              <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider leading-none">{label}</p>
+              <p className="text-sm font-bold text-gray-900 leading-tight">{value}</p>
+            </div>
+          </div>
         ))}
       </div>
 
-      {/* Edit mode */}
+      {/* Edit form */}
       {editing && (
-        <Card className="shadow-sm border-gray-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-gray-700">Modifier le lot</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Card className="shadow-sm border-amber-200 bg-amber-50/30">
+          <CardContent className="pt-5">
             <EditLotForm
               lot={lot}
               onSave={async (data) => {
@@ -156,154 +144,156 @@ export function LotDetailPage() {
         </Card>
       )}
 
-      {/* Tabs */}
-      {!editing && <Tabs defaultValue="infos" className="w-full">
-        <TabsList className="bg-gray-100/80 p-1">
-          <TabsTrigger value="infos" className="text-xs">Informations</TabsTrigger>
-          <TabsTrigger value="tiers" className="text-xs">Tiers ({proprietaires.length + (mandataire ? 1 : 0)})</TabsTrigger>
-          <TabsTrigger value="missions" className="text-xs">Missions</TabsTrigger>
-        </TabsList>
+      {/* Content */}
+      {!editing && (
+        <Tabs defaultValue="infos" className="w-full">
+          <TabsList className="bg-gray-100 p-0.5 h-9">
+            <TabsTrigger value="infos" className="text-xs h-8 px-4">Informations</TabsTrigger>
+            <TabsTrigger value="tiers" className="text-xs h-8 px-4">Tiers ({proprietaires.length + (mandataire ? 1 : 0)})</TabsTrigger>
+            <TabsTrigger value="missions" className="text-xs h-8 px-4">Missions</TabsTrigger>
+          </TabsList>
 
-        {/* Info tab */}
-        <TabsContent value="infos" className="mt-4">
-          <div className="grid grid-cols-2 gap-5">
-            <Card className="shadow-sm border-gray-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold text-gray-700">Informations generales</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="divide-y divide-gray-50">
-                  <InfoRow label="Designation" value={lot.designation} />
-                  <InfoRow label="Reference" value={lot.reference_interne} />
-                  <InfoRow label="Type de bien" value={typeBienLabels[lot.type_bien]} />
-                  <InfoRow label="Etage" value={lot.etage} />
-                  <InfoRow label="Surface" value={lot.surface ? `${lot.surface} m²` : null} />
-                  <InfoRow label="Nb pieces" value={lot.nb_pieces} />
-                  <InfoRow label="Meuble" value={lot.meuble ? 'Oui' : 'Non'} />
-                  <InfoRow label="Emplacement" value={lot.emplacement_palier} />
-                </dl>
-              </CardContent>
-            </Card>
-
-            <Card className="shadow-sm border-gray-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold text-gray-700">Energie & Annexes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="divide-y divide-gray-50">
-                  <InfoRow label="DPE" value={lot.dpe_classe ? <Badge variant="outline" className="text-xs font-bold">{lot.dpe_classe}</Badge> : null} />
-                  <InfoRow label="GES" value={lot.ges_classe ? <Badge variant="outline" className="text-xs font-bold">{lot.ges_classe}</Badge> : null} />
-                  <InfoRow label="N cave" value={lot.num_cave} />
-                  <InfoRow label="N parking" value={lot.num_parking} />
-                </dl>
+          <TabsContent value="infos" className="mt-4">
+            <div className="grid grid-cols-3 gap-4">
+              {/* General */}
+              <div className="col-span-2 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Caracteristiques</h2>
+                <div className="grid grid-cols-2 gap-x-8 divide-y divide-gray-50">
+                  <InfoItem label="Designation" value={lot.designation} />
+                  <InfoItem label="Reference" value={lot.reference_interne} />
+                  <InfoItem label="Type" value={typeBienLabels[lot.type_bien]} />
+                  <InfoItem label="Etage" value={lot.etage} />
+                  <InfoItem label="Emplacement" value={lot.emplacement_palier} />
+                  <InfoItem label="Surface" value={lot.surface ? `${lot.surface} m²` : null} />
+                  <InfoItem label="Pieces" value={lot.nb_pieces} />
+                  <InfoItem label="Meuble" value={lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Oui</Badge> : 'Non'} />
+                </div>
                 {lot.commentaire && (
                   <>
                     <Separator className="my-3" />
-                    <div>
-                      <p className="text-xs font-medium text-gray-500 mb-1.5">Commentaire</p>
-                      <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-3 border border-gray-100">{lot.commentaire}</p>
-                    </div>
+                    <p className="text-xs text-gray-400 mb-1.5">Commentaire</p>
+                    <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-100 leading-relaxed">{lot.commentaire}</p>
                   </>
                 )}
-                <Separator className="my-3" />
-                <div className="text-xs text-gray-400">
-                  Cree le {formatDate(lot.created_at)} — Modifie le {formatDate(lot.updated_at)}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+              </div>
 
-        {/* Tiers tab */}
-        <TabsContent value="tiers" className="mt-4">
-          <div className="grid grid-cols-2 gap-5">
-            {/* Proprietaires */}
-            <Card className="shadow-sm border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-gray-700">
+              {/* Energie + Annexes */}
+              <div className="space-y-4">
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Energie</h2>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                      <Zap className="h-4 w-4 text-orange-500" />
+                      <span className="text-xs text-gray-500 flex-1">DPE</span>
+                      <span className="text-sm font-bold text-gray-900">{lot.dpe_classe || '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                      <Thermometer className="h-4 w-4 text-rose-500" />
+                      <span className="text-xs text-gray-500 flex-1">GES</span>
+                      <span className="text-sm font-bold text-gray-900">{lot.ges_classe || '—'}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Annexes</h2>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                      <Warehouse className="h-4 w-4 text-gray-500" />
+                      <span className="text-xs text-gray-500 flex-1">Cave</span>
+                      <span className="text-sm font-medium text-gray-900">{lot.num_cave || '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                      <Car className="h-4 w-4 text-gray-500" />
+                      <span className="text-xs text-gray-500 flex-1">Parking</span>
+                      <span className="text-sm font-medium text-gray-900">{lot.num_parking || '—'}</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[10px] text-gray-300 px-1">
+                  Cree {formatDate(lot.created_at)} — Modifie {formatDate(lot.updated_at)}
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="tiers" className="mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              {/* Proprietaires */}
+              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                   Proprietaire{proprietaires.length > 1 ? 's' : ''}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h2>
                 {proprietaires.length > 0 ? (
                   <div className="space-y-2">
                     {proprietaires.map((p) => (
-                      <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50/80 border border-gray-100 hover:border-amber-200 transition-colors">
-                        <div className="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                          <User className="h-4.5 w-4.5 text-amber-700" />
+                      <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-amber-200 transition-colors">
+                        <div className="h-9 w-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                          <span className="text-xs font-bold text-amber-700">
+                            {(p.prenom?.[0] || p.nom[0]).toUpperCase()}
+                          </span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">
+                          <p className="text-sm font-medium text-gray-900 truncate">
                             {p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}
                           </p>
-                          {p.email && <p className="text-xs text-gray-500 truncate">{p.email}</p>}
-                          {p.tel && <p className="text-xs text-gray-400">{p.tel}</p>}
+                          <p className="text-xs text-gray-400 truncate">{p.email || p.tel || '—'}</p>
                         </div>
-                        {p.est_principal && (
-                          <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px] shrink-0">Principal</Badge>
-                        )}
+                        {p.est_principal && <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px] shrink-0">Principal</Badge>}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                      <User className="h-5 w-5 text-gray-400" />
+                  <div className="text-center py-6">
+                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2">
+                      <User className="h-4 w-4 text-gray-400" />
                     </div>
-                    <p className="text-sm font-medium text-gray-500">Aucun proprietaire lie</p>
-                    <p className="text-xs text-gray-400 mt-1">Ajoutez un proprietaire depuis l'onglet Tiers</p>
+                    <p className="text-xs text-gray-400">Aucun proprietaire lie</p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Mandataire */}
-            <Card className="shadow-sm border-gray-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold text-gray-700">Mandataire</CardTitle>
-              </CardHeader>
-              <CardContent>
+              {/* Mandataire */}
+              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Mandataire</h2>
                 {mandataire ? (
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50/80 border border-gray-100 hover:border-blue-200 transition-colors">
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                      <Building2 className="h-4.5 w-4.5 text-blue-700" />
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
+                    <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-bold text-blue-700">
+                        {(mandataire.nom[0]).toUpperCase()}
+                      </span>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-medium text-gray-900">
                         {mandataire.prenom ? `${mandataire.prenom} ${mandataire.nom}` : mandataire.raison_sociale || mandataire.nom}
                       </p>
-                      {mandataire.email && <p className="text-xs text-gray-500 truncate">{mandataire.email}</p>}
+                      <p className="text-xs text-gray-400 truncate">{mandataire.email || '—'}</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                      <Building2 className="h-5 w-5 text-gray-400" />
+                  <div className="text-center py-6">
+                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2">
+                      <Building2 className="h-4 w-4 text-gray-400" />
                     </div>
-                    <p className="text-sm font-medium text-gray-500">Aucun mandataire</p>
-                    <p className="text-xs text-gray-400 mt-1">Associez un mandataire de gestion</p>
+                    <p className="text-xs text-gray-400">Aucun mandataire</p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+              </div>
+            </div>
+          </TabsContent>
 
-        {/* Missions tab */}
-        <TabsContent value="missions" className="mt-4">
-          <Card className="shadow-sm border-gray-200">
-            <CardContent className="py-12">
-              <div className="text-center">
-                <div className="h-14 w-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                  <Building2 className="h-6 w-6 text-gray-400" />
+          <TabsContent value="missions" className="mt-4">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
+              <div className="py-10 text-center">
+                <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                  <Building2 className="h-5 w-5 text-gray-400" />
                 </div>
                 <p className="text-sm font-medium text-gray-500">Aucune mission pour ce lot</p>
-                <p className="text-xs text-gray-400 mt-1">Les missions seront disponibles au Sprint 3</p>
+                <p className="text-xs text-gray-400 mt-1">Sprint 3</p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>}
+            </div>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   )
 }
