@@ -43,6 +43,10 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
   // Building creation fields (inline sub-form)
   const [batDesignation, setBatDesignation] = useState('')
   const [batType, setBatType] = useState('immeuble')
+  const [batNumBatiment, setBatNumBatiment] = useState('')
+  const [batNbEtages, setBatNbEtages] = useState('')
+  const [batAnneeConstruction, setBatAnneeConstruction] = useState('')
+  const [batCommentaire, setBatCommentaire] = useState('')
   const [batRue, setBatRue] = useState('')
   const [batCP, setBatCP] = useState('')
   const [batVille, setBatVille] = useState('')
@@ -89,6 +93,10 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
   function resetBat() {
     setBatDesignation('')
     setBatType('immeuble')
+    setBatNumBatiment('')
+    setBatNbEtages('')
+    setBatAnneeConstruction('')
+    setBatCommentaire('')
     setBatRue('')
     setBatCP('')
     setBatVille('')
@@ -103,6 +111,10 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
       const result = await createBatMutation.mutateAsync({
         designation: batDesignation,
         type: batType,
+        num_batiment: batNumBatiment || undefined,
+        nb_etages: batNbEtages ? parseInt(batNbEtages) : undefined,
+        annee_construction: batAnneeConstruction ? parseInt(batAnneeConstruction) : undefined,
+        commentaire: batCommentaire || undefined,
         adresses: [{ type: 'principale', rue: batRue, complement: batComplement || undefined, code_postal: batCP, ville: batVille, latitude: batLat, longitude: batLng }],
       })
       toast.success(`Batiment "${batDesignation}" cree`)
@@ -279,6 +291,14 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">N batiment</Label>
+                  <Input value={batNumBatiment} onChange={(e) => setBatNumBatiment(e.target.value)} placeholder="A, B, C..." className="h-9" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Nombre d'etages</Label>
+                  <Input type="number" value={batNbEtages} onChange={(e) => setBatNbEtages(e.target.value)} placeholder="5" className="h-9" />
+                </div>
               </div>
 
               <div className="space-y-3">
@@ -303,6 +323,16 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                     <Input value={batVille} onChange={(e) => setBatVille(e.target.value)} placeholder="Paris" required className="h-9" />
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs">Annee construction</Label>
+                <Input type="number" value={batAnneeConstruction} onChange={(e) => setBatAnneeConstruction(e.target.value)} placeholder="1990" className="h-9" />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs">Commentaire</Label>
+                <Textarea value={batCommentaire} onChange={(e) => setBatCommentaire(e.target.value)} placeholder="Notes..." rows={2} />
               </div>
 
               <div className="flex justify-between pt-2">
