@@ -15,8 +15,12 @@ export interface Invitation {
   id: string
   email: string
   role: 'admin' | 'gestionnaire' | 'technicien'
-  status: 'pending' | 'accepted'
+  token: string
+  accepted_at: string | null
+  expires_at: string
   created_at: string
+  invited_by_nom?: string
+  invited_by_prenom?: string
 }
 
 // ── Workspace Users ──
