@@ -137,7 +137,7 @@ export function PatrimoinePage() {
       <CreateBuildingModal
         open={showCreateBuilding}
         onOpenChange={setShowCreateBuilding}
-        onCreated={(id) => navigate(`/app/patrimoine/batiments/${id}`)}
+        onCreated={() => {}}
         onMaisonCreated={(batId) => { setMaisonBatimentId(batId); setShowCreateLot(true) }}
       />
       <CreateLotModal
