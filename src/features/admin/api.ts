@@ -23,6 +23,46 @@ export interface Invitation {
   invited_by_prenom?: string
 }
 
+// ── Workspace details ──
+
+export interface WorkspaceDetails {
+  id: string
+  nom: string
+  type_workspace: string
+  statut: string
+  siret: string | null
+  email: string | null
+  telephone: string | null
+  adresse: string | null
+  code_postal: string | null
+  ville: string | null
+  logo_url: string | null
+  couleur_primaire: string | null
+  created_at: string
+  updated_at: string
+}
+
+export function useWorkspaceDetails() {
+  return useQuery({
+    queryKey: ['workspace-details'],
+    queryFn: () => api<WorkspaceDetails>('/workspaces/current'),
+  })
+}
+
+export function useUpdateWorkspace() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (data: Partial<WorkspaceDetails>) =>
+      api<WorkspaceDetails>('/workspaces/current', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workspace-details'] })
+    },
+  })
+}
+
 // ── Workspace Users ──
 
 export function useWorkspaceUsers() {
