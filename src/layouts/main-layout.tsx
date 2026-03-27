@@ -24,7 +24,7 @@ const navigation = [
     group: 'Référentiel',
     items: [
       { label: 'Parc immobilier', icon: Building2, href: '/app/patrimoine', disabled: false },
-      { label: 'Tiers', icon: Users, href: '/app/tiers', disabled: true },
+      { label: 'Tiers', icon: Users, href: '/app/tiers', disabled: false },
     ],
   },
   {

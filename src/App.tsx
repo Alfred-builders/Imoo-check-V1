@@ -11,6 +11,7 @@ import { PatrimoinePage } from './features/patrimoine/components/patrimoine-page
 import { BuildingDetailPage } from './features/patrimoine/components/building-detail-page'
 import { LotDetailPage } from './features/patrimoine/components/lot-detail-page'
 import { SettingsPage } from './features/admin/components/settings-page'
+import { TiersPage } from './features/tiers/components/tiers-page'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -47,6 +48,8 @@ function AppRoutes() {
         <Route path="/app/patrimoine" element={<PatrimoinePage />} />
         <Route path="/app/patrimoine/batiments/:id" element={<BuildingDetailPage />} />
         <Route path="/app/patrimoine/lots/:id" element={<LotDetailPage />} />
+        <Route path="/app/tiers" element={<TiersPage />} />
+        <Route path="/app/tiers/:id" element={<div className="p-6"><p className="text-gray-400">Fiche tiers — Sprint 2 en cours</p></div>} />
         <Route path="/app/parametres" element={<SettingsPage />} />
         <Route path="/app" element={<Navigate to="/app/patrimoine" replace />} />
       </Route>
