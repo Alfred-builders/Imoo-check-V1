@@ -146,7 +146,6 @@ export function PatrimoinePage() {
         preselectedBatimentId={maisonBatimentId ?? undefined}
         preselectedTypeBien={maisonBatimentId ? 'maison' : undefined}
         onCreated={(id) => navigate(`/app/patrimoine/lots/${id}`)}
-        onCreateBatiment={() => { setShowCreateLot(false); setShowCreateBuilding(true) }}
       />
       <ImportCSVModal
         open={showImportCSV}
