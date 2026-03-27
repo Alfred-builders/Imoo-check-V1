@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../../hooks/use-auth'
 import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
@@ -79,9 +79,10 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="text-center text-xs text-gray-400 mt-6">
-        Pas de compte ? Contactez votre administrateur pour une invitation.
-      </p>
+      <div className="text-center mt-6 space-y-2">
+        <Link to="/forgot-password" className="text-xs text-amber-600 hover:text-amber-700">Mot de passe oublie ?</Link>
+        <p className="text-xs text-gray-400">Pas de compte ? Contactez votre administrateur.</p>
+      </div>
     </div>
   )
 }

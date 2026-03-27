@@ -13,9 +13,10 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreated?: (id: string) => void
+  onMaisonCreated?: (batimentId: string) => void // Triggers lot form after maison building
 }
 
-export function CreateBuildingModal({ open, onOpenChange, onCreated }: Props) {
+export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCreated }: Props) {
   const [designation, setDesignation] = useState('')
   const [type, setType] = useState<string>('immeuble')
   const [rue, setRue] = useState('')
@@ -64,7 +65,12 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated }: Props) {
       toast.success(`Bâtiment "${designation}" créé`)
       reset()
       onOpenChange(false)
-      onCreated?.(result.id)
+      // If type=maison, chain to lot creation (US-585)
+      if (type === 'maison' && onMaisonCreated) {
+        onMaisonCreated(result.id)
+      } else {
+        onCreated?.(result.id)
+      }
     } catch (err: any) {
       toast.error(err.message || 'Erreur lors de la création')
     }

@@ -132,4 +132,57 @@ router.patch('/:id', async (req, res) => {
   }
 })
 
+// POST /api/lots/:id/proprietaires — Link owner to lot
+router.post('/:id/proprietaires', async (req, res) => {
+  try {
+    const workspaceId = req.user!.workspaceId
+    const { tiers_id, est_principal } = req.body
+    if (!tiers_id) { sendError(res, { status: 400, message: 'tiers_id requis', code: 'VALIDATION_ERROR' }); return }
+
+    const lot = await query(`SELECT id FROM lot WHERE id = $1 AND workspace_id = $2`, [req.params.id, workspaceId])
+    if (lot.rows.length === 0) throw new NotFoundError('Lot')
+
+    await query(
+      `INSERT INTO lot_proprietaire (lot_id, tiers_id, est_principal)
+       VALUES ($1, $2, $3) ON CONFLICT (lot_id, tiers_id) DO UPDATE SET est_principal = $3`,
+      [req.params.id, tiers_id, est_principal ?? false]
+    )
+    sendSuccess(res, { linked: true }, 201)
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
+// DELETE /api/lots/:id/proprietaires/:tiersId — Unlink owner
+router.delete('/:id/proprietaires/:tiersId', async (req, res) => {
+  try {
+    const workspaceId = req.user!.workspaceId
+    const lot = await query(`SELECT id FROM lot WHERE id = $1 AND workspace_id = $2`, [req.params.id, workspaceId])
+    if (lot.rows.length === 0) throw new NotFoundError('Lot')
+
+    await query(`DELETE FROM lot_proprietaire WHERE lot_id = $1 AND tiers_id = $2`, [req.params.id, req.params.tiersId])
+    sendSuccess(res, { unlinked: true })
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
+// GET /api/lots/search-tiers — Search tiers for picker
+router.get('/search-tiers', async (req, res) => {
+  try {
+    const workspaceId = req.user!.workspaceId
+    const search = req.query.q as string || ''
+    const result = await query(
+      `SELECT id, nom, prenom, raison_sociale, type_personne, email, tel
+       FROM tiers WHERE workspace_id = $1 AND est_archive = false
+       AND (nom ILIKE $2 OR prenom ILIKE $2 OR raison_sociale ILIKE $2 OR email ILIKE $2)
+       ORDER BY nom LIMIT 20`,
+      [workspaceId, `%${search}%`]
+    )
+    sendSuccess(res, result.rows)
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
 export default router

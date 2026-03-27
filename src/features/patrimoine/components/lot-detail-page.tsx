@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight } from 'lucide-react'
+import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, Pencil, AlertTriangle } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
@@ -7,7 +8,9 @@ import { Skeleton } from 'src/components/ui/skeleton'
 import { Separator } from 'src/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'src/components/ui/tabs'
 import { useLotDetail, useUpdateLot } from '../api'
+import { EditLotForm } from './edit-lot-form'
 import { formatDate } from '../../../lib/formatters'
+import { toast } from 'sonner'
 
 const typeBienLabels: Record<string, string> = {
   appartement: 'Appartement', maison: 'Maison', studio: 'Studio',
@@ -26,6 +29,7 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 export function LotDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [editing, setEditing] = useState(false)
   const { data: lot, isLoading } = useLotDetail(id)
   const updateMutation = useUpdateLot()
 
@@ -87,11 +91,26 @@ export function LotDetailPage() {
             </button>
           )}
         </div>
-        <Button variant="outline" size="sm" onClick={handleArchive}>
-          {lot.est_archive ? <ArchiveRestore className="h-3.5 w-3.5 mr-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
-          {lot.est_archive ? 'Restaurer' : 'Archiver'}
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          {!lot.est_archive && (
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+              <Pencil className="h-3.5 w-3.5 mr-1.5" /> Modifier
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={handleArchive}>
+            {lot.est_archive ? <ArchiveRestore className="h-3.5 w-3.5 mr-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
+            {lot.est_archive ? 'Restaurer' : 'Archiver'}
+          </Button>
+        </div>
       </div>
+
+      {/* Archive banner */}
+      {lot.est_archive && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          Ce lot est archive. Les modifications et la creation de missions sont desactivees.
+        </div>
+      )}
 
       {/* Quick stats bar */}
       <div className="grid grid-cols-6 gap-3">
@@ -117,8 +136,28 @@ export function LotDetailPage() {
         ))}
       </div>
 
+      {/* Edit mode */}
+      {editing && (
+        <Card className="shadow-sm border-gray-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-gray-700">Modifier le lot</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EditLotForm
+              lot={lot}
+              onSave={async (data) => {
+                await updateMutation.mutateAsync({ id: lot.id, ...data })
+                toast.success('Lot mis a jour')
+                setEditing(false)
+              }}
+              onCancel={() => setEditing(false)}
+            />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Tabs */}
-      <Tabs defaultValue="infos" className="w-full">
+      {!editing && <Tabs defaultValue="infos" className="w-full">
         <TabsList className="bg-gray-100/80 p-1">
           <TabsTrigger value="infos" className="text-xs">Informations</TabsTrigger>
           <TabsTrigger value="tiers" className="text-xs">Tiers ({proprietaires.length + (mandataire ? 1 : 0)})</TabsTrigger>
@@ -264,7 +303,7 @@ export function LotDetailPage() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+      </Tabs>}
     </div>
   )
 }

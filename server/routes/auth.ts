@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import crypto from 'crypto'
 import { z } from 'zod/v4'
 import * as authService from '../services/auth-service.js'
 import { verifyToken } from '../middleware/auth.js'
@@ -186,6 +187,78 @@ router.get('/me', verifyToken, async (req, res) => {
       },
       role: row.role,
     })
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
+// Forgot password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) { sendSuccess(res, { sent: true }); return } // Don't reveal if email exists
+
+    const userResult = await import('../db/index.js').then(db =>
+      db.query(`SELECT id FROM utilisateur WHERE email = $1`, [email.toLowerCase().trim()])
+    )
+    if (userResult.rows.length === 0) { sendSuccess(res, { sent: true }); return }
+
+    // Generate reset token (stored as invitation with special role)
+    const token = crypto.randomUUID()
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+
+    await import('../db/index.js').then(db =>
+      db.query(
+        `INSERT INTO invitation (workspace_id, email, role, token, invited_by, expires_at)
+         SELECT wu.workspace_id, $1, 'reset_password', $2, $3, $4
+         FROM workspace_user wu WHERE wu.user_id = $3 LIMIT 1`,
+        [email.toLowerCase().trim(), token, userResult.rows[0].id, expiresAt]
+      )
+    )
+
+    // TODO: Send email via Resend with reset link
+    console.log(`[auth] Password reset link: /reset-password/${token}`)
+
+    sendSuccess(res, { sent: true })
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
+// Reset password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body
+    if (!token || !password) {
+      sendError(res, { status: 400, message: 'Token et mot de passe requis', code: 'VALIDATION_ERROR' })
+      return
+    }
+
+    const invResult = await import('../db/index.js').then(db =>
+      db.query(
+        `SELECT i.email FROM invitation i
+         WHERE i.token = $1 AND i.role = 'reset_password' AND i.accepted_at IS NULL AND i.expires_at > now()`,
+        [token]
+      )
+    )
+
+    if (invResult.rows.length === 0) {
+      sendError(res, { status: 400, message: 'Lien de réinitialisation invalide ou expiré', code: 'TOKEN_INVALID' })
+      return
+    }
+
+    const { hashPassword } = await import('../services/auth-service.js')
+    const hash = await hashPassword(password)
+
+    await import('../db/index.js').then(db =>
+      db.query(`UPDATE utilisateur SET password_hash = $1, updated_at = now() WHERE email = $2`, [hash, invResult.rows[0].email])
+    )
+
+    await import('../db/index.js').then(db =>
+      db.query(`UPDATE invitation SET accepted_at = now() WHERE token = $1`, [token])
+    )
+
+    sendSuccess(res, { reset: true })
   } catch (error) {
     sendError(res, error)
   }

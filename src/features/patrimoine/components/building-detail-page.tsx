@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, Archive, ArchiveRestore, Plus, Building2, Layers, Calendar, Hash, ExternalLink } from 'lucide-react'
+import { ArrowLeft, MapPin, Archive, ArchiveRestore, Plus, Building2, Layers, Calendar, Hash, ExternalLink, Pencil, AlertTriangle, ExternalLinkIcon } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
@@ -10,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'src/components/ui/tabs
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'src/components/ui/table'
 import { useBatimentDetail, useBatimentLots, useUpdateBatiment } from '../api'
 import { CreateLotModal } from './create-lot-modal'
+import { EditBuildingForm } from './edit-building-form'
 import { formatDate } from '../../../lib/formatters'
+import { toast } from 'sonner'
 
 const typeLabels: Record<string, string> = {
   immeuble: 'Immeuble', maison: 'Maison', local_commercial: 'Local commercial', mixte: 'Mixte', autre: 'Autre',
@@ -20,6 +22,7 @@ export function BuildingDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [showCreateLot, setShowCreateLot] = useState(false)
+  const [editing, setEditing] = useState(false)
   const { data: batiment, isLoading } = useBatimentDetail(id)
   const { data: lots } = useBatimentLots(id)
   const updateMutation = useUpdateBatiment()
@@ -64,11 +67,46 @@ export function BuildingDetailPage() {
             </p>
           )}
         </div>
-        <Button variant="outline" size="sm" onClick={handleArchive}>
-          {batiment.est_archive ? <ArchiveRestore className="h-3.5 w-3.5 mr-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
-          {batiment.est_archive ? 'Restaurer' : 'Archiver'}
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          {!batiment.est_archive && (
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+              <Pencil className="h-3.5 w-3.5 mr-1.5" /> Modifier
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={handleArchive}>
+            {batiment.est_archive ? <ArchiveRestore className="h-3.5 w-3.5 mr-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
+            {batiment.est_archive ? 'Restaurer' : 'Archiver'}
+          </Button>
+        </div>
       </div>
+
+      {/* Archive banner */}
+      {batiment.est_archive && (
+        <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          Ce batiment est archive. Les modifications sont desactivees.
+        </div>
+      )}
+
+      {/* Edit mode */}
+      {editing && (
+        <Card className="shadow-sm border-gray-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-gray-700">Modifier le batiment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <EditBuildingForm
+              batiment={batiment}
+              onSave={async (data) => {
+                await updateMutation.mutateAsync({ id: batiment.id, ...data })
+                toast.success('Batiment mis a jour')
+                setEditing(false)
+              }}
+              onCancel={() => setEditing(false)}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* KPI row */}
       <div className="grid grid-cols-4 gap-3">
@@ -117,6 +155,18 @@ export function BuildingDetailPage() {
                       <p className="text-sm font-medium text-gray-900">{a.rue}</p>
                       {a.complement && <p className="text-xs text-gray-500">{a.complement}</p>}
                       <p className="text-xs text-gray-400">{a.code_postal} {a.ville}</p>
+                      {a.latitude && a.longitude ? (
+                        <a
+                          href={`https://maps.google.com/?q=${a.latitude},${a.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-blue-500 hover:text-blue-700 flex items-center gap-0.5 mt-1"
+                        >
+                          <ExternalLinkIcon className="h-3 w-3" /> Voir sur Google Maps
+                        </a>
+                      ) : (
+                        <p className="text-[10px] text-gray-300 mt-1">(coordonnees manquantes)</p>
+                      )}
                     </div>
                     <Badge variant="outline" className="text-[10px] capitalize shrink-0">{a.type}</Badge>
                   </div>

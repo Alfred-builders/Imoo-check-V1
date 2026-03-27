@@ -3,6 +3,9 @@ import { AuthProvider, useAuth } from './hooks/use-auth'
 import { AuthLayout } from './layouts/auth-layout'
 import { MainLayout } from './layouts/main-layout'
 import { LoginPage } from './features/auth/components/login-page'
+import { RegisterPage } from './features/auth/components/register-page'
+import { ForgotPasswordPage } from './features/auth/components/forgot-password-page'
+import { ResetPasswordPage } from './features/auth/components/reset-password-page'
 import { WorkspaceSelectPage } from './features/auth/components/workspace-select-page'
 import { PatrimoinePage } from './features/patrimoine/components/patrimoine-page'
 import { BuildingDetailPage } from './features/patrimoine/components/building-detail-page'
@@ -32,6 +35,9 @@ function AppRoutes() {
       {/* Public routes */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register/:token" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       </Route>
       <Route path="/workspace-select" element={<WorkspaceSelectPage />} />
 

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus } from 'lucide-react'
+import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus, Filter } from 'lucide-react'
 import { Input } from 'src/components/ui/input'
 import { Badge } from 'src/components/ui/badge'
 import { Button } from 'src/components/ui/button'
 import { Skeleton } from 'src/components/ui/skeleton'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
 import { useBatiments, useBatimentLots } from '../api'
 import { formatDate } from '../../../lib/formatters'
 import { useNavigate } from 'react-router-dom'
@@ -55,14 +56,21 @@ function useDebounce(value: string, delay: number) {
 
 export function PatrimoinePage() {
   const [search, setSearch] = useState('')
+  const [typeFilter, setTypeFilter] = useState<string>('')
+  const [showArchived, setShowArchived] = useState(false)
   const [view, setView] = useState<'table' | 'carte'>('table')
   const [showCreateBuilding, setShowCreateBuilding] = useState(false)
   const [showCreateLot, setShowCreateLot] = useState(false)
+  const [maisonBatimentId, setMaisonBatimentId] = useState<string | null>(null)
   const debouncedSearch = useDebounce(search, 300)
   const navigate = useNavigate()
   const { visible: visibleCols, setVisible: setVisibleCols } = useColumnPreferences('patrimoine_batiments', BATIMENT_COLUMNS)
 
-  const { data, isLoading } = useBatiments({ search: debouncedSearch || undefined })
+  const { data, isLoading } = useBatiments({
+    search: debouncedSearch || undefined,
+    type: typeFilter || undefined,
+    archived: showArchived || undefined,
+  })
   const batiments = data?.data ?? []
 
   const isColVisible = (id: string) => visibleCols.includes(id)
@@ -74,10 +82,15 @@ export function PatrimoinePage() {
         open={showCreateBuilding}
         onOpenChange={setShowCreateBuilding}
         onCreated={(id) => navigate(`/app/patrimoine/batiments/${id}`)}
+        onMaisonCreated={(batId) => {
+          setMaisonBatimentId(batId)
+          setShowCreateLot(true)
+        }}
       />
       <CreateLotModal
         open={showCreateLot}
-        onOpenChange={setShowCreateLot}
+        onOpenChange={(open) => { setShowCreateLot(open); if (!open) setMaisonBatimentId(null) }}
+        preselectedBatimentId={maisonBatimentId ?? undefined}
         onCreated={(id) => navigate(`/app/patrimoine/lots/${id}`)}
         onCreateBatiment={() => { setShowCreateLot(false); setShowCreateBuilding(true) }}
       />
@@ -115,15 +128,38 @@ export function PatrimoinePage() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Rechercher un bâtiment, lot, adresse, propriétaire..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+      {/* Search + Filters */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative w-80">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher batiment, lot, adresse..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-9 text-sm"
+          />
+        </div>
+        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v === 'all' ? '' : v)}>
+          <SelectTrigger className="w-40 h-9 text-xs">
+            <Filter className="h-3.5 w-3.5 mr-1.5 text-gray-400" />
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les types</SelectItem>
+            <SelectItem value="immeuble">Immeuble</SelectItem>
+            <SelectItem value="maison">Maison</SelectItem>
+            <SelectItem value="local_commercial">Local commercial</SelectItem>
+            <SelectItem value="mixte">Mixte</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          variant={showArchived ? 'default' : 'outline'}
+          size="sm"
+          className="h-9 text-xs"
+          onClick={() => setShowArchived(!showArchived)}
+        >
+          {showArchived ? 'Masquer archives' : 'Afficher archives'}
+        </Button>
       </div>
 
       {/* Table view */}

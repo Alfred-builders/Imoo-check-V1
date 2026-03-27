@@ -22,10 +22,14 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, onCr
   const [batimentId, setBatimentId] = useState(preselectedBatimentId || '')
   const [designation, setDesignation] = useState('')
   const [typeBien, setTypeBien] = useState('appartement')
+  const [referenceInterne, setReferenceInterne] = useState('')
   const [etage, setEtage] = useState('')
+  const [emplacementPalier, setEmplacementPalier] = useState('')
   const [surface, setSurface] = useState('')
   const [meuble, setMeuble] = useState(false)
   const [nbPieces, setNbPieces] = useState('')
+  const [dpeClasse, setDpeClasse] = useState('')
+  const [gesClasse, setGesClasse] = useState('')
   const [commentaire, setCommentaire] = useState('')
 
   const createMutation = useCreateLot()
@@ -41,6 +45,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, onCr
   function reset() {
     if (!preselectedBatimentId) setBatimentId('')
     setDesignation('')
+    setReferenceInterne('')
     setTypeBien('appartement')
     setEtage('')
     setSurface('')
@@ -59,11 +64,15 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, onCr
       const result = await createMutation.mutateAsync({
         batiment_id: batimentId,
         designation,
+        reference_interne: referenceInterne || undefined,
         type_bien: typeBien,
         etage: etage || undefined,
+        emplacement_palier: emplacementPalier || undefined,
         surface: surface ? parseFloat(surface) : undefined,
         meuble,
         nb_pieces: nbPieces || undefined,
+        dpe_classe: dpeClasse || undefined,
+        ges_classe: gesClasse || undefined,
         commentaire: commentaire || undefined,
       })
       toast.success(`Lot "${designation}" créé`)
@@ -99,9 +108,13 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, onCr
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 space-y-2">
-              <Label>Désignation *</Label>
+            <div className="space-y-2">
+              <Label>Designation *</Label>
               <Input value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="Appartement 201" required />
+            </div>
+            <div className="space-y-2">
+              <Label>Reference interne</Label>
+              <Input value={referenceInterne} onChange={(e) => setReferenceInterne(e.target.value)} placeholder="Bail n, ref cadastrale..." />
             </div>
             <div className="space-y-2">
               <Label>Type de bien *</Label>
@@ -119,15 +132,19 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, onCr
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Étage</Label>
-              <Input value={etage} onChange={(e) => setEtage(e.target.value)} placeholder="2" />
+              <Label>Etage</Label>
+              <Input value={etage} onChange={(e) => setEtage(e.target.value)} placeholder="2, RDC, SS-1..." />
             </div>
             <div className="space-y-2">
-              <Label>Surface (m²)</Label>
+              <Label>Emplacement palier</Label>
+              <Input value={emplacementPalier} onChange={(e) => setEmplacementPalier(e.target.value)} placeholder="Porte gauche..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Surface (m2)</Label>
               <Input type="number" step="0.01" value={surface} onChange={(e) => setSurface(e.target.value)} placeholder="65" />
             </div>
             <div className="space-y-2">
-              <Label>Nombre de pièces</Label>
+              <Label>Nombre de pieces</Label>
               <Select value={nbPieces} onValueChange={setNbPieces}>
                 <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
                 <SelectContent>
@@ -138,6 +155,24 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, onCr
                   <SelectItem value="T4">T4</SelectItem>
                   <SelectItem value="T5">T5</SelectItem>
                   <SelectItem value="T6">T6+</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>DPE</Label>
+              <Select value={dpeClasse} onValueChange={setDpeClasse}>
+                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  {['A','B','C','D','E','F','G'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>GES</Label>
+              <Select value={gesClasse} onValueChange={setGesClasse}>
+                <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <SelectContent>
+                  {['A','B','C','D','E','F','G'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
