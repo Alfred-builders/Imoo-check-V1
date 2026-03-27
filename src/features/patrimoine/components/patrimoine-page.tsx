@@ -142,6 +142,7 @@ export function PatrimoinePage() {
         open={showCreateLot}
         onOpenChange={(open) => { setShowCreateLot(open); if (!open) setMaisonBatimentId(null) }}
         preselectedBatimentId={maisonBatimentId ?? undefined}
+        preselectedTypeBien={maisonBatimentId ? 'maison' : undefined}
         onCreated={(id) => navigate(`/app/patrimoine/lots/${id}`)}
         onCreateBatiment={() => { setShowCreateLot(false); setShowCreateBuilding(true) }}
       />

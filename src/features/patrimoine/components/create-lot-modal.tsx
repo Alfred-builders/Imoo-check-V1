@@ -14,14 +14,15 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   preselectedBatimentId?: string
+  preselectedTypeBien?: string
   onCreated?: (id: string) => void
   onCreateBatiment?: () => void
 }
 
-export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, onCreated, onCreateBatiment }: Props) {
+export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, preselectedTypeBien, onCreated, onCreateBatiment }: Props) {
   const [batimentId, setBatimentId] = useState(preselectedBatimentId || '')
   const [designation, setDesignation] = useState('')
-  const [typeBien, setTypeBien] = useState('appartement')
+  const [typeBien, setTypeBien] = useState(preselectedTypeBien || 'appartement')
   const [referenceInterne, setReferenceInterne] = useState('')
   const [etage, setEtage] = useState('')
   const [emplacementPalier, setEmplacementPalier] = useState('')

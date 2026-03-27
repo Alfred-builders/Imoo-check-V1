@@ -216,8 +216,9 @@ router.post('/forgot-password', async (req, res) => {
       )
     )
 
-    // TODO: Send email via Resend with reset link
-    console.log(`[auth] Password reset link: /reset-password/${token}`)
+    // Send email via Resend
+    const { sendPasswordResetEmail } = await import('../services/email-service.js')
+    await sendPasswordResetEmail(email.toLowerCase().trim(), token).catch(err => console.error('[email] Reset email failed:', err))
 
     sendSuccess(res, { sent: true })
   } catch (error) {

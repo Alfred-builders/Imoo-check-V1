@@ -87,8 +87,12 @@ router.post('/', validate(inviteSchema), async (req, res) => {
       [workspaceId, email.toLowerCase(), role, userId, expiresAt]
     )
 
-    // TODO: Send email via Resend
-    console.log(`[invite] Invitation sent to ${email} (role: ${role}, token: ${result.rows[0].token})`)
+    // Send email via Resend
+    const wsResult = await query(`SELECT nom FROM workspace WHERE id = $1`, [workspaceId])
+    const wsName = wsResult.rows[0]?.nom || 'ImmoChecker'
+    const { sendInvitationEmail } = await import('../services/email-service.js')
+    await sendInvitationEmail(email.toLowerCase(), result.rows[0].token, wsName, role).catch(err => console.error('[email] Invitation email failed:', err))
+    console.log(`[invite] Invitation sent to ${email} (role: ${role})`)
 
     sendSuccess(res, result.rows[0], 201)
   } catch (error) {

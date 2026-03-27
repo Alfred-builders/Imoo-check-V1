@@ -10,6 +10,7 @@ import { WorkspaceSelectPage } from './features/auth/components/workspace-select
 import { PatrimoinePage } from './features/patrimoine/components/patrimoine-page'
 import { BuildingDetailPage } from './features/patrimoine/components/building-detail-page'
 import { LotDetailPage } from './features/patrimoine/components/lot-detail-page'
+import { SettingsPage } from './features/admin/components/settings-page'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -46,6 +47,7 @@ function AppRoutes() {
         <Route path="/app/patrimoine" element={<PatrimoinePage />} />
         <Route path="/app/patrimoine/batiments/:id" element={<BuildingDetailPage />} />
         <Route path="/app/patrimoine/lots/:id" element={<LotDetailPage />} />
+        <Route path="/app/parametres" element={<SettingsPage />} />
         <Route path="/app" element={<Navigate to="/app/patrimoine" replace />} />
       </Route>
 

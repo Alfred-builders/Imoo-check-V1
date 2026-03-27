@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, Pencil, AlertTriangle, Thermometer, Car, Warehouse } from 'lucide-react'
+import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, Pencil, AlertTriangle, Thermometer, Car, Warehouse, Plus, X, Search } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { Separator } from 'src/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'src/components/ui/tabs'
-import { useLotDetail, useUpdateLot } from '../api'
+import { Input } from 'src/components/ui/input'
+import { useLotDetail, useUpdateLot, useSearchTiers, useLinkProprietaire, useUnlinkProprietaire } from '../api'
 import { EditLotForm } from './edit-lot-form'
 import { formatDate } from '../../../lib/formatters'
 import { toast } from 'sonner'
@@ -219,38 +220,7 @@ export function LotDetailPage() {
           <TabsContent value="tiers" className="mt-4">
             <div className="grid grid-cols-2 gap-4">
               {/* Proprietaires */}
-              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                  Proprietaire{proprietaires.length > 1 ? 's' : ''}
-                </h2>
-                {proprietaires.length > 0 ? (
-                  <div className="space-y-2">
-                    {proprietaires.map((p) => (
-                      <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-amber-200 transition-colors">
-                        <div className="h-9 w-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                          <span className="text-xs font-bold text-amber-700">
-                            {(p.prenom?.[0] || p.nom[0]).toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}
-                          </p>
-                          <p className="text-xs text-gray-400 truncate">{p.email || p.tel || '—'}</p>
-                        </div>
-                        {p.est_principal && <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px] shrink-0">Principal</Badge>}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2">
-                      <User className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <p className="text-xs text-gray-400">Aucun proprietaire lie</p>
-                  </div>
-                )}
-              </div>
+              <ProprietaireSection lotId={lot.id} proprietaires={proprietaires} isArchived={lot.est_archive} />
 
               {/* Mandataire */}
               <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -293,6 +263,80 @@ export function LotDetailPage() {
             </div>
           </TabsContent>
         </Tabs>
+      )}
+    </div>
+  )
+}
+
+// Proprietaire management sub-component
+function ProprietaireSection({ lotId, proprietaires, isArchived }: { lotId: string; proprietaires: Array<{ id: string; nom: string; prenom?: string | null; raison_sociale?: string | null; email?: string | null; tel?: string | null; est_principal?: boolean }>; isArchived: boolean }) {
+  const [showAdd, setShowAdd] = useState(false)
+  const [searchQ, setSearchQ] = useState('')
+  const { data: searchResults } = useSearchTiers(searchQ)
+  const linkMutation = useLinkProprietaire()
+  const unlinkMutation = useUnlinkProprietaire()
+
+  async function handleLink(tiersId: string) {
+    await linkMutation.mutateAsync({ lotId, tiersId, estPrincipal: proprietaires.length === 0 })
+    setShowAdd(false)
+    setSearchQ('')
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          Proprietaire{proprietaires.length > 1 ? 's' : ''}
+        </h2>
+        {!isArchived && (
+          <Button variant="ghost" size="sm" className="h-6 text-xs text-amber-600 hover:text-amber-700 px-2" onClick={() => setShowAdd(!showAdd)}>
+            {showAdd ? 'Fermer' : <><Plus className="h-3 w-3 mr-1" /> Ajouter</>}
+          </Button>
+        )}
+      </div>
+      {showAdd && (
+        <div className="mb-3 p-3 bg-amber-50/50 border border-amber-200 rounded-lg space-y-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Input value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="Rechercher un tiers..." className="pl-8 h-8 text-xs" autoFocus />
+          </div>
+          {searchResults && searchResults.length > 0 && (
+            <div className="max-h-32 overflow-y-auto space-y-1">
+              {searchResults.filter(t => !proprietaires.some(p => p.id === t.id)).map(t => (
+                <button key={t.id} onClick={() => handleLink(t.id)} className="w-full flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-amber-100 rounded transition-colors text-left">
+                  <User className="h-3 w-3 text-gray-400 shrink-0" />
+                  <span className="font-medium text-gray-800">{t.prenom ? `${t.prenom} ${t.nom}` : t.raison_sociale || t.nom}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {proprietaires.length > 0 ? (
+        <div className="space-y-2">
+          {proprietaires.map((p) => (
+            <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-amber-200 transition-colors group">
+              <div className="h-9 w-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-amber-700">{(p.prenom?.[0] || p.nom[0]).toUpperCase()}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}</p>
+                <p className="text-xs text-gray-400 truncate">{p.email || p.tel || '—'}</p>
+              </div>
+              {p.est_principal && <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px] shrink-0">Principal</Badge>}
+              {!isArchived && (
+                <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: p.id })} className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all" title="Retirer">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-6">
+          <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><User className="h-4 w-4 text-gray-400" /></div>
+          <p className="text-xs text-gray-400">Aucun proprietaire lie</p>
+        </div>
       )}
     </div>
   )

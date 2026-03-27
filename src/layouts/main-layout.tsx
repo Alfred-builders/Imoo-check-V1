@@ -30,7 +30,7 @@ const navigation = [
   {
     group: 'Administration',
     items: [
-      { label: 'Paramètres', icon: Settings, href: '/app/parametres', disabled: true },
+      { label: 'Paramètres', icon: Settings, href: '/app/parametres', disabled: false },
     ],
   },
 ]

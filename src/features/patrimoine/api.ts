@@ -107,3 +107,38 @@ export function useUpdateLot() {
     },
   })
 }
+
+// ── Search tiers ──
+export function useSearchTiers(q: string) {
+  return useQuery({
+    queryKey: ['search-tiers', q],
+    queryFn: () => api<Array<{ id: string; nom: string; prenom?: string; raison_sociale?: string; type_personne: string; email?: string }>>(`/lots/search-tiers?q=${encodeURIComponent(q)}`),
+    enabled: q.length >= 1,
+  })
+}
+
+// ── Link proprietaire ──
+export function useLinkProprietaire() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ lotId, tiersId, estPrincipal }: { lotId: string; tiersId: string; estPrincipal?: boolean }) =>
+      api(`/lots/${lotId}/proprietaires`, { method: 'POST', body: JSON.stringify({ tiers_id: tiersId, est_principal: estPrincipal ?? false }) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lot'] })
+      queryClient.invalidateQueries({ queryKey: ['batiment-lots'] })
+    },
+  })
+}
+
+// ── Unlink proprietaire ──
+export function useUnlinkProprietaire() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ lotId, tiersId }: { lotId: string; tiersId: string }) =>
+      api(`/lots/${lotId}/proprietaires/${tiersId}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lot'] })
+      queryClient.invalidateQueries({ queryKey: ['batiment-lots'] })
+    },
+  })
+}
