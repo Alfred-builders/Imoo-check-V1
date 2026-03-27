@@ -8,11 +8,15 @@ import { Skeleton } from 'src/components/ui/skeleton'
 import { Separator } from 'src/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'src/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'src/components/ui/table'
-import { useBatimentDetail, useBatimentLots, useUpdateBatiment } from '../api'
+import { Input } from 'src/components/ui/input'
+import { Label } from 'src/components/ui/label'
+import { useBatimentDetail, useBatimentLots, useUpdateBatiment, useUpdateAddress, useAddAddress, useDeleteAddress } from '../api'
+import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
 import { CreateLotModal } from './create-lot-modal'
 import { EditBuildingForm } from './edit-building-form'
 import { formatDate } from '../../../lib/formatters'
 import { toast } from 'sonner'
+import { Trash2, Save, X as XIcon } from 'lucide-react'
 
 const typeLabels: Record<string, string> = {
   immeuble: 'Immeuble', maison: 'Maison', local_commercial: 'Local commercial', mixte: 'Mixte', autre: 'Autre',
@@ -146,32 +150,13 @@ export function BuildingDetailPage() {
             <div className="grid grid-cols-3 gap-4">
               {/* Adresses */}
               <div className="col-span-2 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Adresses</h2>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Adresses</h2>
+                  {!batiment.est_archive && <AddAddressButton batimentId={batiment.id} />}
+                </div>
                 <div className="space-y-2">
                   {adresses.map((a) => (
-                    <div key={a.id} className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
-                      <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                        <MapPin className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{a.rue}</p>
-                        {a.complement && <p className="text-xs text-gray-500">{a.complement}</p>}
-                        <p className="text-xs text-gray-400">{a.code_postal} {a.ville}</p>
-                        {a.latitude && a.longitude ? (
-                          <a
-                            href={`https://maps.google.com/?q=${a.latitude},${a.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[11px] text-blue-500 hover:text-blue-700 flex items-center gap-0.5 mt-1"
-                          >
-                            <ExternalLinkIcon className="h-3 w-3" /> Google Maps
-                          </a>
-                        ) : (
-                          <p className="text-[10px] text-gray-300 mt-1">(pas de coordonnees)</p>
-                        )}
-                      </div>
-                      <Badge variant="outline" className="text-[9px] capitalize shrink-0">{a.type}</Badge>
-                    </div>
+                    <AddressCard key={a.id} address={a} batimentId={batiment.id} isArchived={batiment.est_archive} totalAddresses={adresses.length} />
                   ))}
                 </div>
               </div>
@@ -261,6 +246,145 @@ export function BuildingDetailPage() {
         preselectedBatimentId={id}
         onCreated={(lotId) => navigate(`/app/patrimoine/lots/${lotId}`)}
       />
+    </div>
+  )
+}
+
+// ── Address Card (view + inline edit + delete) ──
+function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { address: any; batimentId: string; isArchived: boolean; totalAddresses: number }) {
+  const [editing, setEditing] = useState(false)
+  const [rue, setRue] = useState(a.rue)
+  const [complement, setComplement] = useState(a.complement || '')
+  const [cp, setCp] = useState(a.code_postal)
+  const [ville, setVille] = useState(a.ville)
+  const [lat, setLat] = useState<number | undefined>(a.latitude)
+  const [lng, setLng] = useState<number | undefined>(a.longitude)
+  const updateAddr = useUpdateAddress()
+  const deleteAddr = useDeleteAddress()
+
+  async function handleSave() {
+    try {
+      await updateAddr.mutateAsync({ batimentId, adresseId: a.id, rue, complement: complement || undefined, code_postal: cp, ville, latitude: lat, longitude: lng })
+      toast.success('Adresse mise a jour')
+      setEditing(false)
+    } catch (err: any) { toast.error(err.message || 'Erreur') }
+  }
+
+  async function handleDelete() {
+    try {
+      await deleteAddr.mutateAsync({ batimentId, adresseId: a.id })
+      toast.success('Adresse supprimee')
+    } catch (err: any) { toast.error(err.message || 'Erreur') }
+  }
+
+  if (editing) {
+    return (
+      <div className="p-3 rounded-lg border border-amber-200 bg-amber-50/30 space-y-2">
+        <AddressAutocomplete
+          value={rue}
+          onChange={(addr) => {
+            if (addr) { setRue(addr.rue); setCp(addr.code_postal); setVille(addr.ville); setLat(addr.latitude); setLng(addr.longitude) }
+          }}
+        />
+        <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complement..." className="h-8 text-xs" />
+        <div className="grid grid-cols-2 gap-2">
+          <Input value={cp} onChange={(e) => setCp(e.target.value)} placeholder="Code postal" className="h-8 text-xs" />
+          <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
+        </div>
+        <div className="flex justify-end gap-1.5">
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditing(false)}>
+            <XIcon className="h-3 w-3 mr-1" /> Annuler
+          </Button>
+          <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700 text-white" onClick={handleSave} disabled={updateAddr.isPending}>
+            <Save className="h-3 w-3 mr-1" /> Enregistrer
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors group">
+      <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+        <MapPin className="h-4 w-4 text-blue-600" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900">{a.rue}</p>
+        {a.complement && <p className="text-xs text-gray-500">{a.complement}</p>}
+        <p className="text-xs text-gray-400">{a.code_postal} {a.ville}</p>
+        {a.latitude && a.longitude ? (
+          <a href={`https://maps.google.com/?q=${a.latitude},${a.longitude}`} target="_blank" rel="noopener noreferrer"
+            className="text-[11px] text-blue-500 hover:text-blue-700 flex items-center gap-0.5 mt-1">
+            <ExternalLinkIcon className="h-3 w-3" /> Google Maps
+          </a>
+        ) : (
+          <p className="text-[10px] text-gray-300 mt-1">(pas de coordonnees)</p>
+        )}
+      </div>
+      <Badge variant="outline" className="text-[9px] capitalize shrink-0">{a.type}</Badge>
+      {!isArchived && (
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setEditing(true)}>
+            <Pencil className="h-3 w-3 text-gray-400" />
+          </Button>
+          {totalAddresses > 1 && (
+            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleDelete}>
+              <Trash2 className="h-3 w-3 text-red-400" />
+            </Button>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Add Address Button ──
+function AddAddressButton({ batimentId }: { batimentId: string }) {
+  const [adding, setAdding] = useState(false)
+  const [rue, setRue] = useState('')
+  const [complement, setComplement] = useState('')
+  const [cp, setCp] = useState('')
+  const [ville, setVille] = useState('')
+  const [lat, setLat] = useState<number | undefined>()
+  const [lng, setLng] = useState<number | undefined>()
+  const addAddr = useAddAddress()
+
+  async function handleAdd() {
+    if (!rue || !cp || !ville) { toast.error('Rue, code postal et ville requis'); return }
+    try {
+      await addAddr.mutateAsync({ batimentId, type: 'secondaire', rue, complement: complement || undefined, code_postal: cp, ville, latitude: lat, longitude: lng })
+      toast.success('Adresse ajoutee')
+      setAdding(false); setRue(''); setComplement(''); setCp(''); setVille(''); setLat(undefined); setLng(undefined)
+    } catch (err: any) { toast.error(err.message || 'Erreur') }
+  }
+
+  if (!adding) {
+    return (
+      <Button variant="ghost" size="sm" className="h-7 text-xs text-amber-600 hover:text-amber-700" onClick={() => setAdding(true)}>
+        <Plus className="h-3 w-3 mr-1" /> Adresse
+      </Button>
+    )
+  }
+
+  return (
+    <div className="w-full mt-2 p-3 rounded-lg border border-amber-200 bg-amber-50/30 space-y-2">
+      <p className="text-xs font-medium text-gray-600">Nouvelle adresse secondaire</p>
+      <AddressAutocomplete
+        onChange={(addr) => {
+          if (addr) { setRue(addr.rue); setCp(addr.code_postal); setVille(addr.ville); setLat(addr.latitude); setLng(addr.longitude) }
+        }}
+      />
+      <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complement..." className="h-8 text-xs" />
+      <div className="grid grid-cols-2 gap-2">
+        <Input value={cp} onChange={(e) => setCp(e.target.value)} placeholder="Code postal" className="h-8 text-xs" />
+        <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
+      </div>
+      <div className="flex justify-end gap-1.5">
+        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setAdding(false)}>Annuler</Button>
+        <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700 text-white" onClick={handleAdd} disabled={addAddr.isPending}>
+          <Plus className="h-3 w-3 mr-1" /> Ajouter
+        </Button>
+      </div>
     </div>
   )
 }

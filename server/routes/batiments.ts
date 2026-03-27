@@ -236,4 +236,65 @@ router.patch('/:id', async (req, res) => {
   }
 })
 
+// PUT /api/batiments/:id/adresses/:adresseId — Update an address
+router.put('/:id/adresses/:adresseId', async (req, res) => {
+  try {
+    const workspaceId = req.user!.workspaceId
+    const bat = await query(`SELECT id FROM batiment WHERE id = $1 AND workspace_id = $2`, [req.params.id, workspaceId])
+    if (bat.rows.length === 0) throw new NotFoundError('Bâtiment')
+
+    const { rue, complement, code_postal, ville, latitude, longitude } = req.body
+    const result = await query(
+      `UPDATE adresse_batiment SET rue = $1, complement = $2, code_postal = $3, ville = $4, latitude = $5, longitude = $6, updated_at = now()
+       WHERE id = $7 AND batiment_id = $8 RETURNING *`,
+      [rue, complement ?? null, code_postal, ville, latitude ?? null, longitude ?? null, req.params.adresseId, req.params.id]
+    )
+    if (result.rows.length === 0) throw new NotFoundError('Adresse')
+    sendSuccess(res, result.rows[0])
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
+// POST /api/batiments/:id/adresses — Add a new address
+router.post('/:id/adresses', async (req, res) => {
+  try {
+    const workspaceId = req.user!.workspaceId
+    const bat = await query(`SELECT id FROM batiment WHERE id = $1 AND workspace_id = $2`, [req.params.id, workspaceId])
+    if (bat.rows.length === 0) throw new NotFoundError('Bâtiment')
+
+    const { type, rue, complement, code_postal, ville, latitude, longitude } = req.body
+    const maxOrdre = await query(`SELECT COALESCE(MAX(ordre), 0) + 1 as next FROM adresse_batiment WHERE batiment_id = $1`, [req.params.id])
+
+    const result = await query(
+      `INSERT INTO adresse_batiment (batiment_id, type, rue, complement, code_postal, ville, latitude, longitude, ordre)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [req.params.id, type || 'secondaire', rue, complement ?? null, code_postal, ville, latitude ?? null, longitude ?? null, maxOrdre.rows[0].next]
+    )
+    sendSuccess(res, result.rows[0], 201)
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
+// DELETE /api/batiments/:id/adresses/:adresseId — Remove an address
+router.delete('/:id/adresses/:adresseId', async (req, res) => {
+  try {
+    const workspaceId = req.user!.workspaceId
+    const bat = await query(`SELECT id FROM batiment WHERE id = $1 AND workspace_id = $2`, [req.params.id, workspaceId])
+    if (bat.rows.length === 0) throw new NotFoundError('Bâtiment')
+
+    // Don't allow deleting the last address
+    const count = await query(`SELECT count(*) as cnt FROM adresse_batiment WHERE batiment_id = $1`, [req.params.id])
+    if (parseInt(count.rows[0].cnt) <= 1) {
+      throw new AppError('Impossible de supprimer la dernière adresse', 'LAST_ADDRESS', 409)
+    }
+
+    await query(`DELETE FROM adresse_batiment WHERE id = $1 AND batiment_id = $2`, [req.params.adresseId, req.params.id])
+    sendSuccess(res, { deleted: true })
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
 export default router
