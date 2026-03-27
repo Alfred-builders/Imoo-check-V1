@@ -10,7 +10,7 @@ import { RecordPicker } from 'src/components/shared/record-picker'
 import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
 import { useCreateLot, useCreateBatiment, useBatiments } from '../api'
 import { toast } from 'sonner'
-import { ArrowLeft, Plus } from 'lucide-react'
+import { ArrowLeft, Plus, ChevronDown, ChevronRight } from 'lucide-react'
 
 interface Props {
   open: boolean
@@ -43,6 +43,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
   const [chauffageType, setChauffageType] = useState('')
   const [chauffageMode, setChauffageMode] = useState('')
   const [commentaire, setCommentaire] = useState('')
+  const [energieOpen, setEnergieOpen] = useState(false)
 
   // Building creation fields (inline sub-form)
   const [batDesignation, setBatDesignation] = useState('')
@@ -262,10 +263,17 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                 </div>
               </div>
 
-              {/* Energy section */}
-              <div className="border-t border-gray-100 pt-3">
-                <p className="text-xs font-medium text-gray-500 mb-2">Energie</p>
-                <div className="grid grid-cols-2 gap-3">
+              {/* Energy section — collapsible */}
+              <div className="border border-gray-100 rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setEnergieOpen(!energieOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2.5 bg-gray-50 hover:bg-gray-100/70 transition-colors"
+                >
+                  <span className="text-xs font-medium text-gray-500">Energie & Chauffage</span>
+                  {energieOpen ? <ChevronDown className="h-3.5 w-3.5 text-gray-400" /> : <ChevronRight className="h-3.5 w-3.5 text-gray-400" />}
+                </button>
+                {energieOpen && <div className="grid grid-cols-2 gap-3 p-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs">Eau chaude type</Label>
                     <Select value={eauChaudeType} onValueChange={setEauChaudeType}>
@@ -312,7 +320,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
+                </div>}
               </div>
 
               <div className="flex items-center gap-3">

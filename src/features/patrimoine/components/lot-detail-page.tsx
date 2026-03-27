@@ -156,7 +156,35 @@ export function LotDetailPage() {
 
           <TabsContent value="infos" className="mt-4">
             <div className="grid grid-cols-3 gap-4">
-              {/* General */}
+              {/* Left sidebar — Energie + Annexes */}
+              <div className="space-y-4">
+                <EnergieSection lot={lot} />
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                  <button
+                    onClick={() => {}}
+                    className="w-full flex items-center justify-between px-5 py-3.5"
+                  >
+                    <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Annexes</h2>
+                  </button>
+                  <div className="px-5 pb-5 space-y-2">
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                      <Warehouse className="h-4 w-4 text-gray-500" />
+                      <span className="text-xs text-gray-500 flex-1">Cave</span>
+                      <span className="text-sm font-medium text-gray-900">{lot.num_cave || '—'}</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                      <Car className="h-4 w-4 text-gray-500" />
+                      <span className="text-xs text-gray-500 flex-1">Parking</span>
+                      <span className="text-sm font-medium text-gray-900">{lot.num_parking || '—'}</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[10px] text-gray-300 px-1">
+                  Cree {formatDate(lot.created_at)} — Modifie {formatDate(lot.updated_at)}
+                </p>
+              </div>
+
+              {/* Right main — Caracteristiques */}
               <div className="col-span-2 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Caracteristiques</h2>
                 <div className="grid grid-cols-2 gap-x-8 divide-y divide-gray-50">
@@ -176,29 +204,6 @@ export function LotDetailPage() {
                     <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-100 leading-relaxed">{lot.commentaire}</p>
                   </>
                 )}
-              </div>
-
-              {/* Energie + Annexes */}
-              <div className="space-y-4">
-                <EnergieSection lot={lot} />
-                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Annexes</h2>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
-                      <Warehouse className="h-4 w-4 text-gray-500" />
-                      <span className="text-xs text-gray-500 flex-1">Cave</span>
-                      <span className="text-sm font-medium text-gray-900">{lot.num_cave || '—'}</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
-                      <Car className="h-4 w-4 text-gray-500" />
-                      <span className="text-xs text-gray-500 flex-1">Parking</span>
-                      <span className="text-sm font-medium text-gray-900">{lot.num_parking || '—'}</span>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-[10px] text-gray-300 px-1">
-                  Cree {formatDate(lot.created_at)} — Modifie {formatDate(lot.updated_at)}
-                </p>
               </div>
             </div>
           </TabsContent>
