@@ -101,24 +101,7 @@ export function BuildingDetailPage() {
         </div>
       )}
 
-      {/* Edit form */}
-      {editing && (
-        <Card className="shadow-sm border-amber-200 bg-amber-50/30">
-          <CardContent className="pt-5">
-            <EditBuildingForm
-              batiment={batiment}
-              onSave={async (data) => {
-                await updateMutation.mutateAsync({ id: batiment.id, ...data })
-                toast.success('Batiment mis a jour')
-                setEditing(false)
-              }}
-              onCancel={() => setEditing(false)}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* KPI row */}
+      {/* KPI row — always visible */}
       <div className="grid grid-cols-4 gap-3">
         {[
           { icon: Layers, label: 'Lots', value: batiment.nb_lots, bg: 'bg-blue-500', text: 'text-white' },
@@ -138,15 +121,30 @@ export function BuildingDetailPage() {
         ))}
       </div>
 
-      {/* Tabs */}
-      {!editing && (
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="bg-gray-100 p-0.5 h-9">
-            <TabsTrigger value="overview" className="text-xs h-8 px-4">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="lots" className="text-xs h-8 px-4">Lots ({lots?.length ?? 0})</TabsTrigger>
-          </TabsList>
+      {/* Tabs — always visible */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="bg-gray-100 p-0.5 h-9">
+          <TabsTrigger value="overview" className="text-xs h-8 px-4">Vue d'ensemble</TabsTrigger>
+          <TabsTrigger value="lots" className="text-xs h-8 px-4">Lots ({lots?.length ?? 0})</TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="overview" className="mt-4">
+        <TabsContent value="overview" className="mt-4">
+          {/* Edit form inside tab content */}
+          {editing && (
+            <Card className="shadow-sm border-amber-200 bg-amber-50/30 mb-4">
+              <CardContent className="pt-5">
+                <EditBuildingForm
+                  batiment={batiment}
+                  onSave={async (data) => {
+                    await updateMutation.mutateAsync({ id: batiment.id, ...data })
+                    toast.success('Batiment mis a jour')
+                    setEditing(false)
+                  }}
+                  onCancel={() => setEditing(false)}
+                />
+              </CardContent>
+            </Card>
+          )}
             <div className="grid grid-cols-3 gap-4">
               {/* Adresses */}
               <div className="col-span-2 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -238,7 +236,6 @@ export function BuildingDetailPage() {
             </div>
           </TabsContent>
         </Tabs>
-      )}
 
       <CreateLotModal
         open={showCreateLot}
@@ -304,36 +301,47 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
   }
 
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors group">
-      <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-        <MapPin className="h-4 w-4 text-blue-600" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900">{a.rue}</p>
-        {a.complement && <p className="text-xs text-gray-500">{a.complement}</p>}
-        <p className="text-xs text-gray-400">{a.code_postal} {a.ville}</p>
-        {a.latitude && a.longitude ? (
-          <a href={`https://maps.google.com/?q=${a.latitude},${a.longitude}`} target="_blank" rel="noopener noreferrer"
-            className="text-[11px] text-blue-500 hover:text-blue-700 flex items-center gap-0.5 mt-1">
-            <ExternalLinkIcon className="h-3 w-3" /> Google Maps
-          </a>
-        ) : (
-          <p className="text-[10px] text-gray-300 mt-1">(pas de coordonnees)</p>
+    <div className="p-3.5 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors group">
+      <div className="flex items-start gap-3">
+        <div className="h-9 w-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+          <MapPin className="h-4 w-4 text-blue-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-gray-900">{a.rue}</p>
+            <Badge variant="outline" className="text-[9px] capitalize shrink-0">{a.type}</Badge>
+          </div>
+          {a.complement && <p className="text-xs text-gray-500 mt-0.5">{a.complement}</p>}
+          <p className="text-xs text-gray-500 mt-0.5">{a.code_postal} {a.ville}</p>
+        </div>
+        {!isArchived && (
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-400 hover:text-gray-700" onClick={() => setEditing(true)}>
+              <Pencil className="h-3 w-3 mr-1" /> Modifier
+            </Button>
+            {totalAddresses > 1 && (
+              <Button variant="ghost" size="sm" className="h-7 px-1.5 text-red-400 hover:text-red-600" onClick={handleDelete}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         )}
       </div>
-      <Badge variant="outline" className="text-[9px] capitalize shrink-0">{a.type}</Badge>
-      {!isArchived && (
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setEditing(true)}>
-            <Pencil className="h-3 w-3 text-gray-400" />
-          </Button>
-          {totalAddresses > 1 && (
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={handleDelete}>
-              <Trash2 className="h-3 w-3 text-red-400" />
-            </Button>
-          )}
-        </div>
-      )}
+      {/* Additional info row */}
+      <div className="flex items-center gap-4 mt-2 pl-12 text-[11px]">
+        {a.latitude && a.longitude ? (
+          <>
+            <a href={`https://maps.google.com/?q=${a.latitude},${a.longitude}`} target="_blank" rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-700 flex items-center gap-0.5">
+              <ExternalLinkIcon className="h-3 w-3" /> Voir sur Google Maps
+            </a>
+            <span className="text-gray-300">|</span>
+            <span className="text-gray-400">GPS: {a.latitude.toFixed(4)}, {a.longitude.toFixed(4)}</span>
+          </>
+        ) : (
+          <span className="text-gray-300">Coordonnees GPS non disponibles — saisie manuelle</span>
+        )}
+      </div>
     </div>
   )
 }
