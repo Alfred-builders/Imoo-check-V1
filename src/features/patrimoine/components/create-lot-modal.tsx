@@ -106,10 +106,12 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
         adresses: [{ type: 'principale', rue: batRue, complement: batComplement || undefined, code_postal: batCP, ville: batVille, latitude: batLat, longitude: batLng }],
       })
       toast.success(`Batiment "${batDesignation}" cree`)
-      setBatimentId(result.id) // Auto-select the new building
+      const newId = result.id
       resetBat()
-      setStep('lot') // Go back to lot form
-      refetchBatiments() // Refresh picker options
+      // Refresh picker options first, then set the ID and switch step
+      await refetchBatiments()
+      setBatimentId(newId)
+      setStep('lot')
     } catch (err: any) {
       toast.error(err.message || 'Erreur')
     }
@@ -167,11 +169,14 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                     onCreateClick={() => setStep('create-batiment')}
                     createLabel="Creer un batiment"
                   />
-                  {selectedBatiment && (
+                  {batimentId && selectedBatiment && (
                     <p className="text-[10px] text-emerald-600 flex items-center gap-1">
-                      <span className="font-medium">{selectedBatiment.designation}</span>
+                      Selectionne : <span className="font-medium">{selectedBatiment.designation}</span>
                       — {selectedBatiment.adresse_principale?.rue}, {selectedBatiment.adresse_principale?.ville}
                     </p>
+                  )}
+                  {batimentId && !selectedBatiment && (
+                    <p className="text-[10px] text-emerald-600">Batiment selectionne (chargement...)</p>
                   )}
                 </div>
               )}
