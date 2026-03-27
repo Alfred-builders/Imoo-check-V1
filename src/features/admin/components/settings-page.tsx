@@ -249,12 +249,9 @@ function InvitationsTab() {
               Envoyer
             </Button>
           </form>
-          <div className="flex items-center gap-2 mt-2">
-            <AlertCircle className="h-3 w-3 text-amber-500 shrink-0" />
-            <p className="text-[10px] text-amber-600">
-              Pour envoyer des emails, configurez RESEND_API_KEY. En attendant, copiez le lien d'invitation ci-dessous.
-            </p>
-          </div>
+          <p className="text-[10px] text-gray-400 mt-2">
+            L'invitation expire apres 7 jours. Un email sera envoye automatiquement.
+          </p>
         </CardContent>
       </Card>
 
