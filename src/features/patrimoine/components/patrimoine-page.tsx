@@ -309,35 +309,46 @@ function LotSubRows({ batimentId }: { batimentId: string }) {
 
   if (isLoading) {
     return (
-      <div className="pl-12 pr-4 py-2 bg-gray-50/50">
+      <div className="pl-10 pr-4 py-2 bg-gray-50/60">
         {[1, 2].map((i) => (
-          <div key={i} className="flex gap-4 py-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-4 w-16" /><Skeleton className="h-4 w-20" /></div>
+          <div key={i} className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 py-2">
+            <Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" />
+          </div>
         ))}
       </div>
     )
   }
 
-  if (!lots || lots.length === 0) return <div className="pl-12 pr-4 py-3 bg-gray-50/50 text-xs text-gray-400">Aucun lot</div>
+  if (!lots || lots.length === 0) return <div className="pl-10 pr-4 py-3 bg-gray-50/60 text-xs text-gray-400">Aucun lot</div>
 
   return (
-    <div className="bg-gray-50/50 border-t border-gray-100">
+    <div className="bg-gray-50/60 border-t border-gray-100">
+      {/* Sub-row column headers */}
+      <div className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-1.5 text-[9px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100/80">
+        <div>Lot</div>
+        <div>Type</div>
+        <div>Etage</div>
+        <div>Surface</div>
+        <div>Meuble</div>
+        <div>Proprietaire</div>
+      </div>
       {lots.map((lot) => {
         const propLabel = lot.proprietaires?.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.nom).join(', ') || '—'
         return (
           <div
             key={lot.id}
-            className="flex items-center gap-4 pl-12 pr-4 py-2 hover:bg-amber-50/30 cursor-pointer transition-colors text-xs border-b border-gray-50 last:border-b-0"
+            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-amber-50/40 cursor-pointer transition-colors text-xs border-b border-gray-50 last:border-b-0 items-center"
             onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
           >
-            <div className="flex-1 min-w-0 flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <Home className="h-3 w-3 text-gray-300 shrink-0" />
-              <span className="font-medium text-gray-800">{lot.designation}</span>
+              <span className="font-medium text-gray-800 truncate">{lot.designation}</span>
             </div>
-            <Badge variant="outline" className="text-[9px] capitalize font-normal">{lot.type_bien.replace('_', ' ')}</Badge>
-            <span className="w-12 text-gray-500">{lot.etage || '—'}</span>
-            <span className="w-16 text-gray-500">{lot.surface ? `${lot.surface} m²` : '—'}</span>
-            {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meuble</Badge>}
-            <span className="w-28 text-gray-400 truncate">{propLabel}</span>
+            <div><Badge variant="outline" className="text-[9px] capitalize font-normal">{lot.type_bien.replace('_', ' ')}</Badge></div>
+            <div className="text-gray-500">{lot.etage || '—'}</div>
+            <div className="text-gray-500">{lot.surface ? `${lot.surface} m²` : '—'}</div>
+            <div>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meuble</Badge> : <span className="text-gray-300">—</span>}</div>
+            <div className="text-gray-400 truncate">{propLabel}</div>
           </div>
         )
       })}
