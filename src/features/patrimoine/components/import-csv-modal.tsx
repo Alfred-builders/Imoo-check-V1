@@ -259,7 +259,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v) }}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5 text-amber-600" />
@@ -327,28 +327,32 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
             </div>
 
             <div className="space-y-2 max-h-[350px] overflow-y-auto">
-              {csvData.headers.map((header) => (
-                <div key={header} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg border border-gray-100">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-700 truncate">{header}</p>
-                    <p className="text-[10px] text-gray-400 truncate">{csvData.rows[0]?.[csvData.headers.indexOf(header)] || '—'}</p>
+              {csvData.headers.map((header) => {
+                const currentMapping = mapping[header] || SKIP_VALUE
+                const isMapped = currentMapping !== SKIP_VALUE
+                return (
+                  <div key={header} className={`grid grid-cols-[1fr_24px_240px] items-center gap-3 p-2.5 rounded-lg border ${isMapped ? 'bg-emerald-50/30 border-emerald-200' : 'bg-gray-50 border-gray-100'}`}>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-gray-700 truncate">{header}</p>
+                      <p className="text-[10px] text-gray-400 truncate">{csvData.rows[0]?.[csvData.headers.indexOf(header)] || '—'}</p>
+                    </div>
+                    <ArrowRight className={`h-3.5 w-3.5 shrink-0 ${isMapped ? 'text-emerald-400' : 'text-gray-300'}`} />
+                    <Select value={currentMapping} onValueChange={(v) => setMapping({ ...mapping, [header]: v })}>
+                      <SelectTrigger className="h-8 text-xs w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={SKIP_VALUE} className="text-xs text-gray-400">— Ignorer —</SelectItem>
+                        {targetFields.map(f => (
+                          <SelectItem key={f.id} value={f.id} className="text-xs">
+                            {f.label} {f.required && <span className="text-red-500">*</span>}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <ArrowRight className="h-3.5 w-3.5 text-gray-300 shrink-0" />
-                  <Select value={mapping[header] || SKIP_VALUE} onValueChange={(v) => setMapping({ ...mapping, [header]: v })}>
-                    <SelectTrigger className="w-52 h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={SKIP_VALUE} className="text-xs text-gray-400">— Ignorer —</SelectItem>
-                      {targetFields.map(f => (
-                        <SelectItem key={f.id} value={f.id} className="text-xs">
-                          {f.label} {f.required && <span className="text-red-500">*</span>}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
             {!allRequiredMapped && (

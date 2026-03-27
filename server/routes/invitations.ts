@@ -128,4 +128,52 @@ router.patch('/users/:userId/role', async (req, res) => {
   }
 })
 
+// POST /api/invitations/:id/resend — Resend invitation (extend expiry + re-send email)
+router.post('/:id/resend', async (req, res) => {
+  try {
+    const workspaceId = req.user!.workspaceId
+    const newExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+    const result = await query(
+      `UPDATE invitation SET expires_at = $1 WHERE id = $2 AND workspace_id = $3 AND accepted_at IS NULL
+       RETURNING email, token, role`,
+      [newExpiry, req.params.id, workspaceId]
+    )
+
+    if (result.rows.length === 0) {
+      sendError(res, { status: 404, message: 'Invitation introuvable ou deja acceptee', code: 'NOT_FOUND' })
+      return
+    }
+
+    const inv = result.rows[0]
+    const wsResult = await query(`SELECT nom FROM workspace WHERE id = $1`, [workspaceId])
+    const wsName = wsResult.rows[0]?.nom || 'ImmoChecker'
+    const { sendInvitationEmail } = await import('../services/email-service.js')
+    await sendInvitationEmail(inv.email, inv.token, wsName, inv.role).catch(err => console.error('[email] Resend failed:', err))
+
+    console.log(`[invite] Invitation resent to ${inv.email}`)
+    sendSuccess(res, { resent: true })
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
+// DELETE /api/invitations/:id — Cancel invitation
+router.delete('/:id', async (req, res) => {
+  try {
+    const workspaceId = req.user!.workspaceId
+    const result = await query(
+      `DELETE FROM invitation WHERE id = $1 AND workspace_id = $2 AND accepted_at IS NULL RETURNING id`,
+      [req.params.id, workspaceId]
+    )
+    if (result.rows.length === 0) {
+      sendError(res, { status: 404, message: 'Invitation introuvable', code: 'NOT_FOUND' })
+      return
+    }
+    sendSuccess(res, { deleted: true })
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
 export default router

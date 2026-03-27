@@ -82,3 +82,29 @@ export function useChangeRole() {
     },
   })
 }
+
+// ── Resend Invitation ──
+
+export function useResendInvitation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<void>(`/invitations/${id}/resend`, { method: 'POST' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invitations'] })
+    },
+  })
+}
+
+// ── Cancel Invitation ──
+
+export function useCancelInvitation() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      api<void>(`/invitations/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['invitations'] })
+    },
+  })
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Users, Mail, Send, Loader2, Shield, Building2, UserPlus, Clock, CheckCircle, AlertCircle, Copy } from 'lucide-react'
+import { Users, Mail, Send, Loader2, Shield, Building2, UserPlus, Clock, CheckCircle, AlertCircle, Copy, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'src/components/ui/tabs'
@@ -12,7 +12,7 @@ import { Separator } from 'src/components/ui/separator'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
 import { useAuth } from 'src/hooks/use-auth'
-import { useWorkspaceUsers, useInvitations, useSendInvitation, useChangeRole } from '../api'
+import { useWorkspaceUsers, useInvitations, useSendInvitation, useChangeRole, useResendInvitation, useCancelInvitation } from '../api'
 import type { WorkspaceUser, Invitation } from '../api'
 
 const ROLES = ['admin', 'gestionnaire', 'technicien'] as const
@@ -164,8 +164,11 @@ function UsersTab() {
 function InvitationsTab() {
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<Role>('gestionnaire')
+  const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'expired'>('all')
   const { data: invitations, isLoading } = useInvitations()
   const sendInvitation = useSendInvitation()
+  const resendInvitation = useResendInvitation()
+  const cancelInvitation = useCancelInvitation()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -186,6 +189,37 @@ function InvitationsTab() {
     toast.success('Lien copie dans le presse-papiers')
   }
 
+  function handleResend(inv: Invitation) {
+    resendInvitation.mutate(inv.id, {
+      onSuccess: () => toast.success(`Invitation relancee a ${inv.email}`),
+      onError: () => toast.error('Erreur lors de la relance'),
+    })
+  }
+
+  function handleCancel(inv: Invitation) {
+    cancelInvitation.mutate(inv.id, {
+      onSuccess: () => toast.success('Invitation annulee'),
+      onError: () => toast.error('Erreur'),
+    })
+  }
+
+  // Filter invitations
+  const filtered = (invitations || []).filter(inv => {
+    const isExpired = !inv.accepted_at && new Date(inv.expires_at) < new Date()
+    const isAccepted = !!inv.accepted_at
+    if (filter === 'pending') return !isAccepted && !isExpired
+    if (filter === 'accepted') return isAccepted
+    if (filter === 'expired') return isExpired
+    return true
+  })
+
+  const counts = {
+    all: invitations?.length ?? 0,
+    pending: (invitations || []).filter(i => !i.accepted_at && new Date(i.expires_at) >= new Date()).length,
+    accepted: (invitations || []).filter(i => !!i.accepted_at).length,
+    expired: (invitations || []).filter(i => !i.accepted_at && new Date(i.expires_at) < new Date()).length,
+  }
+
   return (
     <div className="space-y-5">
       {/* Invite form */}
@@ -199,23 +233,14 @@ function InvitationsTab() {
           <form onSubmit={handleSubmit} className="flex items-end gap-3">
             <div className="flex-1 space-y-1.5">
               <Label className="text-xs text-gray-500">Email</Label>
-              <Input
-                type="email"
-                placeholder="nom@exemple.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-9"
-                required
-              />
+              <Input type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-9" required />
             </div>
             <div className="w-44 space-y-1.5">
               <Label className="text-xs text-gray-500">Role</Label>
               <Select value={role} onValueChange={(v) => setRole(v as Role)}>
                 <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {ROLES.map((r) => (
-                    <SelectItem key={r} value={r} className="text-xs">{roleConfig[r].label}</SelectItem>
-                  ))}
+                  {ROLES.map((r) => <SelectItem key={r} value={r} className="text-xs">{roleConfig[r].label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -224,39 +249,60 @@ function InvitationsTab() {
               Envoyer
             </Button>
           </form>
-          <p className="text-[10px] text-gray-300 mt-2">L'invitation expire apres 7 jours. Un email sera envoye si Resend est configure.</p>
+          <div className="flex items-center gap-2 mt-2">
+            <AlertCircle className="h-3 w-3 text-amber-500 shrink-0" />
+            <p className="text-[10px] text-amber-600">
+              Pour envoyer des emails, configurez RESEND_API_KEY. En attendant, copiez le lien d'invitation ci-dessous.
+            </p>
+          </div>
         </CardContent>
       </Card>
 
       {/* Invitations list */}
       <Card className="shadow-sm border-gray-200 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-gray-400" />
-            <h3 className="text-sm font-semibold text-gray-900">Invitations envoyees</h3>
-            <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{invitations?.length ?? 0}</Badge>
+            <h3 className="text-sm font-semibold text-gray-900">Invitations</h3>
+          </div>
+          {/* Filter tabs */}
+          <div className="flex items-center bg-gray-100 rounded-md p-0.5 text-[10px]">
+            {([
+              { key: 'all', label: 'Toutes' },
+              { key: 'pending', label: 'En attente' },
+              { key: 'accepted', label: 'Acceptees' },
+              { key: 'expired', label: 'Expirees' },
+            ] as { key: typeof filter; label: string }[]).map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`px-2.5 py-1 rounded transition-colors font-medium ${filter === key ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                {label} {counts[key] > 0 && <span className="text-gray-400 ml-0.5">{counts[key]}</span>}
+              </button>
+            ))}
           </div>
         </div>
 
-        {isLoading && <div className="p-5 space-y-3">{[1,2].map(i => <Skeleton key={i} className="h-12 rounded" />)}</div>}
+        {isLoading && <div className="p-5 space-y-3">{[1,2].map(i => <Skeleton key={i} className="h-14 rounded" />)}</div>}
 
-        {!isLoading && (!invitations || invitations.length === 0) && (
+        {!isLoading && filtered.length === 0 && (
           <div className="py-8 text-center">
             <Mail className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-            <p className="text-sm text-gray-400">Aucune invitation</p>
+            <p className="text-sm text-gray-400">Aucune invitation {filter !== 'all' ? `(${filter})` : ''}</p>
           </div>
         )}
 
-        {invitations && invitations.length > 0 && (
+        {filtered.length > 0 && (
           <div className="divide-y divide-gray-50">
-            {invitations.map((inv) => {
+            {filtered.map((inv) => {
               const rc = roleConfig[inv.role as Role] || roleConfig.gestionnaire
               const isExpired = !inv.accepted_at && new Date(inv.expires_at) < new Date()
               const isAccepted = !!inv.accepted_at
               const isPending = !isAccepted && !isExpired
 
               return (
-                <div key={inv.id} className="flex items-center gap-4 px-5 py-3">
+                <div key={inv.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/50 transition-colors">
                   <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
                     isAccepted ? 'bg-emerald-100' : isExpired ? 'bg-red-50' : 'bg-amber-50'
                   }`}>
@@ -267,19 +313,41 @@ function InvitationsTab() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">{inv.email}</p>
                     <p className="text-[10px] text-gray-400">
-                      Envoyee le {new Date(inv.created_at).toLocaleDateString('fr-FR')}
-                      {inv.invited_by_nom && ` par ${inv.invited_by_prenom} ${inv.invited_by_nom}`}
+                      {new Date(inv.created_at).toLocaleDateString('fr-FR')}
+                      {inv.invited_by_nom && ` — par ${inv.invited_by_prenom} ${inv.invited_by_nom}`}
+                      {isPending && ` — expire le ${new Date(inv.expires_at).toLocaleDateString('fr-FR')}`}
                     </p>
                   </div>
                   <Badge className={`${rc.bg} ${rc.color} ${rc.border} text-[10px]`}>{rc.label}</Badge>
                   <Badge variant={isAccepted ? 'default' : isExpired ? 'destructive' : 'outline'} className="text-[10px]">
                     {isAccepted ? 'Acceptee' : isExpired ? 'Expiree' : 'En attente'}
                   </Badge>
-                  {isPending && (
-                    <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-400" onClick={() => copyInviteLink(inv.token)}>
-                      <Copy className="h-3 w-3 mr-1" /> Lien
-                    </Button>
-                  )}
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {isPending && (
+                      <>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-gray-400 hover:text-gray-700" onClick={() => copyInviteLink(inv.token)}>
+                          <Copy className="h-3 w-3 mr-0.5" /> Lien
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-blue-500 hover:text-blue-700" onClick={() => handleResend(inv)}>
+                          <Send className="h-3 w-3 mr-0.5" /> Relancer
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-red-400 hover:text-red-600" onClick={() => handleCancel(inv)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </>
+                    )}
+                    {isExpired && (
+                      <>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-blue-500 hover:text-blue-700" onClick={() => handleResend(inv)}>
+                          <Send className="h-3 w-3 mr-0.5" /> Relancer
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-red-400 hover:text-red-600" onClick={() => handleCancel(inv)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               )
             })}
