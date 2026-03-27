@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus } from 'lucide-react'
+import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus, Upload } from 'lucide-react'
 import { Input } from 'src/components/ui/input'
 import { Badge } from 'src/components/ui/badge'
 import { Button } from 'src/components/ui/button'
@@ -9,6 +9,7 @@ import { formatDate } from '../../../lib/formatters'
 import { useNavigate } from 'react-router-dom'
 import { CreateBuildingModal } from './create-building-modal'
 import { CreateLotModal } from './create-lot-modal'
+import { ImportCSVModal } from './import-csv-modal'
 import { PatrimoineMap } from './patrimoine-map'
 import { ColumnConfig, useColumnPreferences, type ColumnDef } from '../../../components/shared/column-config'
 import { DynamicFilter, type FilterField, type ActiveFilter } from '../../../components/shared/dynamic-filter'
@@ -106,6 +107,7 @@ export function PatrimoinePage() {
   const [view, setView] = useState<'table' | 'carte'>('table')
   const [showCreateBuilding, setShowCreateBuilding] = useState(false)
   const [showCreateLot, setShowCreateLot] = useState(false)
+  const [showImportCSV, setShowImportCSV] = useState(false)
   const [maisonBatimentId, setMaisonBatimentId] = useState<string | null>(null)
   const debouncedSearch = useDebounce(search, 300)
   const navigate = useNavigate()
@@ -146,6 +148,11 @@ export function PatrimoinePage() {
         onCreated={(id) => navigate(`/app/patrimoine/lots/${id}`)}
         onCreateBatiment={() => { setShowCreateLot(false); setShowCreateBuilding(true) }}
       />
+      <ImportCSVModal
+        open={showImportCSV}
+        onOpenChange={setShowImportCSV}
+        onImported={() => window.location.reload()}
+      />
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -156,6 +163,9 @@ export function PatrimoinePage() {
           </p>
         </div>
         <div className="flex items-center gap-1.5">
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setShowImportCSV(true)}>
+            <Upload className="h-3.5 w-3.5 mr-1" /> Import CSV
+          </Button>
           <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-amber-600 hover:bg-amber-700 text-white h-8 text-xs">
             <Plus className="h-3.5 w-3.5 mr-1" /> Nouveau lot
           </Button>
