@@ -38,6 +38,10 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
   const [nbPieces, setNbPieces] = useState('')
   const [dpeClasse, setDpeClasse] = useState('')
   const [gesClasse, setGesClasse] = useState('')
+  const [eauChaudeType, setEauChaudeType] = useState('')
+  const [eauChaudeMode, setEauChaudeMode] = useState('')
+  const [chauffageType, setChauffageType] = useState('')
+  const [chauffageMode, setChauffageMode] = useState('')
   const [commentaire, setCommentaire] = useState('')
 
   // Building creation fields (inline sub-form)
@@ -86,6 +90,10 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
     setNbPieces('')
     setDpeClasse('')
     setGesClasse('')
+    setEauChaudeType('')
+    setEauChaudeMode('')
+    setChauffageType('')
+    setChauffageMode('')
     setCommentaire('')
     setStep('lot')
   }
@@ -145,6 +153,10 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
         nb_pieces: nbPieces || undefined,
         dpe_classe: dpeClasse || undefined,
         ges_classe: gesClasse || undefined,
+        eau_chaude_type: eauChaudeType || undefined,
+        eau_chaude_mode: eauChaudeMode || undefined,
+        chauffage_type: chauffageType || undefined,
+        chauffage_mode: chauffageMode || undefined,
         commentaire: commentaire || undefined,
       })
       toast.success(`Lot "${designation}" cree`)
@@ -240,6 +252,66 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                     <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
                     <SelectContent>{['A','B','C','D','E','F','G'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">GES</Label>
+                  <Select value={gesClasse} onValueChange={setGesClasse}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                    <SelectContent>{['A','B','C','D','E','F','G'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Energy section */}
+              <div className="border-t border-gray-100 pt-3">
+                <p className="text-xs font-medium text-gray-500 mb-2">Energie</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Eau chaude type</Label>
+                    <Select value={eauChaudeType} onValueChange={setEauChaudeType}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="individuelle" className="text-xs">Individuelle</SelectItem>
+                        <SelectItem value="collective" className="text-xs">Collective</SelectItem>
+                        <SelectItem value="aucun" className="text-xs">Aucun</SelectItem>
+                        <SelectItem value="autre" className="text-xs">Autre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Eau chaude mode</Label>
+                    <Select value={eauChaudeMode} onValueChange={setEauChaudeMode}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gaz" className="text-xs">Gaz</SelectItem>
+                        <SelectItem value="electrique" className="text-xs">Electrique</SelectItem>
+                        <SelectItem value="autre" className="text-xs">Autre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Chauffage type</Label>
+                    <Select value={chauffageType} onValueChange={setChauffageType}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="individuel" className="text-xs">Individuel</SelectItem>
+                        <SelectItem value="collectif" className="text-xs">Collectif</SelectItem>
+                        <SelectItem value="aucun" className="text-xs">Aucun</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Chauffage mode</Label>
+                    <Select value={chauffageMode} onValueChange={setChauffageMode}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gaz" className="text-xs">Gaz</SelectItem>
+                        <SelectItem value="electrique" className="text-xs">Electrique</SelectItem>
+                        <SelectItem value="fioul" className="text-xs">Fioul</SelectItem>
+                        <SelectItem value="autre" className="text-xs">Autre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
