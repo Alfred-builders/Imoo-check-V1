@@ -151,7 +151,7 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
 
           {/* Secondary address */}
           {!showSecondary ? (
-            <button type="button" onClick={() => setShowSecondary(true)} className="text-xs text-amber-600 hover:text-amber-700 font-medium">
+            <button type="button" onClick={() => setShowSecondary(true)} className="text-xs text-primary hover:text-primary font-medium">
               + Ajouter une adresse secondaire
             </button>
           ) : (

@@ -70,7 +70,7 @@ export function BuildingDetailPage() {
         </Button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-display font-bold text-gray-900">{batiment.designation}</h1>
+            <h1 className="text-xl font-bold text-gray-900">{batiment.designation}</h1>
             <Badge variant="outline" className="text-[10px] font-medium">{typeLabels[batiment.type]}</Badge>
             {batiment.est_archive && <Badge variant="destructive" className="text-[10px]">Archive</Badge>}
           </div>
@@ -95,7 +95,7 @@ export function BuildingDetailPage() {
       </div>
 
       {batiment.est_archive && (
-        <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs">
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-primary/5 border border-primary/30 rounded-lg text-primary text-xs">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           Ce batiment est archive.
         </div>
@@ -105,7 +105,7 @@ export function BuildingDetailPage() {
       <div className="grid grid-cols-4 gap-3">
         {[
           { icon: Layers, label: 'Lots', value: batiment.nb_lots, bg: 'bg-blue-500', text: 'text-white' },
-          { icon: Building2, label: 'Type', value: typeLabels[batiment.type], bg: 'bg-amber-500', text: 'text-white' },
+          { icon: Building2, label: 'Type', value: typeLabels[batiment.type], bg: 'bg-primary', text: 'text-white' },
           { icon: Hash, label: 'Etages', value: batiment.nb_etages ?? '—', bg: 'bg-emerald-500', text: 'text-white' },
           { icon: Calendar, label: 'Construction', value: batiment.annee_construction ?? '—', bg: 'bg-violet-500', text: 'text-white' },
         ].map(({ icon: Icon, label, value, bg, text }) => (
@@ -131,7 +131,7 @@ export function BuildingDetailPage() {
         <TabsContent value="overview" className="mt-4">
           {/* Edit form inside tab content */}
           {editing && (
-            <Card className="shadow-sm border-amber-200 bg-amber-50/30 mb-4">
+            <Card className="shadow-sm border-primary/30 bg-primary/5 mb-4">
               <CardContent className="pt-5">
                 <EditBuildingForm
                   batiment={batiment}
@@ -195,7 +195,7 @@ export function BuildingDetailPage() {
                   <h3 className="text-sm font-semibold text-gray-900">Lots</h3>
                   <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{lots?.length ?? 0}</Badge>
                 </div>
-                <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-amber-600 hover:bg-amber-700 text-white h-7 text-xs px-3">
+                <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-7 text-xs px-3">
                   <Plus className="h-3 w-3 mr-1" /> Ajouter
                 </Button>
               </div>
@@ -207,7 +207,7 @@ export function BuildingDetailPage() {
                     return (
                       <div
                         key={lot.id}
-                        className="flex items-center gap-4 px-4 py-3 hover:bg-amber-50/40 cursor-pointer transition-colors"
+                        className="flex items-center gap-4 px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors"
                         onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
                       >
                         <div className="h-9 w-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
@@ -276,7 +276,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
 
   if (editing) {
     return (
-      <div className="p-3 rounded-lg border border-amber-200 bg-amber-50/30 space-y-2">
+      <div className="p-3 rounded-lg border border-primary/30 bg-primary/5 space-y-2">
         <AddressAutocomplete
           value={rue}
           onChange={(addr) => {
@@ -292,7 +292,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
           <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditing(false)}>
             <XIcon className="h-3 w-3 mr-1" /> Annuler
           </Button>
-          <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700 text-white" onClick={handleSave} disabled={updateAddr.isPending}>
+          <Button size="sm" className="h-7 text-xs bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSave} disabled={updateAddr.isPending}>
             <Save className="h-3 w-3 mr-1" /> Enregistrer
           </Button>
         </div>
@@ -368,14 +368,14 @@ function AddAddressButton({ batimentId }: { batimentId: string }) {
 
   if (!adding) {
     return (
-      <Button variant="ghost" size="sm" className="h-7 text-xs text-amber-600 hover:text-amber-700" onClick={() => setAdding(true)}>
+      <Button variant="ghost" size="sm" className="h-7 text-xs text-primary hover:text-primary" onClick={() => setAdding(true)}>
         <Plus className="h-3 w-3 mr-1" /> Adresse
       </Button>
     )
   }
 
   return (
-    <div className="w-full mt-2 p-3 rounded-lg border border-amber-200 bg-amber-50/30 space-y-2">
+    <div className="w-full mt-2 p-3 rounded-lg border border-primary/30 bg-primary/5 space-y-2">
       <p className="text-xs font-medium text-gray-600">Nouvelle adresse secondaire</p>
       <AddressAutocomplete
         onChange={(addr) => {
@@ -389,7 +389,7 @@ function AddAddressButton({ batimentId }: { batimentId: string }) {
       </div>
       <div className="flex justify-end gap-1.5">
         <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setAdding(false)}>Annuler</Button>
-        <Button size="sm" className="h-7 text-xs bg-amber-600 hover:bg-amber-700 text-white" onClick={handleAdd} disabled={addAddr.isPending}>
+        <Button size="sm" className="h-7 text-xs bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleAdd} disabled={addAddr.isPending}>
           <Plus className="h-3 w-3 mr-1" /> Ajouter
         </Button>
       </div>

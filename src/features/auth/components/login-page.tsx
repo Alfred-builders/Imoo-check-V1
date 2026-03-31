@@ -38,7 +38,7 @@ export function LoginPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-xl font-display font-bold text-gray-900">Connexion</h2>
+        <h2 className="text-xl font-bold text-gray-900">Connexion</h2>
         <p className="text-sm text-gray-500 mt-1">Accédez à votre espace de travail</p>
       </div>
 
@@ -74,13 +74,13 @@ export function LoginPage() {
             className="h-10"
           />
         </div>
-        <Button type="submit" className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white font-medium" disabled={loading}>
+        <Button type="submit" className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium" disabled={loading}>
           {loading ? 'Connexion...' : 'Se connecter'}
         </Button>
       </form>
 
       <div className="text-center mt-6 space-y-2">
-        <Link to="/forgot-password" className="text-xs text-amber-600 hover:text-amber-700">Mot de passe oublie ?</Link>
+        <Link to="/forgot-password" className="text-xs text-primary hover:text-primary/80">Mot de passe oublie ?</Link>
         <p className="text-xs text-gray-400">Pas de compte ? Contactez votre administrateur.</p>
       </div>
     </div>

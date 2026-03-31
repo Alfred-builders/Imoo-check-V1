@@ -34,16 +34,16 @@ export function ResetPasswordPage() {
   if (done) {
     return (
       <div className="text-center">
-        <h2 className="text-xl font-display font-bold text-gray-900 mb-2">Mot de passe reinitialise</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Mot de passe reinitialise</h2>
         <p className="text-sm text-gray-500 mb-6">Vous pouvez maintenant vous connecter.</p>
-        <Link to="/login" className="text-sm text-amber-600 hover:text-amber-700 font-medium">Se connecter</Link>
+        <Link to="/login" className="text-sm text-primary hover:text-primary/80 font-medium">Se connecter</Link>
       </div>
     )
   }
 
   return (
     <div>
-      <h2 className="text-xl font-display font-bold text-gray-900 mb-1">Nouveau mot de passe</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-1">Nouveau mot de passe</h2>
       <p className="text-sm text-gray-500 mb-6">Min 8 caracteres, 1 majuscule, 1 chiffre.</p>
       {error && <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -55,7 +55,7 @@ export function ResetPasswordPage() {
           <Label className="text-gray-700 text-sm">Confirmer</Label>
           <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required className="h-10" />
         </div>
-        <Button type="submit" className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white" disabled={loading}>
+        <Button type="submit" className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={loading}>
           {loading ? 'Reinitialisation...' : 'Reinitialiser'}
         </Button>
       </form>

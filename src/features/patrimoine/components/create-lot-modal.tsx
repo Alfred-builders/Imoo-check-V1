@@ -335,7 +335,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
 
               <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Annuler</Button>
-                <Button type="submit" size="sm" disabled={createLotMutation.isPending} className="bg-amber-600 hover:bg-amber-700 text-white">
+                <Button type="submit" size="sm" disabled={createLotMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
                   {createLotMutation.isPending ? 'Creation...' : 'Creer le lot'}
                 </Button>
               </div>
@@ -419,7 +419,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                 <Button type="button" variant="ghost" size="sm" onClick={() => setStep('lot')}>
                   <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Retour au lot
                 </Button>
-                <Button type="submit" size="sm" disabled={createBatMutation.isPending} className="bg-amber-600 hover:bg-amber-700 text-white">
+                <Button type="submit" size="sm" disabled={createBatMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
                   {createBatMutation.isPending ? 'Creation...' : 'Creer et selectionner'}
                 </Button>
               </div>

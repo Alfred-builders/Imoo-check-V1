@@ -23,11 +23,11 @@ export function ForgotPasswordPage() {
   if (sent) {
     return (
       <div className="text-center">
-        <h2 className="text-xl font-display font-bold text-gray-900 mb-2">Email envoye</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Email envoye</h2>
         <p className="text-sm text-gray-500 mb-6">
           Si un compte existe avec l'adresse <strong>{email}</strong>, vous recevrez un lien de reinitialisation.
         </p>
-        <Link to="/login" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
+        <Link to="/login" className="text-sm text-primary hover:text-primary/80 font-medium">
           Retour a la connexion
         </Link>
       </div>
@@ -36,19 +36,19 @@ export function ForgotPasswordPage() {
 
   return (
     <div>
-      <h2 className="text-xl font-display font-bold text-gray-900 mb-1">Mot de passe oublie</h2>
+      <h2 className="text-xl font-bold text-gray-900 mb-1">Mot de passe oublie</h2>
       <p className="text-sm text-gray-500 mb-6">Entrez votre email pour recevoir un lien de reinitialisation.</p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
           <Label className="text-gray-700 text-sm">Email</Label>
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus className="h-10" />
         </div>
-        <Button type="submit" className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white" disabled={loading}>
+        <Button type="submit" className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={loading}>
           {loading ? 'Envoi...' : 'Envoyer le lien'}
         </Button>
       </form>
       <p className="text-center text-xs text-gray-400 mt-4">
-        <Link to="/login" className="text-amber-600 hover:text-amber-700">Retour a la connexion</Link>
+        <Link to="/login" className="text-primary hover:text-primary/80">Retour a la connexion</Link>
       </p>
     </div>
   )

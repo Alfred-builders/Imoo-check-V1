@@ -42,9 +42,9 @@ export function RegisterPage() {
   if (!invitation?.valid) {
     return (
       <div className="text-center">
-        <h2 className="text-xl font-display font-bold text-gray-900 mb-2">Invitation expiree</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Invitation expiree</h2>
         <p className="text-sm text-gray-500 mb-6">Ce lien d'invitation n'est plus valide. Contactez votre administrateur pour en recevoir un nouveau.</p>
-        <Link to="/login" className="text-sm text-amber-600 hover:text-amber-700 font-medium">Retour a la connexion</Link>
+        <Link to="/login" className="text-sm text-primary hover:text-primary/80 font-medium">Retour a la connexion</Link>
       </div>
     )
   }
@@ -73,11 +73,11 @@ export function RegisterPage() {
         {invitation.workspace_logo ? (
           <img src={invitation.workspace_logo} alt="" className="h-12 w-12 mx-auto rounded-xl object-cover mb-3" />
         ) : (
-          <div className="h-12 w-12 mx-auto rounded-xl bg-amber-500 flex items-center justify-center mb-3">
-            <Building2 className="h-6 w-6 text-white" />
+          <div className="h-12 w-12 mx-auto rounded-xl bg-primary flex items-center justify-center mb-3">
+            <Building2 className="h-6 w-6 text-primary-foreground" />
           </div>
         )}
-        <h2 className="text-lg font-display font-bold text-gray-900">Rejoindre {invitation.workspace_nom}</h2>
+        <h2 className="text-lg font-bold text-gray-900">Rejoindre {invitation.workspace_nom}</h2>
         <p className="text-sm text-gray-500 mt-1">Role : <span className="capitalize font-medium">{invitation.role}</span></p>
       </div>
 
@@ -106,7 +106,7 @@ export function RegisterPage() {
           <Label className="text-gray-700 text-sm">Confirmer *</Label>
           <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required className="h-10" />
         </div>
-        <Button type="submit" className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white" disabled={submitting}>
+        <Button type="submit" className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={submitting}>
           {submitting ? 'Inscription...' : 'Creer mon compte'}
         </Button>
       </form>

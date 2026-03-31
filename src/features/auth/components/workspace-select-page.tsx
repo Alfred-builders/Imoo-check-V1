@@ -41,7 +41,7 @@ export function WorkspaceSelectPage() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-lg p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-display font-bold text-primary">ImmoChecker</h1>
+          <h1 className="text-3xl font-bold text-primary">ImmoChecker</h1>
           <p className="text-muted-foreground mt-2">Choisissez votre workspace</p>
         </div>
         <div className="grid gap-3">

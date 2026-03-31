@@ -156,7 +156,7 @@ export function PatrimoinePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-display font-bold text-gray-900">Parc immobilier</h1>
+          <h1 className="text-xl font-bold text-gray-900">Parc immobilier</h1>
           <p className="text-xs text-gray-400 mt-0.5">
             {isLoading ? '...' : `${filteredBatiments.length} batiment${filteredBatiments.length > 1 ? 's' : ''}`}
           </p>
@@ -165,7 +165,7 @@ export function PatrimoinePage() {
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setShowImportCSV(true)}>
             <Upload className="h-3.5 w-3.5 mr-1" /> Import CSV
           </Button>
-          <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-amber-600 hover:bg-amber-700 text-white h-8 text-xs">
+          <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs">
             <Plus className="h-3.5 w-3.5 mr-1" /> Nouveau lot
           </Button>
           <ColumnConfig
@@ -264,7 +264,7 @@ function BatimentRow({ batiment, visibleCols }: { batiment: Batiment; visibleCol
   return (
     <div className="border-b border-gray-50 last:border-b-0">
       <div
-        className="flex items-center gap-4 px-4 py-2.5 hover:bg-amber-50/40 transition-colors cursor-pointer text-sm"
+        className="flex items-center gap-4 px-4 py-2.5 hover:bg-muted/50 transition-colors cursor-pointer text-sm"
         onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`)}
       >
         <button
@@ -347,7 +347,7 @@ function LotSubRows({ batimentId }: { batimentId: string }) {
         return (
           <div
             key={lot.id}
-            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-amber-50/40 cursor-pointer transition-colors text-xs border-b border-gray-50 last:border-b-0 items-center"
+            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-muted/50 cursor-pointer transition-colors text-xs border-b border-gray-50 last:border-b-0 items-center"
             onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
           >
             <div className="flex items-center gap-2 min-w-0">

@@ -68,7 +68,7 @@ export function LotDetailPage() {
         </Button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-display font-bold text-gray-900">{lot.designation}</h1>
+            <h1 className="text-xl font-bold text-gray-900">{lot.designation}</h1>
             <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] font-medium">
               {typeBienLabels[lot.type_bien] || lot.type_bien}
             </Badge>
@@ -77,7 +77,7 @@ export function LotDetailPage() {
           </div>
           {lot.batiment && (
             <button
-              className="text-xs text-gray-400 mt-0.5 flex items-center gap-1 hover:text-amber-600 transition-colors group"
+              className="text-xs text-gray-400 mt-0.5 flex items-center gap-1 hover:text-primary transition-colors group"
               onClick={() => navigate(`/app/patrimoine/batiments/${lot.batiment!.id}`)}
             >
               <Building2 className="h-3 w-3" />
@@ -100,7 +100,7 @@ export function LotDetailPage() {
       </div>
 
       {lot.est_archive && (
-        <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs">
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-primary/5 border border-primary/30 rounded-lg text-primary text-xs">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           Ce lot est archive. Les modifications sont desactivees.
         </div>
@@ -110,7 +110,7 @@ export function LotDetailPage() {
       <div className="flex items-center gap-0 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden divide-x divide-gray-100">
         {[
           { icon: Home, label: 'Etage', value: lot.etage || 'RDC', bg: 'bg-blue-500' },
-          { icon: Building2, label: 'Type', value: typeBienLabels[lot.type_bien], bg: 'bg-amber-500' },
+          { icon: Building2, label: 'Type', value: typeBienLabels[lot.type_bien], bg: 'bg-primary' },
           { icon: Ruler, label: 'Surface', value: lot.surface ? `${lot.surface} m²` : '—', bg: 'bg-emerald-500' },
           { icon: BedDouble, label: 'Pieces', value: lot.nb_pieces || '—', bg: 'bg-violet-500' },
           { icon: Zap, label: 'DPE', value: lot.dpe_classe || '—', bg: 'bg-orange-500' },
@@ -130,7 +130,7 @@ export function LotDetailPage() {
 
       {/* Edit form */}
       {editing && (
-        <Card className="shadow-sm border-amber-200 bg-amber-50/30">
+        <Card className="shadow-sm border-primary/30 bg-primary/5">
           <CardContent className="pt-5">
             <EditLotForm
               lot={lot}
@@ -331,13 +331,13 @@ function ProprietaireSection({ lotId, proprietaires, isArchived }: { lotId: stri
           Proprietaire{proprietaires.length > 1 ? 's' : ''}
         </h2>
         {!isArchived && (
-          <Button variant="ghost" size="sm" className="h-6 text-xs text-amber-600 hover:text-amber-700 px-2" onClick={() => setShowAdd(!showAdd)}>
+          <Button variant="ghost" size="sm" className="h-6 text-xs text-primary hover:text-primary px-2" onClick={() => setShowAdd(!showAdd)}>
             {showAdd ? 'Fermer' : <><Plus className="h-3 w-3 mr-1" /> Ajouter</>}
           </Button>
         )}
       </div>
       {showAdd && (
-        <div className="mb-3 p-3 bg-amber-50/50 border border-amber-200 rounded-lg space-y-2">
+        <div className="mb-3 p-3 bg-primary/5 border border-primary/30 rounded-lg space-y-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
             <Input value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="Rechercher un tiers..." className="pl-8 h-8 text-xs" autoFocus />
@@ -345,7 +345,7 @@ function ProprietaireSection({ lotId, proprietaires, isArchived }: { lotId: stri
           {searchResults && searchResults.length > 0 && (
             <div className="max-h-32 overflow-y-auto space-y-1">
               {searchResults.filter(t => !proprietaires.some(p => p.id === t.id)).map(t => (
-                <button key={t.id} onClick={() => handleLink(t.id)} className="w-full flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-amber-100 rounded transition-colors text-left">
+                <button key={t.id} onClick={() => handleLink(t.id)} className="w-full flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-primary/10 rounded transition-colors text-left">
                   <User className="h-3 w-3 text-gray-400 shrink-0" />
                   <span className="font-medium text-gray-800">{t.prenom ? `${t.prenom} ${t.nom}` : t.raison_sociale || t.nom}</span>
                 </button>
@@ -357,15 +357,15 @@ function ProprietaireSection({ lotId, proprietaires, isArchived }: { lotId: stri
       {proprietaires.length > 0 ? (
         <div className="space-y-2">
           {proprietaires.map((p) => (
-            <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-amber-200 transition-colors group">
-              <div className="h-9 w-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-amber-700">{(p.prenom?.[0] || p.nom[0]).toUpperCase()}</span>
+            <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:border-primary/30 transition-colors group">
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-primary">{(p.prenom?.[0] || p.nom[0]).toUpperCase()}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}</p>
                 <p className="text-xs text-gray-400 truncate">{p.email || p.tel || '—'}</p>
               </div>
-              {p.est_principal && <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px] shrink-0">Principal</Badge>}
+              {p.est_principal && <Badge className="bg-primary/5 text-primary border-primary/30 text-[9px] shrink-0">Principal</Badge>}
               {!isArchived && (
                 <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: p.id })} className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all" title="Retirer">
                   <X className="h-3.5 w-3.5" />

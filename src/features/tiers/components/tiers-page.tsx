@@ -36,10 +36,10 @@ export function TiersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-display font-bold text-gray-900">Tiers</h1>
+          <h1 className="text-xl font-bold text-gray-900">Tiers</h1>
           <p className="text-xs text-gray-400 mt-0.5">Proprietaires, locataires, mandataires</p>
         </div>
-        <Button size="sm" onClick={() => setShowCreate(true)} className="bg-amber-600 hover:bg-amber-700 text-white h-8 text-xs">
+        <Button size="sm" onClick={() => setShowCreate(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs">
           <Plus className="h-3.5 w-3.5 mr-1" /> Nouveau tiers
         </Button>
       </div>
@@ -106,14 +106,14 @@ function TiersRow({ tiers: t, onClick }: { tiers: Tiers; onClick: () => void }) 
 
   return (
     <div
-      className="flex items-center gap-4 px-4 py-2.5 hover:bg-amber-50/40 cursor-pointer transition-colors text-sm border-b border-gray-50 last:border-b-0"
+      className="flex items-center gap-4 px-4 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors text-sm border-b border-gray-50 last:border-b-0"
       onClick={onClick}
     >
       <div className="w-8 flex justify-center">
-        <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${t.type_personne === 'morale' ? 'bg-blue-100' : 'bg-amber-100'}`}>
+        <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${t.type_personne === 'morale' ? 'bg-blue-100' : 'bg-primary/10'}`}>
           {t.type_personne === 'morale'
             ? <Building2 className="h-3.5 w-3.5 text-blue-700" />
-            : <span className="text-[10px] font-bold text-amber-700">{(t.prenom?.[0] || t.nom[0]).toUpperCase()}</span>
+            : <span className="text-[10px] font-bold text-primary">{(t.prenom?.[0] || t.nom[0]).toUpperCase()}</span>
           }
         </div>
       </div>
@@ -122,7 +122,7 @@ function TiersRow({ tiers: t, onClick }: { tiers: Tiers; onClick: () => void }) 
         {t.est_archive && <Badge variant="outline" className="text-[9px] text-gray-400 border-gray-200">Archive</Badge>}
       </div>
       <div className="w-24">
-        <Badge variant="outline" className={`text-[10px] font-normal ${t.type_personne === 'morale' ? 'text-blue-600 border-blue-200' : 'text-amber-600 border-amber-200'}`}>
+        <Badge variant="outline" className={`text-[10px] font-normal ${t.type_personne === 'morale' ? 'text-blue-600 border-blue-200' : 'text-primary border-primary/20'}`}>
           {t.type_personne === 'morale' ? 'Morale' : 'Physique'}
         </Badge>
       </div>
