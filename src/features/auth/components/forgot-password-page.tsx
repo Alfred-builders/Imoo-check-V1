@@ -27,7 +27,7 @@ export function ForgotPasswordPage() {
         <p className="text-sm text-gray-500 mb-6">
           Si un compte existe avec l'adresse <strong>{email}</strong>, vous recevrez un lien de reinitialisation.
         </p>
-        <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground font-medium">
+        <Link to="/login" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
           Retour a la connexion
         </Link>
       </div>
@@ -43,12 +43,12 @@ export function ForgotPasswordPage() {
           <Label className="text-gray-700 text-sm">Email</Label>
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus className="h-10" />
         </div>
-        <Button type="submit" className="w-full h-10 bg-primary text-primary-foreground hover:bg-primary/90" disabled={loading}>
+        <Button type="submit" className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white" disabled={loading}>
           {loading ? 'Envoi...' : 'Envoyer le lien'}
         </Button>
       </form>
       <p className="text-center text-xs text-gray-400 mt-4">
-        <Link to="/login" className="text-muted-foreground hover:text-foreground">Retour a la connexion</Link>
+        <Link to="/login" className="text-amber-600 hover:text-amber-700">Retour a la connexion</Link>
       </p>
     </div>
   )

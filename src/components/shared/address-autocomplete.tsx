@@ -127,7 +127,7 @@ export function AddressAutocomplete({ value, onChange, placeholder = 'Rechercher
               className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-b-0"
               onClick={() => handleSelect(feat)}
             >
-              <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+              <MapPin className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{feat.text}{feat.address ? ` ${feat.address}` : ''}</p>
                 <p className="text-xs text-gray-500 truncate">{feat.place_name}</p>

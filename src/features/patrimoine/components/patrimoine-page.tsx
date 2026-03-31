@@ -6,7 +6,7 @@ import { Button } from 'src/components/ui/button'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { useBatiments, useBatimentLots } from '../api'
 import { formatDate } from '../../../lib/formatters'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { CreateBuildingModal } from './create-building-modal'
 import { CreateLotModal } from './create-lot-modal'
 import { ImportCSVModal } from './import-csv-modal'
@@ -16,19 +16,19 @@ import { DynamicFilter, type FilterField, type ActiveFilter } from '../../../com
 import type { Batiment, Lot } from '../types'
 
 const BATIMENT_COLUMNS: ColumnDef[] = [
-  { id: 'designation', label: 'Désignation', defaultVisible: true },
+  { id: 'designation', label: 'Designation', defaultVisible: true },
   { id: 'type', label: 'Type', defaultVisible: true },
   { id: 'adresse', label: 'Adresse', defaultVisible: true },
   { id: 'nb_lots', label: 'Lots', defaultVisible: true },
-  { id: 'derniere_mission', label: 'Dernière mission', defaultVisible: true },
-  { id: 'missions_a_venir', label: 'À venir', defaultVisible: true },
-  { id: 'annee_construction', label: 'Année de construction', defaultVisible: false },
-  { id: 'nb_etages', label: 'Étages', defaultVisible: false },
-  { id: 'created_at', label: 'Créé le', defaultVisible: false },
+  { id: 'derniere_mission', label: 'Derniere mission', defaultVisible: true },
+  { id: 'missions_a_venir', label: 'A venir', defaultVisible: true },
+  { id: 'annee_construction', label: 'Annee construction', defaultVisible: false },
+  { id: 'nb_etages', label: 'Etages', defaultVisible: false },
+  { id: 'num_batiment', label: 'N batiment', defaultVisible: false },
+  { id: 'created_at', label: 'Cree le', defaultVisible: false },
 ]
 
 const FILTER_FIELDS: FilterField[] = [
-  { id: 'designation', label: 'Désignation', type: 'text' },
   { id: 'type', label: 'Type', type: 'select', options: [
     { value: 'immeuble', label: 'Immeuble' },
     { value: 'maison', label: 'Maison' },
@@ -36,13 +36,11 @@ const FILTER_FIELDS: FilterField[] = [
     { value: 'mixte', label: 'Mixte' },
   ]},
   { id: 'ville', label: 'Ville', type: 'text' },
+  { id: 'designation', label: 'Designation', type: 'text' },
   { id: 'nb_lots', label: 'Nb lots', type: 'number' },
-  { id: 'nb_etages', label: 'Étages', type: 'number' },
-  { id: 'annee_construction', label: 'Année', type: 'number' },
-  { id: 'derniere_mission', label: 'Dernière mission', type: 'text' },
-  { id: 'missions_a_venir', label: 'Missions à venir', type: 'number' },
-  { id: 'created_at', label: 'Créé le', type: 'text' },
-  { id: 'est_archive', label: 'Archivé', type: 'boolean' },
+  { id: 'nb_etages', label: 'Etages', type: 'number' },
+  { id: 'annee_construction', label: 'Annee', type: 'number' },
+  { id: 'est_archive', label: 'Archive', type: 'boolean' },
 ]
 
 const typeIcons: Record<string, typeof Building2> = {
@@ -79,9 +77,6 @@ function getFieldValue(bat: Batiment, field: string): string | number | boolean 
     case 'nb_lots': return bat.nb_lots
     case 'nb_etages': return bat.nb_etages ?? null
     case 'annee_construction': return bat.annee_construction ?? null
-    case 'derniere_mission': return bat.derniere_mission ?? null
-    case 'missions_a_venir': return bat.missions_a_venir
-    case 'created_at': return bat.created_at
     case 'est_archive': return bat.est_archive
     default: return null
   }
@@ -107,11 +102,9 @@ function matchFilter(val: string | number | boolean | null, op: string, target: 
 }
 
 export function PatrimoinePage() {
-  const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState('')
   const [dynamicFilters, setDynamicFilters] = useState<ActiveFilter[]>([])
-  const view = (searchParams.get('vue') as 'table' | 'carte') || 'table'
-  const setView = (v: 'table' | 'carte') => setSearchParams(v === 'table' ? {} : { vue: v }, { replace: true })
+  const [view, setView] = useState<'table' | 'carte'>('table')
   const [showCreateBuilding, setShowCreateBuilding] = useState(false)
   const [showCreateLot, setShowCreateLot] = useState(false)
   const [showImportCSV, setShowImportCSV] = useState(false)
@@ -163,16 +156,16 @@ export function PatrimoinePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Parc immobilier</h1>
+          <h1 className="text-xl font-display font-bold text-gray-900">Parc immobilier</h1>
           <p className="text-xs text-gray-400 mt-0.5">
-            {isLoading ? '...' : `${filteredBatiments.length} bâtiment${filteredBatiments.length > 1 ? 's' : ''}`}
+            {isLoading ? '...' : `${filteredBatiments.length} batiment${filteredBatiments.length > 1 ? 's' : ''}`}
           </p>
         </div>
         <div className="flex items-center gap-1.5">
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setShowImportCSV(true)}>
             <Upload className="h-3.5 w-3.5 mr-1" /> Import CSV
           </Button>
-          <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs">
+          <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-amber-600 hover:bg-amber-700 text-white h-8 text-xs">
             <Plus className="h-3.5 w-3.5 mr-1" /> Nouveau lot
           </Button>
           <ColumnConfig
@@ -218,17 +211,17 @@ export function PatrimoinePage() {
       {view === 'table' && (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wider select-none">
-            <div className="w-6 shrink-0" /> {/* expand */}
-            {isCol('designation') && <div className="flex-1 min-w-[150px] resizable-col">Désignation</div>}
-            {isCol('type') && <div className="w-28 resizable-col">Type</div>}
-            {isCol('adresse') && <div className="w-48 resizable-col">Adresse</div>}
-            {isCol('nb_lots') && <div className="w-14 text-center resizable-col">Lots</div>}
-            {isCol('nb_etages') && <div className="w-14 text-center resizable-col">Étages</div>}
-            {isCol('annee_construction') && <div className="w-16 text-center resizable-col">Année</div>}
-            {isCol('derniere_mission') && <div className="w-24 resizable-col">Dern. mission</div>}
-            {isCol('missions_a_venir') && <div className="w-16 text-center resizable-col">À venir</div>}
-            {isCol('created_at') && <div className="w-24 resizable-col">Créé le</div>}
+          <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+            <div className="w-6" /> {/* expand */}
+            {isCol('designation') && <div className="flex-1 min-w-[150px]">Designation</div>}
+            {isCol('type') && <div className="w-28">Type</div>}
+            {isCol('adresse') && <div className="w-48">Adresse</div>}
+            {isCol('nb_lots') && <div className="w-14 text-center">Lots</div>}
+            {isCol('nb_etages') && <div className="w-14 text-center">Etages</div>}
+            {isCol('annee_construction') && <div className="w-16 text-center">Annee</div>}
+            {isCol('derniere_mission') && <div className="w-24">Dern. mission</div>}
+            {isCol('missions_a_venir') && <div className="w-16 text-center">A venir</div>}
+            {isCol('created_at') && <div className="w-24">Cree le</div>}
           </div>
 
           {isLoading && (
@@ -246,7 +239,7 @@ export function PatrimoinePage() {
 
           {!isLoading && filteredBatiments.length === 0 && (
             <div className="py-12 text-center text-gray-400 text-sm">
-              {search || dynamicFilters.length > 0 ? 'Aucun résultat' : 'Aucun bâtiment'}
+              {search || dynamicFilters.length > 0 ? 'Aucun resultat' : 'Aucun batiment'}
             </div>
           )}
 
@@ -271,7 +264,7 @@ function BatimentRow({ batiment, visibleCols }: { batiment: Batiment; visibleCol
   return (
     <div className="border-b border-gray-50 last:border-b-0">
       <div
-        className="flex items-center gap-4 px-4 py-2.5 hover:bg-muted transition-colors cursor-pointer text-sm"
+        className="flex items-center gap-4 px-4 py-2.5 hover:bg-amber-50/40 transition-colors cursor-pointer text-sm"
         onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`)}
       >
         <button
@@ -297,13 +290,7 @@ function BatimentRow({ batiment, visibleCols }: { batiment: Batiment; visibleCol
             {adresse ? `${adresse.rue}, ${adresse.ville}` : '—'}
           </div>
         )}
-        {isCol('nb_lots') && (
-          <div className="w-14 text-center">
-            <Badge variant="outline" className={`text-[10px] font-medium tabular-nums ${batiment.nb_lots > 0 ? 'bg-blue-50 text-blue-700 border-blue-200' : 'text-gray-400 border-gray-200'}`}>
-              {batiment.nb_lots}
-            </Badge>
-          </div>
-        )}
+        {isCol('nb_lots') && <div className="w-14 text-center text-gray-600 font-medium">{batiment.nb_lots}</div>}
         {isCol('nb_etages') && <div className="w-14 text-center text-gray-500 text-xs">{batiment.nb_etages ?? '—'}</div>}
         {isCol('annee_construction') && <div className="w-16 text-center text-gray-500 text-xs">{batiment.annee_construction ?? '—'}</div>}
         {isCol('derniere_mission') && (
@@ -350,17 +337,17 @@ function LotSubRows({ batimentId }: { batimentId: string }) {
       <div className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-1.5 text-[9px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100/80">
         <div>Lot</div>
         <div>Type</div>
-        <div>Étage</div>
+        <div>Etage</div>
         <div>Surface</div>
-        <div>Meublé</div>
-        <div>Propriétaire</div>
+        <div>Meuble</div>
+        <div>Proprietaire</div>
       </div>
       {lots.map((lot) => {
         const propLabel = lot.proprietaires?.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.nom).join(', ') || '—'
         return (
           <div
             key={lot.id}
-            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-muted cursor-pointer transition-colors text-xs border-b border-gray-50 last:border-b-0 items-center"
+            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-amber-50/40 cursor-pointer transition-colors text-xs border-b border-gray-50 last:border-b-0 items-center"
             onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
           >
             <div className="flex items-center gap-2 min-w-0">
@@ -370,7 +357,7 @@ function LotSubRows({ batimentId }: { batimentId: string }) {
             <div><Badge variant="outline" className="text-[9px] capitalize font-normal">{lot.type_bien.replace('_', ' ')}</Badge></div>
             <div className="text-gray-500">{lot.etage || '—'}</div>
             <div className="text-gray-500">{lot.surface ? `${lot.surface} m²` : '—'}</div>
-            <div>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meublé</Badge> : <span className="text-gray-300">—</span>}</div>
+            <div>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meuble</Badge> : <span className="text-gray-300">—</span>}</div>
             <div className="text-gray-400 truncate">{propLabel}</div>
           </div>
         )

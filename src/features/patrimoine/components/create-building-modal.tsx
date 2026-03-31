@@ -25,7 +25,7 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
   const [complement, setComplement] = useState('')
   const [latitude, setLatitude] = useState<number | undefined>()
   const [longitude, setLongitude] = useState<number | undefined>()
-  // num_batiment removed from UI per #14 — integrated into address complement
+  const [numBatiment, setNumBatiment] = useState('')
   const [nbEtages, setNbEtages] = useState('')
   const [anneeConstruction, setAnneeConstruction] = useState('')
   const [commentaire, setCommentaire] = useState('')
@@ -56,7 +56,7 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
       const result = await createMutation.mutateAsync({
         designation,
         type,
-        // num_batiment removed — use address complement instead
+        num_batiment: numBatiment || undefined,
         nb_etages: nbEtages ? parseInt(nbEtages) : undefined,
         annee_construction: anneeConstruction ? parseInt(anneeConstruction) : undefined,
         commentaire: commentaire || undefined,
@@ -105,7 +105,11 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Nombre d'étages</Label>
+              <Label>N batiment</Label>
+              <Input value={numBatiment} onChange={(e) => setNumBatiment(e.target.value)} placeholder="A, B, C..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Nombre d'etages</Label>
               <Input type="number" value={nbEtages} onChange={(e) => setNbEtages(e.target.value)} placeholder="5" />
             </div>
           </div>
@@ -129,8 +133,8 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
                 />
               </div>
               <div className="space-y-2">
-                <Label>Complément</Label>
-                <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Bât. A, Entrée 2" />
+                <Label>Complement</Label>
+                <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Bat. A, Entree 2" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -147,7 +151,7 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
 
           {/* Secondary address */}
           {!showSecondary ? (
-            <button type="button" onClick={() => setShowSecondary(true)} className="text-xs text-primary hover:text-primary/80 font-medium">
+            <button type="button" onClick={() => setShowSecondary(true)} className="text-xs text-amber-600 hover:text-amber-700 font-medium">
               + Ajouter une adresse secondaire
             </button>
           ) : (
@@ -172,7 +176,7 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
           )}
 
           <div className="space-y-2">
-            <Label>Année de construction</Label>
+            <Label>Annee construction</Label>
             <Input type="number" value={anneeConstruction} onChange={(e) => setAnneeConstruction(e.target.value)} placeholder="1990" />
           </div>
 

@@ -30,7 +30,7 @@ export function SettingsPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Parametres</h1>
+        <h1 className="text-xl font-display font-bold text-gray-900">Parametres</h1>
         <p className="text-xs text-gray-400 mt-0.5">Gerez votre workspace, vos utilisateurs et vos invitations</p>
       </div>
 
@@ -102,7 +102,7 @@ function WorkspaceTab() {
         ) : (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setEditing(false)}>Annuler</Button>
-            <Button size="sm" className="h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSave} disabled={updateMutation.isPending}>
+            <Button size="sm" className="h-8 text-xs bg-amber-600 hover:bg-amber-700 text-white" onClick={handleSave} disabled={updateMutation.isPending}>
               <Save className="h-3 w-3 mr-1.5" /> Enregistrer
             </Button>
           </div>
@@ -403,7 +403,7 @@ function InvitationsTab() {
                 <SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r} className="text-xs">{roleConfig[r].label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={sendInvitation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4">
+            <Button type="submit" disabled={sendInvitation.isPending} className="bg-amber-600 hover:bg-amber-700 text-white h-9 px-4">
               {sendInvitation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
               Envoyer
             </Button>
@@ -449,8 +449,8 @@ function InvitationsTab() {
 
               return (
                 <div key={inv.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/50 transition-colors">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${isAccepted ? 'bg-emerald-100' : isExpired ? 'bg-red-50' : 'bg-slate-100'}`}>
-                    {isAccepted ? <CheckCircle className="h-4 w-4 text-emerald-600" /> : isExpired ? <AlertCircle className="h-4 w-4 text-red-400" /> : <Clock className="h-4 w-4 text-slate-500" />}
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${isAccepted ? 'bg-emerald-100' : isExpired ? 'bg-red-50' : 'bg-amber-50'}`}>
+                    {isAccepted ? <CheckCircle className="h-4 w-4 text-emerald-600" /> : isExpired ? <AlertCircle className="h-4 w-4 text-red-400" /> : <Clock className="h-4 w-4 text-amber-500" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">{inv.email}</p>

@@ -15,21 +15,22 @@ const BATIMENT_FIELDS = [
   { id: 'rue', label: 'Adresse — Rue', required: true },
   { id: 'code_postal', label: 'Code postal', required: true },
   { id: 'ville', label: 'Ville', required: true },
-  { id: 'complement', label: 'Complément adresse', required: false },
-  { id: 'nb_etages', label: 'Nombre d\'étages', required: false },
-  { id: 'annee_construction', label: 'Année de construction', required: false },
+  { id: 'complement', label: 'Complement adresse', required: false },
+  { id: 'num_batiment', label: 'N batiment', required: false },
+  { id: 'nb_etages', label: 'Nombre etages', required: false },
+  { id: 'annee_construction', label: 'Annee construction', required: false },
   { id: 'commentaire', label: 'Commentaire', required: false },
 ]
 
 const LOT_FIELDS = [
-  { id: 'designation', label: 'Désignation lot', required: true },
+  { id: 'designation', label: 'Designation lot', required: true },
   { id: 'type_bien', label: 'Type de bien', required: true },
-  { id: 'etage', label: 'Étage', required: false },
+  { id: 'etage', label: 'Etage', required: false },
   { id: 'emplacement_palier', label: 'Emplacement palier', required: false },
-  { id: 'surface', label: 'Surface (m²)', required: false },
-  { id: 'nb_pieces', label: 'Nombre de pièces', required: false },
-  { id: 'meuble', label: 'Meublé (oui/non)', required: false },
-  { id: 'reference_interne', label: 'Référence interne', required: false },
+  { id: 'surface', label: 'Surface (m2)', required: false },
+  { id: 'nb_pieces', label: 'Nombre de pieces', required: false },
+  { id: 'meuble', label: 'Meuble (oui/non)', required: false },
+  { id: 'reference_interne', label: 'Reference interne', required: false },
   { id: 'dpe_classe', label: 'DPE (A-G)', required: false },
   { id: 'ges_classe', label: 'GES (A-G)', required: false },
   { id: 'num_cave', label: 'N cave', required: false },
@@ -84,7 +85,8 @@ function autoMatch(csvHeader: string, targetFields: { id: string; label: string 
     rue: ['rue', 'adresse', 'address', 'voie', 'libellerue'],
     code_postal: ['codepostal', 'cp', 'zipcode', 'zip'],
     ville: ['ville', 'city', 'commune', 'localite'],
-    complement: ['complement', 'complementadresse', 'batiment', 'residence', 'numbatiment', 'nbatiment', 'escalier'],
+    complement: ['complement', 'complementadresse', 'batiment', 'residence'],
+    num_batiment: ['numbatiment', 'nbatiment', 'batiment', 'escalier'],
     nb_etages: ['nbetages', 'etages', 'nombreetages', 'niveaux'],
     annee_construction: ['anneeconstruction', 'annee', 'construction', 'dateconst'],
     etage: ['etage', 'niveau', 'floor'],
@@ -226,6 +228,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
             body: JSON.stringify({
               designation: data.designation,
               type: data.type,
+              num_batiment: data.num_batiment,
               nb_etages: data.nb_etages,
               annee_construction: data.annee_construction,
               commentaire: data.commentaire,
@@ -259,7 +262,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
       <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileSpreadsheet className="h-5 w-5 text-foreground" />
+            <FileSpreadsheet className="h-5 w-5 text-amber-600" />
             Importer des donnees (CSV)
           </DialogTitle>
         </DialogHeader>
@@ -274,7 +277,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
                 <Button
                   variant={importType === 'batiments' ? 'default' : 'outline'}
                   size="sm"
-                  className={importType === 'batiments' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}
+                  className={importType === 'batiments' ? 'bg-amber-600 hover:bg-amber-700' : ''}
                   onClick={() => setImportType('batiments')}
                 >
                   Batiments
@@ -282,7 +285,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
                 <Button
                   variant={importType === 'lots' ? 'default' : 'outline'}
                   size="sm"
-                  className={importType === 'lots' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}
+                  className={importType === 'lots' ? 'bg-amber-600 hover:bg-amber-700' : ''}
                   onClick={() => setImportType('lots')}
                 >
                   Lots
@@ -292,7 +295,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
 
             {/* Drop zone */}
             <div
-              className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-gray-400 hover:bg-muted/30 transition-colors cursor-pointer"
+              className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-amber-300 hover:bg-amber-50/30 transition-colors cursor-pointer"
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => document.getElementById('csv-input')?.click()}
@@ -353,7 +356,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
             </div>
 
             {!allRequiredMapped && (
-              <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2.5">
+              <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5">
                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                 Champs obligatoires manquants: {requiredFields.filter(f => !Object.values(mapping).includes(f.id)).map(f => f.label).join(', ')}
               </div>
@@ -392,7 +395,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
 
             <div className="flex justify-between pt-2">
               <Button variant="outline" size="sm" onClick={reset}>Retour</Button>
-              <Button size="sm" onClick={handleImport} disabled={!allRequiredMapped} className="bg-primary text-primary-foreground hover:bg-primary/90 text-white">
+              <Button size="sm" onClick={handleImport} disabled={!allRequiredMapped} className="bg-amber-600 hover:bg-amber-700 text-white">
                 Importer {csvData.rows.length} lignes
               </Button>
             </div>
@@ -402,7 +405,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
         {/* Step 3: Importing */}
         {step === 'importing' && (
           <div className="py-8 text-center">
-            <Loader2 className="h-8 w-8 text-muted-foreground animate-spin mx-auto mb-4" />
+            <Loader2 className="h-8 w-8 text-amber-500 animate-spin mx-auto mb-4" />
             <p className="text-sm font-medium text-gray-700">Import en cours...</p>
             <p className="text-xs text-gray-400 mt-1">{csvData.rows.length} lignes a traiter</p>
           </div>
@@ -433,7 +436,7 @@ export function ImportCSVModal({ open, onOpenChange, onImported }: Props) {
 
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" size="sm" onClick={reset}>Nouvel import</Button>
-              <Button size="sm" onClick={() => { reset(); onOpenChange(false) }} className="bg-primary text-primary-foreground hover:bg-primary/90 text-white">
+              <Button size="sm" onClick={() => { reset(); onOpenChange(false) }} className="bg-amber-600 hover:bg-amber-700 text-white">
                 Fermer
               </Button>
             </div>
