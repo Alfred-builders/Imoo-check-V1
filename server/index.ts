@@ -20,7 +20,7 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') })
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '3001', 10)
-const isProduction = process.env.NODE_ENV === 'production'
+const isProduction = process.env.NODE_ENV !== 'development'
 
 // Middleware
 app.use(cors({
