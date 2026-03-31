@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -15,16 +15,125 @@ function getMarkerColor(bat: Batiment): string {
   return '#9ca3af' // gray
 }
 
+function buildGeoJSON(batiments: Batiment[]): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = []
+  for (const bat of batiments) {
+    const adr = bat.adresse_principale
+    if (!adr?.latitude || !adr?.longitude) continue
+    features.push({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [adr.longitude, adr.latitude] },
+      properties: {
+        id: bat.id,
+        designation: bat.designation,
+        rue: adr.rue,
+        ville: adr.ville,
+        nb_lots: bat.nb_lots,
+        missions_a_venir: bat.missions_a_venir,
+        color: getMarkerColor(bat),
+      },
+    })
+  }
+  return { type: 'FeatureCollection', features }
+}
+
 interface Props {
   batiments: Batiment[]
 }
 
+const SOURCE_ID = 'batiments'
+const CLUSTER_LAYER = 'clusters'
+const CLUSTER_COUNT_LAYER = 'cluster-count'
+const UNCLUSTERED_LAYER = 'unclustered-point'
+
 export function PatrimoineMap({ batiments }: Props) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
-  const markersRef = useRef<mapboxgl.Marker[]>([])
+  const popupRef = useRef<mapboxgl.Popup | null>(null)
   const navigate = useNavigate()
 
+  // Keep navigate stable in a ref so we can use it in map event handlers
+  const navigateRef = useRef(navigate)
+  navigateRef.current = navigate
+
+  const setupLayers = useCallback((map: mapboxgl.Map, geojson: GeoJSON.FeatureCollection) => {
+    // Remove existing source/layers if present (for hot-reload safety)
+    if (map.getLayer(CLUSTER_COUNT_LAYER)) map.removeLayer(CLUSTER_COUNT_LAYER)
+    if (map.getLayer(CLUSTER_LAYER)) map.removeLayer(CLUSTER_LAYER)
+    if (map.getLayer(UNCLUSTERED_LAYER)) map.removeLayer(UNCLUSTERED_LAYER)
+    if (map.getSource(SOURCE_ID)) map.removeSource(SOURCE_ID)
+
+    // Add GeoJSON source with clustering
+    map.addSource(SOURCE_ID, {
+      type: 'geojson',
+      data: geojson,
+      cluster: true,
+      clusterMaxZoom: 14,
+      clusterRadius: 50,
+    })
+
+    // Layer 1: Cluster circles
+    map.addLayer({
+      id: CLUSTER_LAYER,
+      type: 'circle',
+      source: SOURCE_ID,
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': [
+          'step',
+          ['get', 'point_count'],
+          '#60a5fa', // blue-400 for small clusters
+          10,
+          '#3b82f6', // blue-500 for medium
+          30,
+          '#2563eb', // blue-600 for large
+        ],
+        'circle-radius': [
+          'step',
+          ['get', 'point_count'],
+          18, // small
+          10,
+          24, // medium
+          30,
+          30, // large
+        ],
+        'circle-stroke-width': 3,
+        'circle-stroke-color': '#ffffff',
+      },
+    })
+
+    // Layer 2: Cluster count labels
+    map.addLayer({
+      id: CLUSTER_COUNT_LAYER,
+      type: 'symbol',
+      source: SOURCE_ID,
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': ['get', 'point_count_abbreviated'],
+        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+        'text-size': 13,
+      },
+      paint: {
+        'text-color': '#ffffff',
+      },
+    })
+
+    // Layer 3: Unclustered individual points (colored by status)
+    map.addLayer({
+      id: UNCLUSTERED_LAYER,
+      type: 'circle',
+      source: SOURCE_ID,
+      filter: ['!', ['has', 'point_count']],
+      paint: {
+        'circle-color': ['get', 'color'],
+        'circle-radius': 10,
+        'circle-stroke-width': 3,
+        'circle-stroke-color': '#ffffff',
+      },
+    })
+  }, [])
+
+  // Initialize map once
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return
     if (!mapboxgl.accessToken) return
@@ -37,79 +146,119 @@ export function PatrimoineMap({ batiments }: Props) {
     })
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right')
+
+    // Cluster click: zoom in to expand
+    map.on('click', CLUSTER_LAYER, (e) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: [CLUSTER_LAYER] })
+      if (!features.length) return
+      const clusterId = features[0].properties?.cluster_id
+      const source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource
+      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err) return
+        const geometry = features[0].geometry as GeoJSON.Point
+        map.easeTo({
+          center: geometry.coordinates as [number, number],
+          zoom: zoom ?? 14,
+        })
+      })
+    })
+
+    // Individual point click: navigate to building detail
+    map.on('click', UNCLUSTERED_LAYER, (e) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: [UNCLUSTERED_LAYER] })
+      if (!features.length) return
+      const props = features[0].properties
+      if (props?.id) {
+        navigateRef.current(`/app/patrimoine/batiments/${props.id}`, { state: { from: 'carte' } })
+      }
+    })
+
+    // Show popup on hover for individual points
+    map.on('mouseenter', UNCLUSTERED_LAYER, (e) => {
+      map.getCanvas().style.cursor = 'pointer'
+      const features = map.queryRenderedFeatures(e.point, { layers: [UNCLUSTERED_LAYER] })
+      if (!features.length) return
+      const props = features[0].properties
+      const geometry = features[0].geometry as GeoJSON.Point
+
+      if (popupRef.current) popupRef.current.remove()
+      const missionsHtml = props?.missions_a_venir > 0
+        ? `<span style="color: #2563eb; font-weight: 500;">${props.missions_a_venir} mission(s)</span>`
+        : ''
+      popupRef.current = new mapboxgl.Popup({ offset: 15, closeButton: false, className: 'immo-popup' })
+        .setLngLat(geometry.coordinates as [number, number])
+        .setHTML(`
+          <div style="font-family: 'Satoshi', sans-serif; padding: 2px 0; min-width: 180px;">
+            <div style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px;">${props?.designation ?? ''}</div>
+            <div style="font-size: 12px; color: #6b7280;">${props?.rue ?? ''}, ${props?.ville ?? ''}</div>
+            <div style="display: flex; gap: 12px; margin-top: 6px; font-size: 12px;">
+              <span style="color: #374151; font-weight: 500;">${props?.nb_lots ?? 0} lot${(props?.nb_lots ?? 0) > 1 ? 's' : ''}</span>
+              ${missionsHtml}
+            </div>
+          </div>
+        `)
+        .addTo(map)
+    })
+
+    map.on('mouseleave', UNCLUSTERED_LAYER, () => {
+      map.getCanvas().style.cursor = ''
+      if (popupRef.current) {
+        popupRef.current.remove()
+        popupRef.current = null
+      }
+    })
+
+    // Change cursor on cluster hover
+    map.on('mouseenter', CLUSTER_LAYER, () => {
+      map.getCanvas().style.cursor = 'pointer'
+    })
+    map.on('mouseleave', CLUSTER_LAYER, () => {
+      map.getCanvas().style.cursor = ''
+    })
+
     mapRef.current = map
 
     return () => {
+      if (popupRef.current) popupRef.current.remove()
       map.remove()
       mapRef.current = null
     }
-  }, [])
+  }, [setupLayers])
 
+  // Update data when batiments change
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
 
-    markersRef.current.forEach((m) => m.remove())
-    markersRef.current = []
+    const geojson = buildGeoJSON(batiments)
 
-    const bounds = new mapboxgl.LngLatBounds()
-    let hasPoints = false
+    const applyData = () => {
+      const source = map.getSource(SOURCE_ID) as mapboxgl.GeoJSONSource | undefined
+      if (source) {
+        // Source already exists, just update data
+        source.setData(geojson)
+      } else {
+        // First load: set up layers
+        setupLayers(map, geojson)
+      }
 
-    for (const bat of batiments) {
-      const adr = bat.adresse_principale
-      if (!adr?.latitude || !adr?.longitude) continue
-
-      hasPoints = true
-      const color = getMarkerColor(bat)
-
-      const el = document.createElement('div')
-      el.className = 'immo-marker'
-      el.innerHTML = `
-        <div style="
-          width: 32px; height: 32px; border-radius: 50%;
-          background: ${color}; border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-          cursor: pointer;
-          transition: transform 0.15s ease;
-          transform-origin: center center;
-          display: flex; align-items: center; justify-content: center;
-          font-size: 11px; font-weight: 700; color: white;
-        ">${bat.nb_lots}</div>
-      `
-      const inner = el.firstElementChild as HTMLElement
-      el.addEventListener('mouseenter', () => { inner.style.transform = 'scale(1.25)' })
-      el.addEventListener('mouseleave', () => { inner.style.transform = 'scale(1)' })
-
-      const popup = new mapboxgl.Popup({ offset: 20, closeButton: false, className: 'immo-popup' })
-        .setHTML(`
-          <div style="font-family: 'Satoshi', sans-serif; padding: 2px 0; min-width: 180px;">
-            <div style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px;">${bat.designation}</div>
-            <div style="font-size: 12px; color: #6b7280;">${adr.rue}, ${adr.ville}</div>
-            <div style="display: flex; gap: 12px; margin-top: 6px; font-size: 12px;">
-              <span style="color: #374151; font-weight: 500;">${bat.nb_lots} lot${bat.nb_lots > 1 ? 's' : ''}</span>
-              ${bat.missions_a_venir > 0 ? `<span style="color: #2563eb; font-weight: 500;">${bat.missions_a_venir} mission(s)</span>` : ''}
-            </div>
-          </div>
-        `)
-
-      // anchor: center so the marker doesn't shift on hover
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([adr.longitude, adr.latitude])
-        .setPopup(popup)
-        .addTo(map)
-
-      el.addEventListener('click', () => {
-        navigate(`/app/patrimoine/batiments/${bat.id}`)
-      })
-
-      bounds.extend([adr.longitude, adr.latitude])
-      markersRef.current.push(marker)
+      // Fit bounds to data
+      if (geojson.features.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds()
+        for (const f of geojson.features) {
+          const coords = (f.geometry as GeoJSON.Point).coordinates as [number, number]
+          bounds.extend(coords)
+        }
+        map.fitBounds(bounds, { padding: 60, maxZoom: 15, duration: 500 })
+      }
     }
 
-    if (hasPoints) {
-      map.fitBounds(bounds, { padding: 60, maxZoom: 15, duration: 500 })
+    if (map.isStyleLoaded()) {
+      applyData()
+    } else {
+      map.once('load', applyData)
     }
-  }, [batiments, navigate])
+  }, [batiments, setupLayers])
 
   if (!mapboxgl.accessToken) {
     return (

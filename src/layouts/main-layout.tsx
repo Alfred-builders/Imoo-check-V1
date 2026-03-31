@@ -25,7 +25,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu'
-import { Separator } from '../components/ui/separator'
 
 const navigation = [
   {
@@ -182,10 +181,8 @@ export function MainLayout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border/50 px-4">
+        <header className="flex h-10 shrink-0 items-center gap-2 border-b border-border/40 px-4">
           <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <span className="text-sm text-muted-foreground">ImmoChecker</span>
         </header>
         <main className="flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">

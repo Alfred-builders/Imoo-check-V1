@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, Archive, ArchiveRestore, Plus, Building2, Layers, Calendar, Hash, ExternalLink, Pencil, AlertTriangle, ExternalLinkIcon, Home, Armchair, Ruler } from 'lucide-react'
+import { ArrowLeft, MapPin, Archive, ArchiveRestore, Plus, Building2, Layers, Calendar, Hash, ExternalLink, Pencil, AlertTriangle, ExternalLinkIcon, Home, Armchair, Ruler, ArrowUpCircle } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
@@ -46,7 +46,7 @@ export function BuildingDetailPage() {
     )
   }
 
-  if (!batiment) return <div className="p-6"><p className="text-gray-400">Batiment introuvable</p></div>
+  if (!batiment) return <div className="p-6"><p className="text-gray-400">Bâtiment introuvable</p></div>
 
   const adresses = batiment.adresses ?? []
   const principale = adresses.find(a => a.type === 'principale')
@@ -55,7 +55,7 @@ export function BuildingDetailPage() {
     if (!id) return
     try {
       await updateMutation.mutateAsync({ id, est_archive: !batiment!.est_archive })
-      toast.success(batiment!.est_archive ? 'Batiment restaure' : 'Batiment archive')
+      toast.success(batiment!.est_archive ? 'Bâtiment restauré' : 'Bâtiment archivé')
     } catch (err: any) {
       toast.error(err.message || 'Erreur')
     }
@@ -72,12 +72,12 @@ export function BuildingDetailPage() {
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl font-bold text-gray-900">{batiment.designation}</h1>
             <Badge variant="outline" className="text-[10px] font-medium">{typeLabels[batiment.type]}</Badge>
-            {batiment.est_archive && <Badge variant="destructive" className="text-[10px]">Archive</Badge>}
+            {batiment.est_archive && <Badge variant="destructive" className="text-[10px]">Archivé</Badge>}
           </div>
           {principale && (
             <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
               <MapPin className="h-3 w-3" />
-              {principale.rue}, {principale.code_postal} {principale.ville}
+              {principale.rue}, {principale.ville}
             </p>
           )}
         </div>
@@ -97,7 +97,7 @@ export function BuildingDetailPage() {
       {batiment.est_archive && (
         <div className="flex items-center gap-2 px-3 py-2.5 bg-primary/5 border border-primary/30 rounded-lg text-primary text-xs">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          Ce batiment est archive.
+          Ce bâtiment est archivé.
         </div>
       )}
 
@@ -106,7 +106,7 @@ export function BuildingDetailPage() {
         {[
           { icon: Layers, label: 'Lots', value: batiment.nb_lots, bg: 'bg-blue-500', text: 'text-white' },
           { icon: Building2, label: 'Type', value: typeLabels[batiment.type], bg: 'bg-primary', text: 'text-white' },
-          { icon: Hash, label: 'Etages', value: batiment.nb_etages ?? '—', bg: 'bg-emerald-500', text: 'text-white' },
+          { icon: Hash, label: 'Étages', value: batiment.nb_etages ?? '—', bg: 'bg-emerald-500', text: 'text-white' },
           { icon: Calendar, label: 'Construction', value: batiment.annee_construction ?? '—', bg: 'bg-violet-500', text: 'text-white' },
         ].map(({ icon: Icon, label, value, bg, text }) => (
           <div key={label} className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl shadow-sm">
@@ -137,7 +137,7 @@ export function BuildingDetailPage() {
                   batiment={batiment}
                   onSave={async (data) => {
                     await updateMutation.mutateAsync({ id: batiment.id, ...data })
-                    toast.success('Batiment mis a jour')
+                    toast.success('Bâtiment mis à jour')
                     setEditing(false)
                   }}
                   onCancel={() => setEditing(false)}
@@ -164,10 +164,9 @@ export function BuildingDetailPage() {
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Informations</h2>
                 <dl className="space-y-3">
                   {([
-                    ['N batiment', batiment.num_batiment],
-                    ['Etages', batiment.nb_etages],
-                    ['Annee', batiment.annee_construction],
-                    ['Cree le', formatDate(batiment.created_at)],
+                    ['Étages', batiment.nb_etages],
+                    ['Année', batiment.annee_construction],
+                    ['Créé le', formatDate(batiment.created_at)],
                   ] as [string, string | number | null | undefined][]).map(([label, val]) => (
                     <div key={label} className="flex items-center justify-between text-sm">
                       <dt className="text-gray-400">{label}</dt>
@@ -222,7 +221,7 @@ export function BuildingDetailPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px] h-5">Meuble</Badge>}
+                          {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px] h-5">Meublé</Badge>}
                           <span className="text-xs text-gray-400 max-w-[120px] truncate">{propLabel}</span>
                           <ExternalLink className="h-3.5 w-3.5 text-gray-300" />
                         </div>
@@ -262,7 +261,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
   async function handleSave() {
     try {
       await updateAddr.mutateAsync({ batimentId, adresseId: a.id, rue, complement: complement || undefined, code_postal: cp, ville, latitude: lat, longitude: lng })
-      toast.success('Adresse mise a jour')
+      toast.success('Adresse mise à jour')
       setEditing(false)
     } catch (err: any) { toast.error(err.message || 'Erreur') }
   }
@@ -270,7 +269,14 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
   async function handleDelete() {
     try {
       await deleteAddr.mutateAsync({ batimentId, adresseId: a.id })
-      toast.success('Adresse supprimee')
+      toast.success('Adresse supprimée')
+    } catch (err: any) { toast.error(err.message || 'Erreur') }
+  }
+
+  async function handleSetPrimary() {
+    try {
+      await updateAddr.mutateAsync({ batimentId, adresseId: a.id, type: 'principale' })
+      toast.success('Adresse définie comme principale')
     } catch (err: any) { toast.error(err.message || 'Erreur') }
   }
 
@@ -283,7 +289,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
             if (addr) { setRue(addr.rue); setCp(addr.code_postal); setVille(addr.ville); setLat(addr.latitude); setLng(addr.longitude) }
           }}
         />
-        <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complement..." className="h-8 text-xs" />
+        <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complément..." className="h-8 text-xs" />
         <div className="grid grid-cols-2 gap-2">
           <Input value={cp} onChange={(e) => setCp(e.target.value)} placeholder="Code postal" className="h-8 text-xs" />
           <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
@@ -312,7 +318,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
             <Badge variant="outline" className="text-[9px] capitalize shrink-0">{a.type}</Badge>
           </div>
           {a.complement && <p className="text-xs text-gray-500 mt-0.5">{a.complement}</p>}
-          <p className="text-xs text-gray-500 mt-0.5">{a.code_postal} {a.ville}</p>
+          <p className="text-xs text-gray-500 mt-0.5">{a.ville}</p>
         </div>
         {!isArchived && (
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -330,16 +336,24 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
       {/* Additional info row */}
       <div className="flex items-center gap-4 mt-2 pl-12 text-[11px]">
         {a.latitude && a.longitude ? (
-          <>
-            <a href={`https://maps.google.com/?q=${a.latitude},${a.longitude}`} target="_blank" rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-700 flex items-center gap-0.5">
-              <ExternalLinkIcon className="h-3 w-3" /> Voir sur Google Maps
-            </a>
-            <span className="text-gray-300">|</span>
-            <span className="text-gray-400">GPS: {a.latitude.toFixed(4)}, {a.longitude.toFixed(4)}</span>
-          </>
+          <a href={`https://maps.google.com/?q=${a.latitude},${a.longitude}`} target="_blank" rel="noopener noreferrer"
+            className="text-blue-500 hover:text-blue-700 flex items-center gap-0.5">
+            <ExternalLinkIcon className="h-3 w-3" /> Voir sur Google Maps
+          </a>
         ) : (
-          <span className="text-gray-300">Coordonnees GPS non disponibles — saisie manuelle</span>
+          <span className="text-gray-300">Coordonnées GPS non disponibles — saisie manuelle</span>
+        )}
+        {!isArchived && a.type === 'secondaire' && (
+          <>
+            {a.latitude && a.longitude && <span className="text-gray-300">|</span>}
+            <button
+              className="text-primary hover:text-primary/80 flex items-center gap-0.5 font-medium cursor-pointer"
+              onClick={handleSetPrimary}
+              disabled={updateAddr.isPending}
+            >
+              <ArrowUpCircle className="h-3 w-3" /> Définir comme principale
+            </button>
+          </>
         )}
       </div>
     </div>
@@ -358,10 +372,10 @@ function AddAddressButton({ batimentId }: { batimentId: string }) {
   const addAddr = useAddAddress()
 
   async function handleAdd() {
-    if (!rue || !cp || !ville) { toast.error('Rue, code postal et ville requis'); return }
+    if (!rue || !cp || !ville) { toast.error('Rue, code postal et ville sont requis'); return }
     try {
       await addAddr.mutateAsync({ batimentId, type: 'secondaire', rue, complement: complement || undefined, code_postal: cp, ville, latitude: lat, longitude: lng })
-      toast.success('Adresse ajoutee')
+      toast.success('Adresse ajoutée')
       setAdding(false); setRue(''); setComplement(''); setCp(''); setVille(''); setLat(undefined); setLng(undefined)
     } catch (err: any) { toast.error(err.message || 'Erreur') }
   }
@@ -382,7 +396,7 @@ function AddAddressButton({ batimentId }: { batimentId: string }) {
           if (addr) { setRue(addr.rue); setCp(addr.code_postal); setVille(addr.ville); setLat(addr.latitude); setLng(addr.longitude) }
         }}
       />
-      <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complement..." className="h-8 text-xs" />
+      <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complément..." className="h-8 text-xs" />
       <div className="grid grid-cols-2 gap-2">
         <Input value={cp} onChange={(e) => setCp(e.target.value)} placeholder="Code postal" className="h-8 text-xs" />
         <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />

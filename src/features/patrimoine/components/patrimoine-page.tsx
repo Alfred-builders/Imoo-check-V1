@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus, Upload } from 'lucide-react'
 import { Input } from 'src/components/ui/input'
 import { Badge } from 'src/components/ui/badge'
@@ -6,7 +6,7 @@ import { Button } from 'src/components/ui/button'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { useBatiments, useBatimentLots } from '../api'
 import { formatDate } from '../../../lib/formatters'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { CreateBuildingModal } from './create-building-modal'
 import { CreateLotModal } from './create-lot-modal'
 import { ImportCSVModal } from './import-csv-modal'
@@ -16,16 +16,15 @@ import { DynamicFilter, type FilterField, type ActiveFilter } from '../../../com
 import type { Batiment, Lot } from '../types'
 
 const BATIMENT_COLUMNS: ColumnDef[] = [
-  { id: 'designation', label: 'Designation', defaultVisible: true },
+  { id: 'designation', label: 'Désignation', defaultVisible: true },
   { id: 'type', label: 'Type', defaultVisible: true },
   { id: 'adresse', label: 'Adresse', defaultVisible: true },
   { id: 'nb_lots', label: 'Lots', defaultVisible: true },
-  { id: 'derniere_mission', label: 'Derniere mission', defaultVisible: true },
-  { id: 'missions_a_venir', label: 'A venir', defaultVisible: true },
-  { id: 'annee_construction', label: 'Annee construction', defaultVisible: false },
-  { id: 'nb_etages', label: 'Etages', defaultVisible: false },
-  { id: 'num_batiment', label: 'N batiment', defaultVisible: false },
-  { id: 'created_at', label: 'Cree le', defaultVisible: false },
+  { id: 'derniere_mission', label: 'Dernière mission', defaultVisible: true },
+  { id: 'missions_a_venir', label: 'À venir', defaultVisible: true },
+  { id: 'annee_construction', label: 'Année construction', defaultVisible: false },
+  { id: 'nb_etages', label: 'Étages', defaultVisible: false },
+  { id: 'created_at', label: 'Créé le', defaultVisible: false },
 ]
 
 const FILTER_FIELDS: FilterField[] = [
@@ -36,11 +35,14 @@ const FILTER_FIELDS: FilterField[] = [
     { value: 'mixte', label: 'Mixte' },
   ]},
   { id: 'ville', label: 'Ville', type: 'text' },
-  { id: 'designation', label: 'Designation', type: 'text' },
+  { id: 'designation', label: 'Désignation', type: 'text' },
   { id: 'nb_lots', label: 'Nb lots', type: 'number' },
-  { id: 'nb_etages', label: 'Etages', type: 'number' },
-  { id: 'annee_construction', label: 'Annee', type: 'number' },
-  { id: 'est_archive', label: 'Archive', type: 'boolean' },
+  { id: 'nb_etages', label: 'Étages', type: 'number' },
+  { id: 'annee_construction', label: 'Année', type: 'number' },
+  { id: 'derniere_mission', label: 'Dernière mission', type: 'text' },
+  { id: 'missions_a_venir', label: 'Missions à venir', type: 'number' },
+  { id: 'created_at', label: 'Créé le', type: 'text' },
+  { id: 'est_archive', label: 'Archivé', type: 'boolean' },
 ]
 
 const typeIcons: Record<string, typeof Building2> = {
@@ -111,7 +113,13 @@ export function PatrimoinePage() {
   const [maisonBatimentId, setMaisonBatimentId] = useState<string | null>(null)
   const debouncedSearch = useDebounce(search, 300)
   const navigate = useNavigate()
+  const location = useLocation()
   const { visible: visibleCols, setVisible: setVisibleCols } = useColumnPreferences('patrimoine_batiments', BATIMENT_COLUMNS)
+
+  // Restore map view when navigating back from a building detail
+  useEffect(() => {
+    if (location.state?.from === 'carte') setView('carte')
+  }, [location.state])
 
   // Check if archive filter is active
   const hasArchiveFilter = dynamicFilters.some(f => f.field === 'est_archive')
@@ -213,15 +221,15 @@ export function PatrimoinePage() {
           {/* Header */}
           <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
             <div className="w-6" /> {/* expand */}
-            {isCol('designation') && <div className="flex-1 min-w-[150px]">Designation</div>}
+            {isCol('designation') && <div className="flex-1 min-w-[150px]">Désignation</div>}
             {isCol('type') && <div className="w-28">Type</div>}
             {isCol('adresse') && <div className="w-48">Adresse</div>}
             {isCol('nb_lots') && <div className="w-14 text-center">Lots</div>}
-            {isCol('nb_etages') && <div className="w-14 text-center">Etages</div>}
-            {isCol('annee_construction') && <div className="w-16 text-center">Annee</div>}
+            {isCol('nb_etages') && <div className="w-14 text-center">Étages</div>}
+            {isCol('annee_construction') && <div className="w-16 text-center">Année</div>}
             {isCol('derniere_mission') && <div className="w-24">Dern. mission</div>}
-            {isCol('missions_a_venir') && <div className="w-16 text-center">A venir</div>}
-            {isCol('created_at') && <div className="w-24">Cree le</div>}
+            {isCol('missions_a_venir') && <div className="w-16 text-center">À venir</div>}
+            {isCol('created_at') && <div className="w-24">Créé le</div>}
           </div>
 
           {isLoading && (
@@ -239,7 +247,7 @@ export function PatrimoinePage() {
 
           {!isLoading && filteredBatiments.length === 0 && (
             <div className="py-12 text-center text-gray-400 text-sm">
-              {search || dynamicFilters.length > 0 ? 'Aucun resultat' : 'Aucun batiment'}
+              {search || dynamicFilters.length > 0 ? 'Aucun résultat' : 'Aucun bâtiment'}
             </div>
           )}
 
@@ -290,7 +298,7 @@ function BatimentRow({ batiment, visibleCols }: { batiment: Batiment; visibleCol
             {adresse ? `${adresse.rue}, ${adresse.ville}` : '—'}
           </div>
         )}
-        {isCol('nb_lots') && <div className="w-14 text-center text-gray-600 font-medium">{batiment.nb_lots}</div>}
+        {isCol('nb_lots') && <div className="w-14 text-center"><Badge variant="outline" className="text-[10px] font-medium">{batiment.nb_lots}</Badge></div>}
         {isCol('nb_etages') && <div className="w-14 text-center text-gray-500 text-xs">{batiment.nb_etages ?? '—'}</div>}
         {isCol('annee_construction') && <div className="w-16 text-center text-gray-500 text-xs">{batiment.annee_construction ?? '—'}</div>}
         {isCol('derniere_mission') && (
