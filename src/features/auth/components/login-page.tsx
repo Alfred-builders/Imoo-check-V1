@@ -74,13 +74,13 @@ export function LoginPage() {
             className="h-10"
           />
         </div>
-        <Button type="submit" className="w-full h-10 bg-amber-600 hover:bg-amber-700 text-white font-medium" disabled={loading}>
+        <Button type="submit" className="w-full h-10 bg-primary text-primary-foreground hover:bg-primary/90 font-medium" disabled={loading}>
           {loading ? 'Connexion...' : 'Se connecter'}
         </Button>
       </form>
 
       <div className="text-center mt-6 space-y-2">
-        <Link to="/forgot-password" className="text-xs text-amber-600 hover:text-amber-700">Mot de passe oublie ?</Link>
+        <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-foreground">Mot de passe oublie ?</Link>
         <p className="text-xs text-gray-400">Pas de compte ? Contactez votre administrateur.</p>
       </div>
     </div>

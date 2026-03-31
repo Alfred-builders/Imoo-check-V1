@@ -72,11 +72,11 @@ export function CreateTiersModal({ open, onOpenChange, onCreated }: Props) {
             <span className="text-xs text-gray-500">Type :</span>
             <div className="flex items-center gap-2 bg-white rounded-md border border-gray-200 p-0.5">
               <button type="button" onClick={() => setTypePersonne('physique')}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${typePersonne === 'physique' ? 'bg-amber-600 text-white' : 'text-gray-500 hover:text-gray-700'}`}>
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${typePersonne === 'physique' ? 'bg-primary text-primary-foreground' : 'text-gray-500 hover:text-gray-700'}`}>
                 Personne physique
               </button>
               <button type="button" onClick={() => setTypePersonne('morale')}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${typePersonne === 'morale' ? 'bg-amber-600 text-white' : 'text-gray-500 hover:text-gray-700'}`}>
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${typePersonne === 'morale' ? 'bg-primary text-primary-foreground' : 'text-gray-500 hover:text-gray-700'}`}>
                 Personne morale
               </button>
             </div>
@@ -142,7 +142,7 @@ export function CreateTiersModal({ open, onOpenChange, onCreated }: Props) {
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Annuler</Button>
-            <Button type="submit" size="sm" disabled={createMutation.isPending} className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Button type="submit" size="sm" disabled={createMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
               {createMutation.isPending ? 'Creation...' : 'Creer'}
             </Button>
           </div>

@@ -48,7 +48,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
   // Building creation fields (inline sub-form)
   const [batDesignation, setBatDesignation] = useState('')
   const [batType, setBatType] = useState('immeuble')
-  const [batNumBatiment, setBatNumBatiment] = useState('')
+  // num_batiment removed from UI per #14 — integrated into address complement
   const [batNbEtages, setBatNbEtages] = useState('')
   const [batAnneeConstruction, setBatAnneeConstruction] = useState('')
   const [batCommentaire, setBatCommentaire] = useState('')
@@ -120,13 +120,12 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
       const result = await createBatMutation.mutateAsync({
         designation: batDesignation,
         type: batType,
-        num_batiment: batNumBatiment || undefined,
         nb_etages: batNbEtages ? parseInt(batNbEtages) : undefined,
         annee_construction: batAnneeConstruction ? parseInt(batAnneeConstruction) : undefined,
         commentaire: batCommentaire || undefined,
         adresses: [{ type: 'principale', rue: batRue, complement: batComplement || undefined, code_postal: batCP, ville: batVille, latitude: batLat, longitude: batLng }],
       })
-      toast.success(`Batiment "${batDesignation}" cree`)
+      toast.success(`Bâtiment "${batDesignation}" créé`)
       const newId = result.id
       resetBat()
       // Refresh picker options first, then set the ID and switch step
@@ -335,7 +334,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
 
               <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Annuler</Button>
-                <Button type="submit" size="sm" disabled={createLotMutation.isPending} className="bg-amber-600 hover:bg-amber-700 text-white">
+                <Button type="submit" size="sm" disabled={createLotMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
                   {createLotMutation.isPending ? 'Creation...' : 'Creer le lot'}
                 </Button>
               </div>
@@ -372,11 +371,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">N batiment</Label>
-                  <Input value={batNumBatiment} onChange={(e) => setBatNumBatiment(e.target.value)} placeholder="A, B, C..." className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Nombre d'etages</Label>
+                  <Label className="text-xs">Nombre d'étages</Label>
                   <Input type="number" value={batNbEtages} onChange={(e) => setBatNbEtages(e.target.value)} placeholder="5" className="h-9" />
                 </div>
               </div>
@@ -419,7 +414,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                 <Button type="button" variant="ghost" size="sm" onClick={() => setStep('lot')}>
                   <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Retour au lot
                 </Button>
-                <Button type="submit" size="sm" disabled={createBatMutation.isPending} className="bg-amber-600 hover:bg-amber-700 text-white">
+                <Button type="submit" size="sm" disabled={createBatMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
                   {createBatMutation.isPending ? 'Creation...' : 'Creer et selectionner'}
                 </Button>
               </div>

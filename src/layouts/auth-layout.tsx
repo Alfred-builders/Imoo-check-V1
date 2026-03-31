@@ -7,7 +7,7 @@ export function AuthLayout() {
       {/* Left panel — brand */}
       <div className="hidden lg:flex lg:w-1/2 bg-gray-900 items-center justify-center p-12">
         <div className="max-w-md text-center">
-          <div className="h-16 w-16 rounded-2xl bg-amber-500 flex items-center justify-center mx-auto mb-6">
+          <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6">
             <Building2 className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-display font-bold text-white">ImmoChecker</h1>
@@ -24,7 +24,7 @@ export function AuthLayout() {
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-sm">
           <div className="lg:hidden text-center mb-8">
-            <div className="h-12 w-12 rounded-xl bg-amber-500 flex items-center justify-center mx-auto mb-3">
+            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-3">
               <Building2 className="h-6 w-6 text-white" />
             </div>
             <h1 className="text-2xl font-display font-bold text-gray-900">ImmoChecker</h1>

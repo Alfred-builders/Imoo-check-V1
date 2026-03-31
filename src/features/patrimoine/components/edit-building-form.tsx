@@ -15,7 +15,6 @@ interface Props {
 export function EditBuildingForm({ batiment, onSave, onCancel }: Props) {
   const [designation, setDesignation] = useState(batiment.designation)
   const [type, setType] = useState(batiment.type)
-  const [numBatiment, setNumBatiment] = useState(batiment.num_batiment || '')
   const [nbEtages, setNbEtages] = useState(batiment.nb_etages?.toString() || '')
   const [anneeConstruction, setAnneeConstruction] = useState(batiment.annee_construction?.toString() || '')
   const [commentaire, setCommentaire] = useState(batiment.commentaire || '')
@@ -25,7 +24,6 @@ export function EditBuildingForm({ batiment, onSave, onCancel }: Props) {
     onSave({
       designation,
       type,
-      num_batiment: numBatiment || undefined,
       nb_etages: nbEtages ? parseInt(nbEtages) : undefined,
       annee_construction: anneeConstruction ? parseInt(anneeConstruction) : undefined,
       commentaire: commentaire || undefined,
@@ -35,10 +33,10 @@ export function EditBuildingForm({ batiment, onSave, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
-        {/* Designation */}
+        {/* Désignation */}
         <div className="col-span-2 space-y-2">
-          <Label>Designation *</Label>
-          <Input value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="Residence Les Lilas" required />
+          <Label>Désignation *</Label>
+          <Input value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="Résidence Les Lilas" required />
         </div>
 
         {/* Type */}
@@ -56,21 +54,15 @@ export function EditBuildingForm({ batiment, onSave, onCancel }: Props) {
           </Select>
         </div>
 
-        {/* Num batiment */}
+        {/* Nb étages */}
         <div className="space-y-2">
-          <Label>N batiment</Label>
-          <Input value={numBatiment} onChange={(e) => setNumBatiment(e.target.value)} placeholder="Bat. A" />
-        </div>
-
-        {/* Nb etages */}
-        <div className="space-y-2">
-          <Label>Nombre d'etages</Label>
+          <Label>Nombre d'étages</Label>
           <Input type="number" min="0" value={nbEtages} onChange={(e) => setNbEtages(e.target.value)} placeholder="5" />
         </div>
 
-        {/* Annee construction */}
+        {/* Année construction */}
         <div className="space-y-2">
-          <Label>Annee de construction</Label>
+          <Label>Année de construction</Label>
           <Input type="number" min="1800" max="2099" value={anneeConstruction} onChange={(e) => setAnneeConstruction(e.target.value)} placeholder="1990" />
         </div>
       </div>
@@ -84,7 +76,7 @@ export function EditBuildingForm({ batiment, onSave, onCancel }: Props) {
       {/* Actions */}
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>Annuler</Button>
-        <Button type="submit">Enregistrer</Button>
+        <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90">Enregistrer</Button>
       </div>
     </form>
   )
