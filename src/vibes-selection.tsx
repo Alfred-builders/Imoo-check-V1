@@ -1,211 +1,91 @@
 import React, { useState } from 'react'
 import {
-  Building2, Layers, ClipboardCheck, Users, ArrowUpRight, ArrowDownRight,
-  MoreHorizontal, ChevronRight, Filter, Plus, Home, Users2, TrendingUp,
-  LayoutGrid, Settings, LayoutDashboard, MapPin, CalendarDays
+  LayoutDashboard, Building2, Users, Users2, ClipboardList, Settings,
+  Plus, Download, Search, MoreHorizontal, MoreVertical, Home, TrendingUp,
+  ArrowUpRight, ArrowDownRight, Bell, ChevronRight, Filter, MapPin, LayoutGrid
 } from 'lucide-react'
 
-// ═══════════════════════════════════════════════════════════════
-// VIBE 1: "Corporate Blue" — Stripe-like, clean, professional
-// ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   VIBE A — "Zaant Modern"
+   Clean blue, gradient icons, multi-layer shadows, no borders
+   ═══════════════════════════════════════════════════════════════ */
 
-function Vibe1() {
+function VibeA() {
   const buildings = [
-    { id: 1, name: "Résidence Les Pins", type: "Résidentiel", address: "14 Rue de la Paix, Paris", lots: 42 },
-    { id: 2, name: "Le Central Business", type: "Tertiaire", address: "89 Ave de la République, Lyon", lots: 12 },
-    { id: 3, name: "L'Oliveraie Fontaine", type: "Résidentiel", address: "42 Blvd Gambetta, Nice", lots: 28 },
-    { id: 4, name: "Espace Tech Sud", type: "Mixte", address: "Zone Industrielle - Bât B, Montpellier", lots: 74 },
+    { id: '1', designation: 'Résidence Belle-Vue', type: 'Immeuble' as const, address: '12 Rue de la Paix, 75002 Paris', lots: 24, lastMission: '12/05/2025' },
+    { id: '2', designation: 'Villa des Pins', type: 'Maison' as const, address: '5 Av. des Fleurs, 06000 Nice', lots: 1, lastMission: '10/06/2025' },
+    { id: '3', designation: 'Le Cristal', type: 'Immeuble' as const, address: '45 Blvd Haussmann, 75009 Paris', lots: 82, lastMission: '15/05/2025' },
+    { id: '4', designation: 'Logis Vert', type: 'Immeuble' as const, address: '8 Rue Verte, 44000 Nantes', lots: 36, lastMission: '02/06/2025' },
+    { id: '5', designation: "L'Alcôve", type: 'Maison' as const, address: '22 Chemin du Roy, 33000 Bordeaux', lots: 1, lastMission: '20/05/2025' },
   ]
   return (
-    <div className="bg-slate-50 p-8 font-sans antialiased text-slate-900 rounded-2xl">
-      <div className="space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Parc immobilier</h1>
-            <p className="text-sm text-slate-500 mt-1">Vous gérez <span className="font-semibold text-blue-600">24 bâtiments</span></p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 shadow-sm"><Filter className="w-4 h-4" />Filtrer</button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm"><Plus className="w-4 h-4" />Ajouter</button>
-          </div>
+    <div className="flex min-h-[700px] bg-[#f8fafc] font-sans antialiased text-slate-900">
+      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-200"><Building2 size={22} /></div>
+          <span className="text-xl font-bold tracking-tight">ImmoChecker</span>
         </div>
-        <div className="grid grid-cols-4 gap-6">
-          {[
-            { title: 'Bâtiments', value: '24', icon: Building2, trend: '+2.5%', up: true },
-            { title: 'Lots', value: '156', icon: Layers, trend: '+14', up: true },
-            { title: 'Missions', value: '8', icon: ClipboardCheck, trend: '-12%', up: false },
-            { title: 'Occupation', value: '92%', icon: Users, trend: '+0.8%', up: true },
-          ].map((s, i) => (
-            <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
-              <div className="flex justify-between items-start mb-4">
-                <div className="p-2.5 bg-blue-50 rounded-lg group-hover:bg-blue-600 transition-colors"><s.icon className="w-5 h-5 text-blue-600 group-hover:text-white transition-colors" /></div>
-                <div className={`flex items-center gap-0.5 text-xs font-semibold px-2 py-1 rounded-full ${s.up ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'}`}>
-                  {s.up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}{s.trend}
-                </div>
-              </div>
-              <p className="text-sm font-medium text-slate-500 mb-1">{s.title}</p>
-              <h3 className="text-2xl font-bold text-slate-900 tracking-tight">{s.value}</h3>
-            </div>
-          ))}
-        </div>
-        <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Détails du parc</h2>
-            <button className="text-blue-600 text-sm font-medium hover:underline inline-flex items-center gap-1">Voir tout <ChevronRight className="w-4 h-4" /></button>
-          </div>
-          <table className="w-full text-left"><thead><tr className="bg-slate-50/50">
-            <th className="px-6 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Nom</th>
-            <th className="px-6 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Type</th>
-            <th className="px-6 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Adresse</th>
-            <th className="px-6 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Lots</th>
-          </tr></thead><tbody className="divide-y divide-slate-100">
-            {buildings.map(b => (
-              <tr key={b.id} className="hover:bg-blue-50/30 transition-colors">
-                <td className="px-6 py-4 text-sm font-semibold text-slate-900">{b.name}</td>
-                <td className="px-6 py-4"><span className={`px-2 py-0.5 rounded-md text-xs font-medium border ${b.type === 'Tertiaire' ? 'bg-blue-50 text-blue-700 border-blue-100' : b.type === 'Résidentiel' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>{b.type}</span></td>
-                <td className="px-6 py-4 text-sm text-slate-600">{b.address}</td>
-                <td className="px-6 py-4"><div className="flex items-center gap-2"><span className="text-sm font-medium text-slate-700">{b.lots}</span><div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-blue-500 h-full rounded-full" style={{ width: `${Math.min((b.lots / 80) * 100, 100)}%` }} /></div></div></td>
-              </tr>
-            ))}
-          </tbody></table>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════
-// VIBE 2: "Soft Gradient" — Glassmorphism, pastel gradients
-// ═══════════════════════════════════════════════════════════════
-
-function Vibe2() {
-  return (
-    <div className="bg-[#F8FAFF] p-8 font-sans rounded-2xl relative overflow-hidden">
-      <div className="absolute top-[-10%] right-[-5%] w-[300px] h-[300px] bg-indigo-200/20 blur-[80px] rounded-full -z-0" />
-      <div className="absolute bottom-[-10%] left-[-5%] w-[300px] h-[300px] bg-cyan-200/20 blur-[80px] rounded-full -z-0" />
-      <div className="relative z-10 space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Parc immobilier</h1>
-              <span className="px-3 py-1 bg-white border border-slate-200 text-slate-500 text-xs font-bold rounded-full shadow-sm">156 lots</span>
-            </div>
-            <p className="text-slate-500 font-medium">Gestion proactive de votre patrimoine.</p>
-          </div>
-          <button className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white px-5 py-2.5 rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all active:scale-95">
-            <LayoutGrid className="w-4 h-4" />Nouveau lot
-          </button>
-        </div>
-        <div className="grid grid-cols-4 gap-6">
-          {[
-            { title: 'Immeubles', value: '24', trend: '+12%', icon: Building2, grad: 'from-blue-400 to-cyan-400' },
-            { title: 'Appartements', value: '156', trend: '+5%', icon: Home, grad: 'from-emerald-400 to-teal-400' },
-            { title: 'Locataires', value: '89', trend: '+3.1%', icon: Users2, grad: 'from-fuchsia-400 to-pink-400' },
-            { title: 'Inspections', value: '8', trend: '+18%', icon: ClipboardCheck, grad: 'from-orange-400 to-yellow-400' },
-          ].map((s, i) => (
-            <div key={i} className="relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[20px] transition-transform duration-300 hover:scale-[1.02]">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
-              <div className="relative z-10 p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-3 bg-gradient-to-br ${s.grad}`}><s.icon className="w-6 h-6 text-white" /></div>
-                  <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50 border border-emerald-100/50"><TrendingUp className="w-3 h-3 text-emerald-500" /><span className="text-[11px] font-bold text-emerald-600">{s.trend}</span></div>
-                </div>
-                <p className="text-slate-500 text-xs font-medium uppercase tracking-wider">{s.title}</p>
-                <h3 className="text-2xl font-bold text-slate-800 tracking-tight">{s.value}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="relative overflow-hidden bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] rounded-[20px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-              <h2 className="text-lg font-bold text-slate-800">Dernières activités</h2>
-              <button className="text-slate-400 hover:text-indigo-500 transition-colors"><MoreHorizontal className="w-5 h-5" /></button>
-            </div>
-            <table className="w-full text-left"><thead><tr className="text-slate-400 text-[11px] uppercase tracking-widest font-bold">
-              <th className="px-6 py-4">Propriété</th><th className="px-6 py-4">Locataire</th><th className="px-6 py-4">Statut</th><th className="px-6 py-4">Date</th>
-            </tr></thead><tbody className="divide-y divide-slate-50">
-              {['Résidence Les Pins', 'Le Central', 'Villa Fontaine', 'Espace Tech'].map((n, i) => (
-                <tr key={i} className="hover:bg-slate-50/50 cursor-pointer transition-colors">
-                  <td className="px-6 py-5"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center"><Building2 className="w-5 h-5 text-slate-400" /></div><div><div className="font-bold text-slate-700 text-sm">{n}</div><div className="text-slate-400 text-xs">Lot B-{i + 1}</div></div></div></td>
-                  <td className="px-6 py-5 text-sm text-slate-600">Nom Prénom</td>
-                  <td className="px-6 py-5"><span className={`px-3 py-1 rounded-full text-[11px] font-bold border ${i % 2 === 0 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>{i % 2 === 0 ? 'Loué' : 'Disponible'}</span></td>
-                  <td className="px-6 py-5 text-sm text-slate-500">12 Oct 2025</td>
-                </tr>
-              ))}
-            </tbody></table>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════
-// VIBE 3: "Dark Sidebar Luxe" — Banking, gold accents, serif
-// ═══════════════════════════════════════════════════════════════
-
-function Vibe3() {
-  return (
-    <div className="flex min-h-[520px] bg-[#F8FAFC] overflow-hidden rounded-2xl border border-slate-200 shadow-2xl">
-      <aside className="w-56 flex flex-col shrink-0 bg-[#0F172A]">
-        <div className="p-6 pb-8">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#D4AF37] flex items-center justify-center rounded-[2px] rotate-45"><Building2 size={16} className="-rotate-45 text-white" /></div>
-            <span className="text-white font-serif text-lg tracking-tight">Immo<span className="text-[#D4AF37]">Checker</span></span>
-          </div>
-        </div>
-        <nav className="flex-1 space-y-1">
-          {[{ icon: LayoutDashboard, label: 'Tableau de bord', active: true }, { icon: Building2, label: 'Patrimoine' }, { icon: Users, label: 'Locataires' }, { icon: ClipboardCheck, label: 'États des lieux' }, { icon: Settings, label: 'Configuration' }].map((item, i) => (
-            <div key={i} className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-all ${item.active ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-              <item.icon size={18} className={item.active ? 'text-[#D4AF37]' : ''} />
-              <span className="text-sm font-medium tracking-wide">{item.label}</span>
-              {item.active && <div className="ml-auto w-1 h-4 bg-[#D4AF37] rounded-full" />}
-            </div>
+        <nav className="flex-1 mt-4">
+          <div className="px-4 mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Menu</div>
+          {[{ icon: LayoutDashboard, label: 'Tableau de bord', active: false }, { icon: Building2, label: 'Parc immobilier', active: true }, { icon: Users, label: 'Tiers', active: false }, { icon: ClipboardList, label: 'Missions', active: false }, { icon: Settings, label: 'Paramètres', active: false }].map((item, i) => (
+            <button key={i} className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all relative ${item.active ? 'text-blue-600 bg-blue-50/50' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
+              {item.active && <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 rounded-r-full" />}
+              <item.icon size={20} className={item.active ? 'text-blue-600' : 'text-slate-400'} />{item.label}
+            </button>
           ))}
         </nav>
+        <div className="p-4 border-t border-slate-100">
+          <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50">
+            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">CD</div>
+            <div className="flex-1 text-left"><p className="text-sm font-semibold">Cécile Dupont</p><p className="text-xs text-slate-500">Gestionnaire</p></div>
+          </div>
+        </div>
       </aside>
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-8 shrink-0">
-          <div>
-            <h1 className="text-lg font-serif text-[#0F172A]">Vue d'ensemble</h1>
-            <p className="text-[10px] text-slate-400">Gestion du patrimoine</p>
+      <main className="flex-1">
+        <header className="h-16 bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/50 px-8 flex items-center justify-between">
+          <div><h1 className="text-xl font-bold">Parc immobilier</h1><p className="text-xs text-slate-500">Gestion de vos actifs</p></div>
+          <div className="flex items-center gap-4">
+            <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} /><input placeholder="Rechercher..." className="bg-slate-100 rounded-xl pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-blue-500/20 focus:bg-white outline-none" /></div>
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-200 active:scale-95"><Plus size={18} />Ajouter</button>
           </div>
         </header>
-        <div className="p-8 space-y-6 overflow-y-auto">
-          <div className="grid grid-cols-4 gap-4">
-            {[{ title: 'Actifs', value: '128', label: 'Unités', trend: '+4%' }, { title: 'Occupation', value: '98.2%', label: 'Total', trend: '+1.2%' }, { title: 'Revenus', value: '245k€', label: 'Mensuel', trend: '+12%' }, { title: 'Maintien', value: '14', label: 'Interventions', trend: '-2%' }].map((s, i) => (
-              <div key={i} className="bg-white border border-slate-100 p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.08)] transition-all rounded-sm relative group overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#D4AF37]/5 rounded-full -mr-12 -mt-12 transition-transform group-hover:scale-150" />
-                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-semibold mb-3">{s.title}</p>
-                <div className="flex items-end justify-between relative z-10">
-                  <div><h3 className="text-2xl font-serif text-[#0F172A] mb-1">{s.value}</h3><p className="text-xs text-slate-500">{s.label}</p></div>
-                  <div className="flex items-center text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100"><TrendingUp size={10} className="mr-1" />{s.trend}</div>
+        <div className="p-8 space-y-8">
+          <div className="grid grid-cols-4 gap-6">
+            {[{ label: 'Bâtiments', value: '24', trend: '+12%', up: true, icon: Building2, grad: 'from-blue-500 to-indigo-600' },
+              { label: 'Lots', value: '156', trend: '+4%', up: true, icon: Home, grad: 'from-emerald-400 to-teal-600' },
+              { label: 'Missions', value: '8', trend: '-2', up: false, icon: ClipboardList, grad: 'from-violet-500 to-purple-600' },
+              { label: 'Occupation', value: '92%', trend: '+1.2%', up: true, icon: TrendingUp, grad: 'from-orange-400 to-amber-600' },
+            ].map((s, i) => (
+              <div key={i} className="bg-white p-6 rounded-2xl shadow-[0_2px_4px_rgba(0,0,0,0.02),0_10px_20px_rgba(0,0,0,0.04)] hover:-translate-y-1 transition-transform">
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${s.grad} text-white shadow-lg`}><s.icon size={22} /></div>
+                  <div className={`flex items-center gap-0.5 text-xs font-bold px-2 py-1 rounded-full ${s.up ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'}`}>{s.up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}{s.trend}</div>
                 </div>
+                <p className="text-slate-500 text-sm font-medium">{s.label}</p>
+                <h3 className="text-2xl font-bold text-slate-900">{s.value}</h3>
               </div>
             ))}
           </div>
-          <div className="bg-white border border-slate-100 shadow-sm rounded-sm">
-            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between">
-              <h2 className="font-serif text-[#0F172A]">Derniers États des Lieux</h2>
-              <button className="text-[10px] flex items-center gap-1 uppercase tracking-widest text-[#D4AF37] font-bold hover:underline">Tout voir <ArrowUpRight size={12} /></button>
+          <div className="bg-white rounded-2xl shadow-[0_2px_4px_rgba(0,0,0,0.02),0_10px_30px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <h2 className="font-bold text-slate-800">Liste des bâtiments</h2>
+              <button className="flex items-center gap-2 text-xs font-bold text-slate-500 px-3 py-1.5 rounded-lg border border-slate-200 bg-white"><Download size={14} />Exporter</button>
             </div>
-            <table className="w-full text-left"><thead><tr className="bg-slate-50/50">
-              <th className="px-6 py-3 text-[10px] uppercase tracking-widest text-slate-500 font-bold border-b border-slate-100">Propriété</th>
-              <th className="px-6 py-3 text-[10px] uppercase tracking-widest text-slate-500 font-bold border-b border-slate-100">Locataire</th>
-              <th className="px-6 py-3 text-[10px] uppercase tracking-widest text-slate-500 font-bold border-b border-slate-100">Date</th>
-              <th className="px-6 py-3 text-[10px] uppercase tracking-widest text-slate-500 font-bold border-b border-slate-100 text-right">Statut</th>
-            </tr></thead><tbody className="divide-y divide-slate-50">
-              {[{ p: 'Ave Montaigne, Paris VIII', t: 'Jean-Pierre Dubois', d: '12 Oct', s: 'Terminé' }, { p: 'Villa Cap Ferrat, Nice', t: 'Sarah Hamilton', d: '15 Oct', s: 'En cours' }, { p: 'Quai des Orfèvres, Paris I', t: 'Marc-Antoine Roche', d: '18 Oct', s: 'À venir' }].map((r, i) => (
-                <tr key={i} className="hover:bg-slate-50/80 transition-colors cursor-pointer">
-                  <td className="px-6 py-4"><div className="flex items-center gap-3"><MapPin size={14} className="text-[#D4AF37]" /><span className="text-sm font-medium text-slate-700">{r.p}</span></div></td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{r.t}</td>
-                  <td className="px-6 py-4"><div className="flex items-center gap-2 text-xs text-slate-500"><CalendarDays size={14} className="text-slate-400" />{r.d}</div></td>
-                  <td className="px-6 py-4 text-right"><span className={`text-[10px] font-bold uppercase tracking-tight px-2.5 py-1 rounded-sm border ${r.s === 'Terminé' ? 'bg-slate-100 text-slate-700 border-slate-200' : r.s === 'En cours' ? 'bg-amber-50 text-amber-700 border-amber-200/50' : 'bg-white text-slate-400 border-slate-100'}`}>{r.s}</span></td>
+            <table className="w-full text-left"><thead><tr className="text-slate-400 text-[11px] font-bold uppercase tracking-wider">
+              <th className="px-6 py-4">Désignation</th><th className="px-6 py-4">Type</th><th className="px-6 py-4">Adresse</th><th className="px-6 py-4 text-center">Lots</th><th className="px-6 py-4">Dernière mission</th><th className="px-6 py-4 text-right"></th>
+            </tr></thead><tbody className="divide-y divide-slate-100">
+              {buildings.map(b => (
+                <tr key={b.id} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="px-6 py-4"><div className="flex items-center gap-3"><div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${b.type === 'Immeuble' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}>{b.designation.charAt(0)}</div><span className="font-semibold text-slate-900">{b.designation}</span></div></td>
+                  <td className="px-6 py-4"><span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${b.type === 'Immeuble' ? 'bg-blue-50 text-blue-700' : 'bg-amber-50 text-amber-700'}`}>{b.type}</span></td>
+                  <td className="px-6 py-4 text-sm text-slate-500">{b.address}</td>
+                  <td className="px-6 py-4 text-center"><span className="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full text-xs font-semibold">{b.lots}</span></td>
+                  <td className="px-6 py-4"><div className="flex items-center gap-2 text-sm text-slate-600"><ClipboardList size={14} className="text-slate-400" />{b.lastMission}</div></td>
+                  <td className="px-6 py-4 text-right"><button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-200 rounded-lg"><MoreHorizontal size={18} /></button></td>
                 </tr>
               ))}
             </tbody></table>
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500"><p>5 sur 24</p><div className="flex gap-2"><button disabled className="px-3 py-1 rounded-lg border border-slate-200 opacity-50">Précédent</button><button className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50">Suivant</button></div></div>
           </div>
         </div>
       </main>
@@ -213,61 +93,144 @@ function Vibe3() {
   )
 }
 
-// ═══════════════════════════════════════════════════════════════
-// VIBES SELECTION PAGE
-// ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   VIBE B — "Notion Clean"
+   Minimal, whitespace, indigo accent, shadow-only, big typo
+   ═══════════════════════════════════════════════════════════════ */
+
+function VibeB() {
+  const NAV = [{ id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard }, { id: 'property', label: 'Parc immobilier', icon: Building2 }, { id: 'tiers', label: 'Tiers', icon: Users }, { id: 'missions', label: 'Missions', icon: ClipboardList }, { id: 'settings', label: 'Paramètres', icon: Settings }]
+  const STATS = [{ label: 'Bâtiments', value: '24' }, { label: 'Lots', value: '156' }, { label: 'Missions', value: '8' }, { label: 'Occupation', value: '92%' }]
+  const PROPS = [{ name: 'Résidence les Lilas', address: '12 Rue de la Paix, Paris', units: 42, status: 'Complet' }, { name: 'Le Belvédère', address: '45 Avenue Foch, Lyon', units: 28, status: 'Maintenance' }, { name: 'Immeuble Haussmann', address: '8 Blvd Malesherbes, Paris', units: 12, status: 'Complet' }, { name: 'Technopole Sud', address: 'ZAC de la Plaine, Bordeaux', units: 5, status: 'Vacance' }, { name: 'Square des Arts', address: '3 Place du Capitole, Toulouse', units: 64, status: 'Complet' }]
+  const active = 'property'
+  return (
+    <div className="flex min-h-[700px] bg-white text-slate-900 font-sans antialiased">
+      <aside className="w-64 bg-[#fafafa] flex flex-col shrink-0 shadow-[20px_0_40px_-15px_rgba(0,0,0,0.03)]">
+        <div className="p-8 flex items-center gap-3"><div className="w-8 h-8 bg-indigo-600 rounded flex items-center justify-center text-white font-bold text-lg">I</div><span className="font-bold text-xl uppercase italic tracking-tight">ImmoChecker</span></div>
+        <nav className="flex-1 px-4 space-y-1 mt-4">
+          {NAV.map(item => {
+            const isActive = active === item.id
+            return (<button key={item.id} className={`w-full flex items-center justify-between px-4 py-2.5 text-sm rounded-md ${isActive ? 'font-bold text-slate-900' : 'text-slate-500 hover:text-slate-900'}`}>
+              <div className="flex items-center gap-3"><item.icon size={18} strokeWidth={isActive ? 2.5 : 2} className={isActive ? 'text-indigo-600' : 'text-slate-400'} /><span>{item.label}</span></div>
+              {isActive && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 mr-1" />}
+            </button>)
+          })}
+        </nav>
+        <div className="p-8 border-t border-slate-100"><div className="flex items-center gap-3"><div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-xs font-medium text-slate-600">JD</div><div><span className="text-sm font-semibold">Jean Dupont</span><br /><span className="text-xs text-slate-400">Admin</span></div></div></div>
+      </aside>
+      <main className="flex-1 overflow-y-auto">
+        <header className="h-16 flex items-center justify-between px-10 border-b border-slate-50">
+          <div className="flex items-center gap-2 text-xs text-slate-400 font-medium tracking-wide"><span>IMMOCHECKER</span><ChevronRight size={14} className="text-slate-300" /><span className="text-slate-600">PARC IMMOBILIER</span></div>
+          <div className="flex items-center gap-6"><button className="text-slate-400 hover:text-slate-600"><Search size={20} /></button><button className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-indigo-700 active:scale-95"><Plus size={18} strokeWidth={3} />Nouveau</button></div>
+        </header>
+        <div className="p-10 max-w-7xl mx-auto">
+          <div className="mb-12"><h1 className="text-4xl font-extrabold tracking-tight text-slate-900 mb-2">Parc immobilier</h1><p className="text-slate-400 text-lg">Consultez et gérez l'ensemble de votre patrimoine.</p></div>
+          <div className="grid grid-cols-4 gap-8 mb-16">
+            {STATS.map((s, i) => (<div key={i} className="bg-white p-8 shadow-[0_1px_3px_rgba(0,0,0,0.05),0_10px_40px_-15px_rgba(0,0,0,0.05)] rounded-xl hover:-translate-y-1 transition-transform"><div className="text-3xl font-bold text-slate-900 mb-1">{s.value}</div><div className="text-sm font-medium text-slate-400 uppercase tracking-widest">{s.label}</div></div>))}
+          </div>
+          <div className="bg-white shadow-[0_1px_3px_rgba(0,0,0,0.05),0_20px_60px_-20px_rgba(0,0,0,0.1)] rounded-xl overflow-hidden">
+            <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between"><h2 className="font-bold text-lg">Liste des actifs</h2><div className="flex gap-2"><button className="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50 rounded">Filtrer</button><button className="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50 rounded">Exporter</button></div></div>
+            <table className="w-full text-left"><thead><tr className="border-b border-slate-100"><th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Bâtiment</th><th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Adresse</th><th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Lots</th><th className="px-8 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Statut</th></tr></thead><tbody className="divide-y divide-slate-50">
+              {PROPS.map((p, i) => (<tr key={i} className="hover:bg-slate-50/50 even:bg-[#fafafa]/40 transition-colors"><td className="px-8 py-6 font-bold text-base">{p.name}</td><td className="px-8 py-6 text-sm text-slate-500">{p.address}</td><td className="px-8 py-6 text-sm text-center font-medium">{p.units}</td><td className="px-8 py-6"><span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${p.status === 'Complet' ? 'text-emerald-700 bg-emerald-50' : p.status === 'Maintenance' ? 'text-amber-700 bg-amber-50' : 'text-indigo-700 bg-indigo-50'}`}>{p.status}</span></td></tr>))}
+            </tbody></table>
+            <div className="px-8 py-6 border-t border-slate-50 flex items-center justify-between text-sm text-slate-400"><span>5 sur 24</span><div className="flex gap-4"><button disabled className="opacity-30">Précédent</button><button className="hover:text-slate-900">Suivant</button></div></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VIBE D — "Rounded Pastel"
+   Violet primary, pastel KPI cards, very rounded, playful
+   ═══════════════════════════════════════════════════════════════ */
+
+function VibeD() {
+  const NAV = [{ id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard, color: 'text-blue-500', pill: 'bg-blue-50' }, { id: 'properties', label: 'Parc immobilier', icon: Building2, color: 'text-violet-500', pill: 'bg-violet-50' }, { id: 'tiers', label: 'Tiers', icon: Users2, color: 'text-emerald-500', pill: 'bg-emerald-50' }, { id: 'missions', label: 'Missions', icon: ClipboardList, color: 'text-amber-500', pill: 'bg-amber-50' }, { id: 'settings', label: 'Paramètres', icon: Settings, color: 'text-gray-500', pill: 'bg-gray-50' }]
+  const KPI = [{ label: 'Bâtiments', value: 24, icon: Building2, bg: 'bg-blue-50', ic: 'text-blue-600' }, { label: 'Lots', value: 156, icon: Home, bg: 'bg-emerald-50', ic: 'text-emerald-600' }, { label: 'Missions', value: 8, icon: ClipboardList, bg: 'bg-violet-50', ic: 'text-violet-600' }, { label: 'Occupation', value: '92%', icon: Users2, bg: 'bg-amber-50', ic: 'text-amber-600' }]
+  const BLDG = [{ name: 'Résidence Horizon', address: '12 Rue de la Paix, Paris', units: 42, type: 'Résidentiel', status: 'Complet' }, { name: 'Espace Lumière', address: '45 Av. des Champs, Lyon', units: 12, type: 'Commercial', status: 'Maintenance' }, { name: 'Le Belvédère', address: '8 Blvd de la Mer, Marseille', units: 28, type: 'Mixte', status: 'Partiel' }, { name: 'Villa Jade', address: '5 Impasse des Pins, Nice', units: 4, type: 'Résidentiel', status: 'Complet' }, { name: 'Technopole Sud', address: "300 Rue de l'Innovation, Toulouse", units: 65, type: 'Commercial', status: 'Complet' }]
+  const active = 'properties'
+  return (
+    <div className="flex min-h-[700px] bg-[#fffffe] font-sans text-slate-900">
+      <aside className="w-72 bg-white border-r border-slate-100 p-6 flex flex-col shrink-0">
+        <div className="flex items-center gap-3 px-2 mb-10"><div className="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center shadow-md shadow-violet-200"><Building2 className="text-white w-6 h-6" /></div><h1 className="text-xl font-black tracking-tight uppercase">Immo<span className="text-violet-600">Checker</span></h1></div>
+        <nav className="flex-1">
+          {NAV.map(item => {
+            const isA = active === item.id
+            return (<button key={item.id} className={`group flex items-center w-full px-4 py-3 mb-2 transition-all rounded-xl ${isA ? 'bg-violet-600 text-white shadow-lg shadow-violet-200' : 'text-slate-600 hover:bg-slate-50'}`}>
+              <div className={`flex items-center justify-center w-9 h-9 rounded-lg mr-3 ${isA ? 'bg-white/20' : item.pill}`}><item.icon className={`w-5 h-5 ${isA ? 'text-white' : item.color}`} /></div>
+              <span className={`text-sm font-medium ${isA && 'font-bold'}`}>{item.label}</span>
+              {isA && <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />}
+            </button>)
+          })}
+        </nav>
+        <div className="mt-auto pt-6 border-t border-slate-100"><div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-violet-200 border-2 border-white flex items-center justify-center font-bold text-violet-700 text-sm">SB</div><div className="flex-1 min-w-0"><p className="text-sm font-bold truncate">Sophie Bernard</p><p className="text-xs text-slate-500">Admin</p></div></div></div>
+      </aside>
+      <main className="flex-1 overflow-y-auto p-8">
+        <header className="flex items-center justify-between mb-10">
+          <div><h2 className="text-2xl font-bold">Parc immobilier</h2><p className="text-slate-500 text-sm">Gérez vos actifs immobiliers.</p></div>
+          <div className="flex items-center gap-4">
+            <div className="relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><input placeholder="Rechercher..." className="pl-11 pr-6 py-2.5 bg-slate-50 rounded-full w-64 text-sm focus:ring-2 focus:ring-violet-200 outline-none" /></div>
+            <button className="bg-violet-600 hover:bg-violet-700 text-white px-5 py-2.5 rounded-full flex items-center gap-2 font-bold text-sm shadow-lg shadow-violet-200 active:scale-95"><Plus className="w-4 h-4" />Ajouter</button>
+          </div>
+        </header>
+        <div className="grid grid-cols-4 gap-6 mb-8">
+          {KPI.map((k, i) => (<div key={i} className={`relative overflow-hidden p-6 rounded-3xl border border-white transition-transform hover:scale-[1.02] ${k.bg}`}><div className="flex items-start justify-between"><div><p className="text-slate-500 font-medium text-sm mb-1">{k.label}</p><h3 className="text-3xl font-bold text-slate-800">{k.value}</h3></div><div className="bg-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm"><k.icon className={`w-6 h-6 ${k.ic}`} /></div></div><div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/30 rounded-full blur-2xl" /></div>))}
+        </div>
+        <section className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden">
+          <div className="px-8 py-6 flex items-center justify-between border-b border-slate-50"><h3 className="font-bold">Liste des bâtiments</h3><div className="flex gap-2"><button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-xl"><Filter className="w-4 h-4" />Filtrer</button></div></div>
+          <table className="w-full text-left"><thead><tr className="text-slate-400 uppercase text-[11px] font-bold tracking-wider"><th className="px-8 py-4">Bâtiment</th><th className="px-8 py-4">Localisation</th><th className="px-8 py-4 text-center">Unités</th><th className="px-8 py-4">Type</th><th className="px-8 py-4">Statut</th><th className="px-8 py-4"></th></tr></thead><tbody className="divide-y divide-slate-50">
+            {BLDG.map((b, i) => (<tr key={i} className="group hover:bg-slate-50/50 transition-colors"><td className="px-8 py-5"><div className="flex items-center gap-3"><div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-violet-100 group-hover:text-violet-600 transition-colors"><Home className="w-5 h-5" /></div><span className="font-bold text-slate-700">{b.name}</span></div></td><td className="px-8 py-5"><div className="flex items-center gap-1.5 text-slate-500 text-sm"><MapPin className="w-3.5 h-3.5" />{b.address}</div></td><td className="px-8 py-5 text-center font-semibold text-slate-700">{b.units}</td><td className="px-8 py-5"><span className={`px-3 py-1 rounded-full text-xs font-semibold ${b.type === 'Résidentiel' ? 'bg-blue-100 text-blue-700' : b.type === 'Commercial' ? 'bg-violet-100 text-violet-700' : 'bg-amber-100 text-amber-700'}`}>{b.type}</span></td><td className="px-8 py-5"><div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full ${b.status === 'Complet' ? 'bg-emerald-500' : b.status === 'Partiel' ? 'bg-amber-500' : 'bg-rose-500'}`} /><span className="text-sm font-medium text-slate-600">{b.status}</span></div></td><td className="px-8 py-5 text-right"><button className="p-2 text-slate-300 hover:text-slate-600 rounded-lg"><ChevronRight className="w-5 h-5" /></button></td></tr>))}
+          </tbody></table>
+          <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-50 flex items-center justify-between"><p className="text-xs text-slate-500 font-medium">5 sur 24</p><div className="flex gap-2"><button disabled className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-400 opacity-50">Précédent</button><button className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:border-violet-300">Suivant</button></div></div>
+        </section>
+      </main>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VIBES SELECTION PAGE
+   ═══════════════════════════════════════════════════════════════ */
 
 export default function VibesSelection() {
-  const [selected, setSelected] = useState<number | null>(null)
+  const [selected, setSelected] = useState<string | null>(null)
+  const vibes = [
+    { id: 'A', name: 'Zaant Modern', desc: 'Blue primary, gradient icons, multi-layer shadows, sticky header, Intercom/Linear energy', color: 'ring-blue-500' },
+    { id: 'B', name: 'Notion Clean', desc: 'Ultra-minimal, whitespace-heavy, indigo accent, typography-driven, Vercel/Cal.com energy', color: 'ring-indigo-500' },
+    { id: 'D', name: 'Rounded Pastel', desc: 'Violet primary, pastel KPI cards, very rounded (32px), colorful icon pills, Figma/Loom energy', color: 'ring-violet-500' },
+  ]
+  const components: Record<string, React.FC> = { A: VibeA, B: VibeB, D: VibeD }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8">
-      <div className="max-w-7xl mx-auto space-y-12">
-        <div className="text-center space-y-3">
+    <div className="min-h-screen bg-gray-950 text-white p-8 font-sans">
+      <div className="max-w-[1400px] mx-auto space-y-12">
+        <div className="text-center space-y-3 pt-8">
           <h1 className="text-4xl font-bold">Choisissez votre Design System</h1>
-          <p className="text-gray-400 text-lg">Cliquez sur le vibe qui vous plaît pour ImmoChecker</p>
+          <p className="text-gray-400 text-lg">Cliquez sur le design qui vous plaît. Chaque vibe montre le layout complet (sidebar + dashboard + table).</p>
         </div>
 
-        {/* Vibe 1 */}
-        <div
-          onClick={() => setSelected(1)}
-          className={`cursor-pointer rounded-3xl overflow-hidden transition-all duration-300 ${selected === 1 ? 'ring-4 ring-blue-500 scale-[1.01]' : 'ring-1 ring-gray-700 hover:ring-gray-500'}`}
-        >
-          <div className="bg-gray-800 px-6 py-3 flex items-center justify-between">
-            <span className="text-sm font-bold">Vibe 1 — Corporate Blue</span>
-            <span className="text-xs text-gray-400">Stripe / Linear style — Clean, professionnel, trustworthy</span>
-          </div>
-          <Vibe1 />
-        </div>
-
-        {/* Vibe 2 */}
-        <div
-          onClick={() => setSelected(2)}
-          className={`cursor-pointer rounded-3xl overflow-hidden transition-all duration-300 ${selected === 2 ? 'ring-4 ring-indigo-500 scale-[1.01]' : 'ring-1 ring-gray-700 hover:ring-gray-500'}`}
-        >
-          <div className="bg-gray-800 px-6 py-3 flex items-center justify-between">
-            <span className="text-sm font-bold">Vibe 2 — Soft Gradient</span>
-            <span className="text-xs text-gray-400">Glassmorphism, gradients pastels, créatif et moderne</span>
-          </div>
-          <Vibe2 />
-        </div>
-
-        {/* Vibe 3 */}
-        <div
-          onClick={() => setSelected(3)}
-          className={`cursor-pointer rounded-3xl overflow-hidden transition-all duration-300 ${selected === 3 ? 'ring-4 ring-amber-500 scale-[1.01]' : 'ring-1 ring-gray-700 hover:ring-gray-500'}`}
-        >
-          <div className="bg-gray-800 px-6 py-3 flex items-center justify-between">
-            <span className="text-sm font-bold">Vibe 3 — Dark Sidebar Luxe</span>
-            <span className="text-xs text-gray-400">Banking / luxe — Sidebar sombre, accents dorés, serif</span>
-          </div>
-          <Vibe3 />
-        </div>
+        {vibes.map(vibe => {
+          const Comp = components[vibe.id]
+          return (
+            <div key={vibe.id} onClick={() => setSelected(vibe.id)} className={`cursor-pointer rounded-3xl overflow-hidden transition-all duration-300 ${selected === vibe.id ? `ring-4 ${vibe.color} scale-[1.005]` : 'ring-1 ring-gray-700 hover:ring-gray-500'}`}>
+              <div className="bg-gray-800 px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="bg-gray-700 text-white text-sm font-bold px-3 py-1 rounded-lg">Vibe {vibe.id}</span>
+                  <span className="text-sm font-bold">{vibe.name}</span>
+                </div>
+                <span className="text-xs text-gray-400">{vibe.desc}</span>
+              </div>
+              <Comp />
+            </div>
+          )
+        })}
 
         {selected && (
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white text-gray-900 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 z-50">
-            <span className="font-bold">Vibe {selected} sélectionnée</span>
-            <span className="text-gray-500 text-sm">Dites-moi "vibe {selected}" pour l'appliquer</span>
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white text-gray-900 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 z-50 animate-bounce">
+            <span className="font-bold text-lg">Vibe {selected} sélectionnée</span>
+            <span className="text-gray-500">→ Dites-moi "vibe {selected}" pour l'appliquer à toute l'app</span>
           </div>
         )}
       </div>
