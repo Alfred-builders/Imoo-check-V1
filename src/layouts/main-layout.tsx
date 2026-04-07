@@ -15,8 +15,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarRail,
-  SidebarTrigger,
 } from '../components/ui/sidebar'
 import {
   DropdownMenu,
@@ -28,21 +26,21 @@ import {
 
 const navigation = [
   {
-    group: 'Opérationnel',
+    group: 'OPÉRATIONNEL',
     items: [
       { label: 'Tableau de bord', icon: LayoutDashboard, href: '/app/dashboard', disabled: true },
       { label: 'Missions', icon: ClipboardList, href: '/app/missions', disabled: true },
     ],
   },
   {
-    group: 'Référentiel',
+    group: 'RÉFÉRENTIEL',
     items: [
       { label: 'Parc immobilier', icon: Building2, href: '/app/patrimoine', disabled: false },
       { label: 'Tiers', icon: Users, href: '/app/tiers', disabled: false },
     ],
   },
   {
-    group: 'Administration',
+    group: 'ADMINISTRATION',
     items: [
       { label: 'Paramètres', icon: Settings, href: '/app/parametres', disabled: false },
     ],
@@ -69,31 +67,26 @@ function AppSidebar() {
   const initials = user ? `${user.prenom[0]}${user.nom[0]}`.toUpperCase() : '?'
 
   return (
-    <Sidebar variant="inset">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to="/app/patrimoine">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg gradient-accent text-white shadow-md">
-                  <Building2 className="size-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">ImmoChecker</span>
-                  {workspace && (
-                    <span className="text-xs text-muted-foreground">{workspace.nom}</span>
-                  )}
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+    <Sidebar>
+      {/* Logo */}
+      <SidebarHeader className="px-5 py-5">
+        <Link to="/app/patrimoine" className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2563eb] shadow-lg shadow-blue-500/20">
+            <Building2 className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-[15px] font-medium text-slate-800">
+            Immo<span className="text-[#2563eb] font-semibold">Checker</span>
+          </span>
+        </Link>
       </SidebarHeader>
 
-      <SidebarContent>
+      {/* Navigation */}
+      <SidebarContent className="px-3">
         {navigation.map((group) => (
-          <SidebarGroup key={group.group}>
-            <SidebarGroupLabel>{group.group}</SidebarGroupLabel>
+          <SidebarGroup key={group.group} className="py-1">
+            <SidebarGroupLabel className="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-[#94a3b8]">
+              {group.group}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
@@ -101,24 +94,22 @@ function AppSidebar() {
                   return (
                     <SidebarMenuItem key={item.href}>
                       {item.disabled ? (
-                        <SidebarMenuButton
-                          tooltip={item.label}
-                          className="opacity-40 cursor-not-allowed"
-                        >
-                          <item.icon />
+                        <div className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-[#94a3b8] cursor-not-allowed border-l-[3px] border-transparent">
+                          <item.icon className="h-[18px] w-[18px]" />
                           <span>{item.label}</span>
-                        </SidebarMenuButton>
+                        </div>
                       ) : (
-                        <SidebarMenuButton
-                          asChild
-                          isActive={isActive}
-                          tooltip={item.label}
+                        <Link
+                          to={item.href}
+                          className={
+                            isActive
+                              ? 'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium bg-[#eff6ff] text-[#2563eb] border-l-[3px] border-[#2563eb] transition-colors'
+                              : 'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-[#64748b] border-l-[3px] border-transparent hover:bg-slate-50 transition-colors'
+                          }
                         >
-                          <Link to={item.href}>
-                            <item.icon />
-                            <span>{item.label}</span>
-                          </Link>
-                        </SidebarMenuButton>
+                          <item.icon className="h-[18px] w-[18px]" />
+                          <span>{item.label}</span>
+                        </Link>
                       )}
                     </SidebarMenuItem>
                   )
@@ -129,23 +120,24 @@ function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter>
+      {/* User footer */}
+      <SidebarFooter className="border-t border-slate-100 px-4 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton
                   size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  className="w-full data-[state=open]:bg-slate-50"
                 >
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 ring-2 ring-primary/15 text-sm font-semibold text-primary">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-600">
                     {initials}
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{user?.prenom} {user?.nom}</span>
-                    <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
+                    <span className="truncate font-semibold text-slate-800">{user?.prenom} {user?.nom}</span>
+                    <span className="truncate text-xs text-[#94a3b8]">{user?.email}</span>
                   </div>
-                  <ChevronsUpDown className="ml-auto size-4" />
+                  <ChevronsUpDown className="ml-auto h-4 w-4 text-[#94a3b8]" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -155,12 +147,12 @@ function AppSidebar() {
                 sideOffset={4}
               >
                 <div className="px-2 py-1.5">
-                  <p className="text-sm font-medium">{user?.prenom} {user?.nom}</p>
-                  <p className="text-xs text-muted-foreground">{workspace?.nom}</p>
+                  <p className="text-sm font-medium text-slate-800">{user?.prenom} {user?.nom}</p>
+                  <p className="text-xs text-[#94a3b8]">{workspace?.nom}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                  <LogOut className="mr-2 size-4" />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+                  <LogOut className="mr-2 h-4 w-4" />
                   Se déconnecter
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -168,8 +160,6 @@ function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
-
-      <SidebarRail />
     </Sidebar>
   )
 }
@@ -181,10 +171,7 @@ export function MainLayout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-10 shrink-0 items-center gap-2 border-b border-border/40 px-4">
-          <SidebarTrigger className="-ml-1" />
-        </header>
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-[#f1f5f9]">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

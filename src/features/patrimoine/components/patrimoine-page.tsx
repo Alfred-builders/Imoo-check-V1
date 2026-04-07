@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
-import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus, Upload } from 'lucide-react'
+import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus, Upload, Loader2 } from 'lucide-react'
 import { Input } from 'src/components/ui/input'
 import { Badge } from 'src/components/ui/badge'
 import { Button } from 'src/components/ui/button'
@@ -14,6 +14,8 @@ import { PatrimoineMap } from './patrimoine-map'
 import { ColumnConfig, useColumnPreferences, type ColumnDef } from '../../../components/shared/column-config'
 import { DynamicFilter, type FilterField, type ActiveFilter } from '../../../components/shared/dynamic-filter'
 import type { Batiment, Lot } from '../types'
+
+const BATCH_SIZE = 20
 
 const BATIMENT_COLUMNS: ColumnDef[] = [
   { id: 'designation', label: 'Désignation', defaultVisible: true },
@@ -153,6 +155,8 @@ export function PatrimoinePage() {
   const [maisonBatimentId, setMaisonBatimentId] = useState<string | null>(null)
   const [colWidths, setColWidths] = useState<Record<string, number>>({ ...DEFAULT_COL_WIDTHS })
   const startWidths = useRef<Record<string, number>>({})
+  const [displayCount, setDisplayCount] = useState(BATCH_SIZE)
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
   const handleResizeStart = useCallback(() => {
     startWidths.current = { ...colWidths }
@@ -191,10 +195,40 @@ export function PatrimoinePage() {
     [data, dynamicFilters]
   )
 
+  // Reset display count when filters/search change
+  useEffect(() => {
+    setDisplayCount(BATCH_SIZE)
+  }, [debouncedSearch, dynamicFilters])
+
+  const displayedBatiments = useMemo(
+    () => filteredBatiments.slice(0, displayCount),
+    [filteredBatiments, displayCount]
+  )
+
+  const hasMore = displayCount < filteredBatiments.length
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore) {
+          setDisplayCount(prev => Math.min(prev + BATCH_SIZE, filteredBatiments.length))
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasMore, filteredBatiments.length])
+
   const isCol = (id: string) => visibleCols.includes(id)
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-6 space-y-5">
       {/* Modals */}
       <CreateBuildingModal
         open={showCreateBuilding}
@@ -215,20 +249,36 @@ export function PatrimoinePage() {
         onImported={() => window.location.reload()}
       />
 
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-[13px] text-[#94a3b8]">
+        <span>Référentiel</span>
+        <ChevronRight className="h-3 w-3 text-[#cbd5e1]" />
+        <span className="text-slate-700 font-medium">Parc immobilier</span>
+      </nav>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Parc immobilier</h1>
-          <p className="text-xs text-gray-400 mt-0.5">
-            {isLoading ? '...' : `${filteredBatiments.length} batiment${filteredBatiments.length > 1 ? 's' : ''}`}
+          <h1 className="text-[28px] font-bold tracking-[-0.5px] text-slate-900">Parc immobilier</h1>
+          <p className="text-[13px] text-[#94a3b8] mt-0.5">
+            {isLoading ? '...' : `${filteredBatiments.length} bâtiment${filteredBatiments.length > 1 ? 's' : ''}`}
           </p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setShowImportCSV(true)}>
-            <Upload className="h-3.5 w-3.5 mr-1" /> Import CSV
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs border-[#e2e8f0] text-slate-600 hover:bg-slate-50"
+            onClick={() => setShowImportCSV(true)}
+          >
+            <Upload className="h-3.5 w-3.5 mr-1.5" /> Import CSV
           </Button>
-          <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs">
-            <Plus className="h-3.5 w-3.5 mr-1" /> Nouveau lot
+          <Button
+            size="sm"
+            onClick={() => setShowCreateLot(true)}
+            className="h-8 text-xs bg-[#2563eb] text-white hover:bg-[#1d4ed8] shadow-lg shadow-blue-500/15"
+          >
+            <Plus className="h-3.5 w-3.5 mr-1.5" /> Nouveau lot
           </Button>
           <ColumnConfig
             page="patrimoine_batiments"
@@ -236,16 +286,16 @@ export function PatrimoinePage() {
             visibleColumns={visibleCols}
             onColumnsChange={setVisibleCols}
           />
-          <div className="flex items-center bg-gray-100 rounded-md p-0.5 ml-1">
+          <div className="flex items-center bg-[#f1f5f9] rounded-lg p-0.5 ml-1">
             <button
               onClick={() => setView('table')}
-              className={`p-1.5 rounded transition-colors ${view === 'table' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}
+              className={`p-1.5 rounded-md transition-colors ${view === 'table' ? 'bg-white shadow-sm text-slate-900' : 'text-[#94a3b8] hover:text-slate-600'}`}
             >
               <List className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => setView('carte')}
-              className={`p-1.5 rounded transition-colors ${view === 'carte' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400'}`}
+              className={`p-1.5 rounded-md transition-colors ${view === 'carte' ? 'bg-white shadow-sm text-slate-900' : 'text-[#94a3b8] hover:text-slate-600'}`}
             >
               <Map className="h-3.5 w-3.5" />
             </button>
@@ -257,12 +307,12 @@ export function PatrimoinePage() {
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <div className="relative w-72">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#94a3b8]" />
             <Input
               placeholder="Rechercher..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-8 text-xs"
+              className="pl-8 h-8 text-xs border-[#e2e8f0] focus-visible:ring-[#2563eb]/20"
             />
           </div>
           <DynamicFilter fields={FILTER_FIELDS} filters={dynamicFilters} onChange={setDynamicFilters} />
@@ -271,9 +321,9 @@ export function PatrimoinePage() {
 
       {/* Table view */}
       {view === 'table' && (
-        <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wider select-none">
+        <div className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+          {/* Table header */}
+          <div className="flex items-center gap-4 px-4 py-2.5 bg-[#f8fafc] border-b border-[#e2e8f0] text-[11px] font-bold text-[#94a3b8] uppercase tracking-wider select-none">
             <div className="w-6 shrink-0" /> {/* expand */}
             {isCol('designation') && (
               <div className="relative overflow-visible shrink-0" style={{ width: colWidths.designation, minWidth: 40 }}>
@@ -332,7 +382,7 @@ export function PatrimoinePage() {
           </div>
 
           {isLoading && (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-[#f1f5f9]">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center gap-4 px-4 py-3">
                   <div className="w-6" />
@@ -345,14 +395,28 @@ export function PatrimoinePage() {
           )}
 
           {!isLoading && filteredBatiments.length === 0 && (
-            <div className="py-12 text-center text-gray-400 text-sm">
+            <div className="py-16 text-center text-[#94a3b8] text-sm">
               {search || dynamicFilters.length > 0 ? 'Aucun résultat' : 'Aucun bâtiment'}
             </div>
           )}
 
-          {!isLoading && filteredBatiments.map((bat) => (
+          {!isLoading && displayedBatiments.map((bat) => (
             <BatimentRow key={bat.id} batiment={bat} visibleCols={visibleCols} colWidths={colWidths} />
           ))}
+
+          {/* Infinite scroll sentinel */}
+          {!isLoading && hasMore && (
+            <div ref={sentinelRef} className="py-4 text-center">
+              <Loader2 className="h-5 w-5 animate-spin text-[#94a3b8] mx-auto" />
+            </div>
+          )}
+
+          {/* End of list indicator */}
+          {!isLoading && !hasMore && filteredBatiments.length > BATCH_SIZE && (
+            <div className="py-3 text-center text-[12px] text-[#cbd5e1]">
+              {filteredBatiments.length} bâtiment{filteredBatiments.length > 1 ? 's' : ''} affichés
+            </div>
+          )}
         </div>
       )}
 
@@ -369,49 +433,49 @@ function BatimentRow({ batiment, visibleCols, colWidths }: { batiment: Batiment;
   const isCol = (id: string) => visibleCols.includes(id)
 
   return (
-    <div className="border-b border-gray-50 last:border-b-0">
+    <div className="border-b border-[#f1f5f9] last:border-b-0">
       <div
-        className="flex items-center gap-4 px-4 py-2.5 hover:bg-muted/50 transition-colors cursor-pointer text-sm"
+        className="flex items-center gap-4 px-4 py-2.5 hover:bg-[#eff6ff]/30 transition-colors cursor-pointer text-sm"
         onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`)}
       >
         <button
           onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
-          className="w-6 shrink-0 flex items-center justify-center p-0.5 rounded hover:bg-gray-100"
+          className="w-6 shrink-0 flex items-center justify-center p-0.5 rounded hover:bg-[#f1f5f9]"
         >
-          {expanded ? <ChevronDown className="h-3.5 w-3.5 text-gray-400" /> : <ChevronRight className="h-3.5 w-3.5 text-gray-400" />}
+          {expanded ? <ChevronDown className="h-3.5 w-3.5 text-[#94a3b8]" /> : <ChevronRight className="h-3.5 w-3.5 text-[#94a3b8]" />}
         </button>
         {isCol('designation') && (
-          <div className="shrink-0 flex items-center gap-2 min-w-0 overflow-hidden" style={{ width: colWidths.designation }}>
-            <Icon className="h-4 w-4 shrink-0 text-gray-400" />
-            <span className="font-medium text-gray-900 truncate">{batiment.designation}</span>
-            {batiment.est_archive && <Badge variant="outline" className="text-[9px] text-gray-400 border-gray-200">Archive</Badge>}
+          <div className="shrink-0 flex items-center gap-2 min-w-0 overflow-hidden group" style={{ width: colWidths.designation }}>
+            <Icon className="h-4 w-4 shrink-0 text-[#94a3b8]" />
+            <span className="font-bold text-slate-900 group-hover:text-[#2563eb] truncate transition-colors">{batiment.designation}</span>
+            {batiment.est_archive && <Badge variant="outline" className="text-[9px] text-[#94a3b8] border-[#e2e8f0]">Archive</Badge>}
           </div>
         )}
         {isCol('type') && (
           <div className="shrink-0" style={{ width: colWidths.type }}>
-            <Badge variant="outline" className="text-[10px] font-normal capitalize">{typeLabels[batiment.type]}</Badge>
+            <Badge variant="outline" className="text-[10px] font-normal capitalize border-[#e2e8f0] text-slate-600">{typeLabels[batiment.type]}</Badge>
           </div>
         )}
         {isCol('adresse') && (
-          <div className="shrink-0 text-xs text-gray-500 truncate" style={{ width: colWidths.adresse }}>
+          <div className="shrink-0 text-xs text-slate-500 truncate" style={{ width: colWidths.adresse }}>
             {adresse ? `${adresse.rue}, ${adresse.ville}` : '—'}
           </div>
         )}
-        {isCol('nb_lots') && <div className="shrink-0 text-center" style={{ width: colWidths.nb_lots }}><Badge variant="outline" className="text-[10px] font-medium">{batiment.nb_lots}</Badge></div>}
-        {isCol('nb_etages') && <div className="shrink-0 text-center text-gray-500 text-xs" style={{ width: colWidths.nb_etages }}>{batiment.nb_etages ?? '—'}</div>}
-        {isCol('annee_construction') && <div className="shrink-0 text-center text-gray-500 text-xs" style={{ width: colWidths.annee_construction }}>{batiment.annee_construction ?? '—'}</div>}
+        {isCol('nb_lots') && <div className="shrink-0 text-center" style={{ width: colWidths.nb_lots }}><Badge variant="outline" className="text-[10px] font-medium border-[#e2e8f0]">{batiment.nb_lots}</Badge></div>}
+        {isCol('nb_etages') && <div className="shrink-0 text-center text-slate-500 text-xs" style={{ width: colWidths.nb_etages }}>{batiment.nb_etages ?? '—'}</div>}
+        {isCol('annee_construction') && <div className="shrink-0 text-center text-slate-500 text-xs" style={{ width: colWidths.annee_construction }}>{batiment.annee_construction ?? '—'}</div>}
         {isCol('derniere_mission') && (
-          <div className="shrink-0 text-xs text-gray-500" style={{ width: colWidths.derniere_mission }}>{batiment.derniere_mission ? formatDate(batiment.derniere_mission) : '—'}</div>
+          <div className="shrink-0 text-xs text-slate-500" style={{ width: colWidths.derniere_mission }}>{batiment.derniere_mission ? formatDate(batiment.derniere_mission) : '—'}</div>
         )}
         {isCol('missions_a_venir') && (
           <div className="shrink-0 text-center" style={{ width: colWidths.missions_a_venir }}>
             {batiment.missions_a_venir > 0 ? (
-              <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">{batiment.missions_a_venir}</Badge>
-            ) : <span className="text-xs text-gray-300">—</span>}
+              <Badge className="bg-blue-50 text-[#2563eb] border-blue-200 text-[10px]">{batiment.missions_a_venir}</Badge>
+            ) : <span className="text-xs text-[#cbd5e1]">—</span>}
           </div>
         )}
         {isCol('created_at') && (
-          <div className="shrink-0 text-xs text-gray-400" style={{ width: colWidths.created_at }}>{formatDate(batiment.created_at)}</div>
+          <div className="shrink-0 text-xs text-[#94a3b8]" style={{ width: colWidths.created_at }}>{formatDate(batiment.created_at)}</div>
         )}
       </div>
 
@@ -426,7 +490,7 @@ function LotSubRows({ batimentId }: { batimentId: string }) {
 
   if (isLoading) {
     return (
-      <div className="pl-10 pr-4 py-2 bg-gray-50/60">
+      <div className="pl-10 pr-4 py-2 bg-[#f8fafc]">
         {[1, 2].map((i) => (
           <div key={i} className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 py-2">
             <Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" />
@@ -436,12 +500,12 @@ function LotSubRows({ batimentId }: { batimentId: string }) {
     )
   }
 
-  if (!lots || lots.length === 0) return <div className="pl-10 pr-4 py-3 bg-gray-50/60 text-xs text-gray-400">Aucun lot</div>
+  if (!lots || lots.length === 0) return <div className="pl-10 pr-4 py-3 bg-[#f8fafc] text-xs text-[#94a3b8]">Aucun lot</div>
 
   return (
-    <div className="bg-gray-50/60 border-t border-gray-100">
+    <div className="bg-[#f8fafc] border-t border-[#e2e8f0]">
       {/* Sub-row column headers */}
-      <div className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-1.5 text-[9px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100/80">
+      <div className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-1.5 text-[9px] font-bold text-[#94a3b8] uppercase tracking-wider border-b border-[#e2e8f0]/60">
         <div>Lot</div>
         <div>Type</div>
         <div>Etage</div>
@@ -454,18 +518,18 @@ function LotSubRows({ batimentId }: { batimentId: string }) {
         return (
           <div
             key={lot.id}
-            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-muted/50 cursor-pointer transition-colors text-xs border-b border-gray-50 last:border-b-0 items-center"
+            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-[#eff6ff]/30 cursor-pointer transition-colors text-xs border-b border-[#f1f5f9] last:border-b-0 items-center"
             onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
           >
-            <div className="flex items-center gap-2 min-w-0">
-              <Home className="h-3 w-3 text-gray-300 shrink-0" />
-              <span className="font-medium text-gray-800 truncate">{lot.designation}</span>
+            <div className="flex items-center gap-2 min-w-0 group">
+              <Home className="h-3 w-3 text-[#cbd5e1] shrink-0" />
+              <span className="font-bold text-slate-800 group-hover:text-[#2563eb] truncate transition-colors">{lot.designation}</span>
             </div>
-            <div><Badge variant="outline" className="text-[9px] capitalize font-normal">{lot.type_bien.replace('_', ' ')}</Badge></div>
-            <div className="text-gray-500">{lot.etage || '—'}</div>
-            <div className="text-gray-500">{lot.surface ? `${lot.surface} m²` : '—'}</div>
-            <div>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meuble</Badge> : <span className="text-gray-300">—</span>}</div>
-            <div className="text-gray-400 truncate">{propLabel}</div>
+            <div><Badge variant="outline" className="text-[9px] capitalize font-normal border-[#e2e8f0] text-slate-600">{lot.type_bien.replace('_', ' ')}</Badge></div>
+            <div className="text-slate-500">{lot.etage || '—'}</div>
+            <div className="text-slate-500">{lot.surface ? `${lot.surface} m²` : '—'}</div>
+            <div>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meublé</Badge> : <span className="text-[#cbd5e1]">—</span>}</div>
+            <div className="text-[#94a3b8] truncate">{propLabel}</div>
           </div>
         )
       })}

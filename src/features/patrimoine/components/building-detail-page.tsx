@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, Archive, ArchiveRestore, Plus, Building2, Layers, Calendar, Hash, ExternalLink, Pencil, AlertTriangle, ExternalLinkIcon, Home, Armchair, Ruler, ArrowUpCircle } from 'lucide-react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { MapPin, Archive, ArchiveRestore, Plus, Building2, Layers, Calendar, Hash, ExternalLink, Pencil, AlertTriangle, ExternalLinkIcon, Home, ArrowUpCircle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Skeleton } from 'src/components/ui/skeleton'
@@ -9,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from 'src/components/ui/tabs
 import { Input } from 'src/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
 import { Textarea } from 'src/components/ui/textarea'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator } from 'src/components/ui/breadcrumb'
 import { useBatimentDetail, useBatimentLots, useUpdateBatiment, useUpdateAddress, useAddAddress, useDeleteAddress } from '../api'
 import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
 import { InlineField } from '../../../components/shared/inline-field'
@@ -69,8 +71,15 @@ export function BuildingDetailPage() {
         annee_construction: formData.annee_construction ? parseInt(formData.annee_construction) : null,
         commentaire: formData.commentaire || null,
       })
-      toast.success('Bâtiment mis à jour')
-      setEditing(false)
+      toast.success('Batiment mis a jour')
+      // Flash animation on all cards
+      const cards = document.querySelectorAll('[data-card]')
+      cards.forEach(c => {
+        c.classList.add('animate-save-success')
+        setTimeout(() => c.classList.remove('animate-save-success'), 600)
+      })
+      // Smooth close after delay
+      setTimeout(() => setEditing(false), 400)
     } catch {
       toast.error('Erreur')
     } finally {
@@ -94,6 +103,7 @@ export function BuildingDetailPage() {
   if (isLoading) {
     return (
       <div className="p-6 space-y-6 max-w-6xl mx-auto">
+        <Skeleton className="h-4 w-48" />
         <Skeleton className="h-10 w-72" />
         <div className="grid grid-cols-4 gap-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
         <Skeleton className="h-80 rounded-xl" />
@@ -101,7 +111,7 @@ export function BuildingDetailPage() {
     )
   }
 
-  if (!batiment) return <div className="p-6"><p className="text-gray-400">Bâtiment introuvable</p></div>
+  if (!batiment) return <div className="p-6"><p className="text-gray-400">Batiment introuvable</p></div>
 
   const adresses = batiment.adresses ?? []
   const principale = adresses.find(a => a.type === 'principale')
@@ -110,7 +120,7 @@ export function BuildingDetailPage() {
     if (!id) return
     try {
       await updateMutation.mutateAsync({ id, est_archive: !batiment!.est_archive })
-      toast.success(batiment!.est_archive ? 'Bâtiment restauré' : 'Bâtiment archivé')
+      toast.success(batiment!.est_archive ? 'Batiment restaure' : 'Batiment archive')
     } catch (err: any) {
       toast.error(err.message || 'Erreur')
     }
@@ -118,22 +128,42 @@ export function BuildingDetailPage() {
 
   return (
     <div className="p-6 space-y-5 max-w-6xl mx-auto">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList className="text-xs">
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/app/patrimoine" className="text-[#94a3b8] hover:text-slate-600">Referentiel</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link to="/app/patrimoine" className="text-[#94a3b8] hover:text-slate-600">Parc immobilier</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage className="text-slate-700 font-medium">{batiment.designation}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       {/* Header */}
-      <div className="flex items-start gap-3">
-        <Button variant="ghost" size="icon" className="mt-0.5 shrink-0 h-8 w-8" onClick={() => navigate('/app/patrimoine')}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+      <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            {editing ? (
-              <Input
-                value={formData.designation}
-                onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
-                className="text-xl font-bold h-auto py-1 px-2 border-primary/30 bg-primary/[0.03]"
-              />
-            ) : (
-              <h1 className="text-2xl font-bold text-foreground">{batiment.designation}</h1>
-            )}
+          <div className="flex items-center gap-3 flex-wrap">
+            <motion.div layout transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}>
+              {editing ? (
+                <Input
+                  value={formData.designation}
+                  onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+                  className="text-[28px] font-bold tracking-[-0.5px] h-auto py-1 px-2 border-primary/30 bg-primary/[0.03] max-w-md"
+                />
+              ) : (
+                <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">{batiment.designation}</h1>
+              )}
+            </motion.div>
             {editing ? (
               <Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}>
                 <SelectTrigger className="h-7 w-32 text-xs"><SelectValue /></SelectTrigger>
@@ -147,19 +177,19 @@ export function BuildingDetailPage() {
             ) : (
               <Badge variant="outline" className="capitalize">{typeLabels[batiment.type]}</Badge>
             )}
-            {batiment.est_archive && <Badge variant="destructive" className="text-[10px]">Archivé</Badge>}
+            {batiment.est_archive && <Badge variant="destructive" className="text-[10px]">Archive</Badge>}
           </div>
           {principale && (
-            <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
               <MapPin className="h-3 w-3" />
               {principale.rue}, {principale.ville}
             </p>
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          {!batiment.est_archive && (
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setEditing(!editing)}>
-              <Pencil className="h-3 w-3 mr-1" /> {editing ? 'Annuler' : 'Modifier'}
+          {!batiment.est_archive && !editing && (
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setEditing(true)}>
+              <Pencil className="h-3 w-3 mr-1" /> Modifier
             </Button>
           )}
           <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleArchive}>
@@ -172,31 +202,37 @@ export function BuildingDetailPage() {
       {batiment.est_archive && (
         <div className="flex items-center gap-2 px-3 py-2.5 bg-primary/5 border border-primary/30 rounded-lg text-primary text-xs">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          Ce bâtiment est archivé.
+          Ce batiment est archive.
         </div>
       )}
 
-      {/* KPI row — always visible */}
+      {/* KPI row — Option A Minimal Pro style */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { icon: Layers, label: 'Lots', value: batiment.nb_lots, bg: 'bg-blue-500', text: 'text-white' },
-          { icon: Building2, label: 'Type', value: typeLabels[batiment.type], bg: 'bg-primary', text: 'text-white' },
-          { icon: Hash, label: 'Étages', value: batiment.nb_etages ?? '—', bg: 'bg-emerald-500', text: 'text-white' },
-          { icon: Calendar, label: 'Construction', value: batiment.annee_construction ?? '—', bg: 'bg-violet-500', text: 'text-white' },
-        ].map(({ icon: Icon, label, value, bg, text }) => (
-          <div key={label} className="flex items-center gap-3 p-3.5 bg-white rounded-2xl shadow-card">
-            <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${bg}`}>
-              <Icon className={`h-4 w-4 ${text}`} />
+          { icon: Layers, label: 'Lots', value: batiment.nb_lots },
+          { icon: Building2, label: 'Type', value: typeLabels[batiment.type] },
+          { icon: Hash, label: 'Etages', value: batiment.nb_etages ?? '---' },
+          { icon: Calendar, label: 'Construction', value: batiment.annee_construction ?? '---' },
+        ].map(({ icon: Icon, label, value }) => (
+          <motion.div
+            key={label}
+            layout
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            data-card
+            className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-lg border border-slate-100"
+          >
+            <div className="h-9 w-9 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
+              <Icon className="h-4 w-4 text-slate-400" />
             </div>
             <div>
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{label}</p>
-              <p className="text-base font-bold text-gray-900 -mt-0.5">{value}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">{label}</p>
+              <p className="text-[14px] font-bold text-slate-700 -mt-0.5">{value}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* Tabs — always visible */}
+      {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="bg-gray-100 p-0.5 h-9">
           <TabsTrigger value="overview" className="text-xs h-8 px-4">Vue d'ensemble</TabsTrigger>
@@ -204,92 +240,106 @@ export function BuildingDetailPage() {
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-            <div className="grid grid-cols-3 gap-4">
-              {/* Adresses */}
-              <div className="col-span-2 bg-white rounded-2xl shadow-card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Adresses</h2>
-                  {!batiment.est_archive && <AddAddressButton batimentId={batiment.id} />}
-                </div>
-                <div className="space-y-2">
-                  {adresses.map((a) => (
-                    <AddressCard key={a.id} address={a} batimentId={batiment.id} isArchived={batiment.est_archive} totalAddresses={adresses.length} />
-                  ))}
-                </div>
+          <motion.div
+            layout
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="grid grid-cols-3 gap-4"
+          >
+            {/* Adresses */}
+            <motion.div
+              layout
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              data-card
+              className="col-span-2 bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-5"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">Adresses</h2>
+                {!batiment.est_archive && <AddAddressButton batimentId={batiment.id} />}
               </div>
+              <div className="space-y-2">
+                {adresses.map((a) => (
+                  <AddressCard key={a.id} address={a} batimentId={batiment.id} isArchived={batiment.est_archive} totalAddresses={adresses.length} />
+                ))}
+              </div>
+            </motion.div>
 
-              {/* Infos */}
-              <div className="bg-white rounded-2xl shadow-card p-5">
-                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Informations</h2>
-                <div className="space-y-1">
-                  <InlineField label="Étages" editing={editing} value={batiment.nb_etages ?? '—'}>
-                    <Input type="number" value={formData.nb_etages} onChange={(e) => setFormData(prev => ({ ...prev, nb_etages: e.target.value }))} className="h-7 text-sm" />
-                  </InlineField>
-                  <InlineField label="Année" editing={editing} value={batiment.annee_construction ?? '—'}>
-                    <Input type="number" value={formData.annee_construction} onChange={(e) => setFormData(prev => ({ ...prev, annee_construction: e.target.value }))} className="h-7 text-sm" />
-                  </InlineField>
-                  <InlineField label="Créé le" editing={false} value={formatDate(batiment.created_at)}>
-                    <span />
-                  </InlineField>
-                  <Separator className="my-2" />
-                  <InlineField label="Commentaire" editing={editing} value={batiment.commentaire || '—'} horizontal={false}>
-                    <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} className="text-sm min-h-[60px]" />
-                  </InlineField>
-                </div>
+            {/* Infos */}
+            <motion.div
+              layout
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              data-card
+              className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-5"
+            >
+              <h2 className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8] mb-3">Informations</h2>
+              <div className="space-y-1">
+                <InlineField label="Etages" editing={editing} value={batiment.nb_etages ?? '---'}>
+                  <Input type="number" value={formData.nb_etages} onChange={(e) => setFormData(prev => ({ ...prev, nb_etages: e.target.value }))} className="h-7 text-sm" />
+                </InlineField>
+                <InlineField label="Annee" editing={editing} value={batiment.annee_construction ?? '---'}>
+                  <Input type="number" value={formData.annee_construction} onChange={(e) => setFormData(prev => ({ ...prev, annee_construction: e.target.value }))} className="h-7 text-sm" />
+                </InlineField>
+                <InlineField label="Cree le" editing={false} value={formatDate(batiment.created_at)}>
+                  <span />
+                </InlineField>
+                <Separator className="my-2" />
+                <InlineField label="Commentaire" editing={editing} value={batiment.commentaire || '---'} horizontal={false}>
+                  <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} className="text-sm min-h-[60px]" />
+                </InlineField>
               </div>
+            </motion.div>
+          </motion.div>
+        </TabsContent>
+
+        {/* Lots tab */}
+        <TabsContent value="lots" className="mt-4">
+          <div data-card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4 text-gray-400" />
+                <h3 className="text-sm font-semibold text-gray-900">Lots</h3>
+                <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{lots?.length ?? 0}</Badge>
+              </div>
+              <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-7 text-xs px-3">
+                <Plus className="h-3 w-3 mr-1" /> Ajouter
+              </Button>
             </div>
-          </TabsContent>
-
-          {/* Lots tab */}
-          <TabsContent value="lots" className="mt-4">
-            <div className="bg-white rounded-2xl shadow-card overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-gray-400" />
-                  <h3 className="text-sm font-semibold text-gray-900">Lots</h3>
-                  <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{lots?.length ?? 0}</Badge>
-                </div>
-                <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-7 text-xs px-3">
-                  <Plus className="h-3 w-3 mr-1" /> Ajouter
-                </Button>
-              </div>
-              {lots && lots.length > 0 ? (
-                <div className="divide-y divide-gray-50">
-                  {lots.map((lot) => {
-                    const propLabel = lot.proprietaires?.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom).join(', ') || '—'
-                    const LotIcon = typeBienIcons[lot.type_bien] || Building2
-                    return (
-                      <div
-                        key={lot.id}
-                        className="flex items-center gap-4 px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors"
-                        onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
-                      >
-                        <div className="h-9 w-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                          <LotIcon className="h-4 w-4 text-gray-500" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">{lot.designation}</p>
-                          <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
-                            <span className="capitalize">{lot.type_bien.replace('_', ' ')}</span>
-                            {lot.etage && <span>Et. {lot.etage}</span>}
-                            {lot.surface && <span>{lot.surface} m²</span>}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px] h-5">Meublé</Badge>}
-                          <span className="text-xs text-gray-400 max-w-[120px] truncate">{propLabel}</span>
-                          <ExternalLink className="h-3.5 w-3.5 text-gray-300" />
+            {lots && lots.length > 0 ? (
+              <div className="divide-y divide-gray-50">
+                {lots.map((lot) => {
+                  const propLabel = lot.proprietaires?.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom).join(', ') || '---'
+                  const LotIcon = typeBienIcons[lot.type_bien] || Building2
+                  return (
+                    <div
+                      key={lot.id}
+                      className="flex items-center gap-4 px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
+                    >
+                      <div className="h-9 w-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                        <LotIcon className="h-4 w-4 text-gray-500" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{lot.designation}</p>
+                        <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
+                          <span className="capitalize">{lot.type_bien.replace('_', ' ')}</span>
+                          {lot.etage && <span>Et. {lot.etage}</span>}
+                          {lot.surface && <span>{lot.surface} m2</span>}
                         </div>
                       </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <div className="py-10 text-center text-gray-400 text-sm">Aucun lot</div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px] h-5">Meuble</Badge>}
+                        <span className="text-xs text-gray-400 max-w-[120px] truncate">{propLabel}</span>
+                        <ExternalLink className="h-3.5 w-3.5 text-gray-300" />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="py-10 text-center text-gray-400 text-sm">Aucun lot</div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <CreateLotModal
         open={showCreateLot}
@@ -303,7 +353,7 @@ export function BuildingDetailPage() {
   )
 }
 
-// ── Address Card (view + inline edit + delete) ──
+// -- Address Card (view + inline edit + delete) --
 function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { address: any; batimentId: string; isArchived: boolean; totalAddresses: number }) {
   const [editing, setEditing] = useState(false)
   const [rue, setRue] = useState(a.rue)
@@ -318,7 +368,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
   async function handleSave() {
     try {
       await updateAddr.mutateAsync({ batimentId, adresseId: a.id, rue, complement: complement || undefined, code_postal: cp, ville, latitude: lat, longitude: lng })
-      toast.success('Adresse mise à jour')
+      toast.success('Adresse mise a jour')
       setEditing(false)
     } catch (err: any) { toast.error(err.message || 'Erreur') }
   }
@@ -326,14 +376,14 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
   async function handleDelete() {
     try {
       await deleteAddr.mutateAsync({ batimentId, adresseId: a.id })
-      toast.success('Adresse supprimée')
+      toast.success('Adresse supprimee')
     } catch (err: any) { toast.error(err.message || 'Erreur') }
   }
 
   async function handleSetPrimary() {
     try {
       await updateAddr.mutateAsync({ batimentId, adresseId: a.id, type: 'principale' })
-      toast.success('Adresse définie comme principale')
+      toast.success('Adresse definie comme principale')
     } catch (err: any) { toast.error(err.message || 'Erreur') }
   }
 
@@ -346,7 +396,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
             if (addr) { setRue(addr.rue); setCp(addr.code_postal); setVille(addr.ville); setLat(addr.latitude); setLng(addr.longitude) }
           }}
         />
-        <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complément..." className="h-8 text-xs" />
+        <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complement..." className="h-8 text-xs" />
         <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
         <div className="flex justify-end gap-1.5">
           <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditing(false)}>
@@ -395,7 +445,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
             <ExternalLinkIcon className="h-3 w-3" /> Voir sur Google Maps
           </a>
         ) : (
-          <span className="text-gray-300">Coordonnées GPS non disponibles — saisie manuelle</span>
+          <span className="text-gray-300">Coordonnees GPS non disponibles --- saisie manuelle</span>
         )}
         {!isArchived && a.type === 'secondaire' && (
           <>
@@ -405,7 +455,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
               onClick={handleSetPrimary}
               disabled={updateAddr.isPending}
             >
-              <ArrowUpCircle className="h-3 w-3" /> Définir comme principale
+              <ArrowUpCircle className="h-3 w-3" /> Definir comme principale
             </button>
           </>
         )}
@@ -414,7 +464,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
   )
 }
 
-// ── Add Address Button ──
+// -- Add Address Button --
 function AddAddressButton({ batimentId }: { batimentId: string }) {
   const [adding, setAdding] = useState(false)
   const [rue, setRue] = useState('')
@@ -429,7 +479,7 @@ function AddAddressButton({ batimentId }: { batimentId: string }) {
     if (!rue || !cp || !ville) { toast.error('Rue, code postal et ville sont requis'); return }
     try {
       await addAddr.mutateAsync({ batimentId, type: 'secondaire', rue, complement: complement || undefined, code_postal: cp, ville, latitude: lat, longitude: lng })
-      toast.success('Adresse ajoutée')
+      toast.success('Adresse ajoutee')
       setAdding(false); setRue(''); setComplement(''); setCp(''); setVille(''); setLat(undefined); setLng(undefined)
     } catch (err: any) { toast.error(err.message || 'Erreur') }
   }
@@ -450,7 +500,7 @@ function AddAddressButton({ batimentId }: { batimentId: string }) {
           if (addr) { setRue(addr.rue); setCp(addr.code_postal); setVille(addr.ville); setLat(addr.latitude); setLng(addr.longitude) }
         }}
       />
-      <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complément..." className="h-8 text-xs" />
+      <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complement..." className="h-8 text-xs" />
       <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
       <div className="flex justify-end gap-1.5">
         <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setAdding(false)}>Annuler</Button>

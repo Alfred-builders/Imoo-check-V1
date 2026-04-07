@@ -4,34 +4,33 @@ import { Building2 } from 'lucide-react'
 export function AuthLayout() {
   return (
     <div className="min-h-screen flex">
-      {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 via-slate-800 to-primary/20 items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-56 h-56 bg-primary/8 rounded-full blur-2xl" />
-        <div className="max-w-md text-center">
-          <div className="h-16 w-16 rounded-2xl gradient-accent flex items-center justify-center shadow-lg mx-auto mb-6">
-            <Building2 className="h-8 w-8 text-primary-foreground" />
+      {/* Left panel — dark navy brand */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#0f172a] items-center justify-center p-12">
+        <div className="text-center">
+          <div className="h-16 w-16 rounded-2xl bg-[#2563eb] flex items-center justify-center shadow-lg shadow-blue-500/20 mx-auto mb-6">
+            <Building2 className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white">ImmoChecker</h1>
-          <p className="text-gray-400 mt-3 text-lg">
-            Etats des lieux & Inventaires
-          </p>
-          <p className="text-gray-500 mt-6 text-sm leading-relaxed">
-            Plateforme de gestion des états des lieux immobiliers. Créez, planifiez et suivez vos interventions en toute simplicité.
+          <p className="text-slate-400 mt-3 text-lg">
+            Gestion d'états des lieux simplifiée
           </p>
         </div>
       </div>
 
-      {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+      {/* Right panel — light form area */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-[#f1f5f9]">
         <div className="w-full max-w-sm">
-          <div className="lg:hidden text-center mb-8">
-            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-3">
-              <Building2 className="h-6 w-6 text-primary-foreground" />
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8">
+            {/* Mobile-only logo */}
+            <div className="lg:hidden text-center mb-8">
+              <div className="h-12 w-12 rounded-xl bg-[#2563eb] flex items-center justify-center mx-auto mb-3 shadow-lg shadow-blue-500/20">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-slate-900">ImmoChecker</h1>
+              <p className="text-slate-400 text-sm mt-1">Gestion d'états des lieux simplifiée</p>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">ImmoChecker</h1>
+            <Outlet />
           </div>
-          <Outlet />
         </div>
       </div>
     </div>

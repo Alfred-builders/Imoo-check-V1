@@ -29,8 +29,15 @@ const typeLabels: Record<string, string> = {
 export function SettingsPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1.5 text-[12px] text-[#94a3b8]">
+        <span>Administration</span>
+        <span>/</span>
+        <span className="text-[#1e293b] font-medium">Parametres</span>
+      </div>
+
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Parametres</h1>
+        <h1 className="text-[28px] font-bold tracking-[-0.5px] text-gray-900">Parametres</h1>
         <p className="text-xs text-gray-400 mt-0.5">Gerez votre workspace, vos utilisateurs et vos invitations</p>
       </div>
 
@@ -96,13 +103,13 @@ function WorkspaceTab() {
       {/* Header actions */}
       <div className="flex justify-end">
         {!editing ? (
-          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={startEdit}>
+          <Button variant="outline" size="sm" className="h-8 text-xs border-[#e2e8f0]" onClick={startEdit}>
             <Pencil className="h-3 w-3 mr-1.5" /> Modifier
           </Button>
         ) : (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setEditing(false)}>Annuler</Button>
-            <Button size="sm" className="h-8 text-xs bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleSave} disabled={updateMutation.isPending}>
+            <Button variant="outline" size="sm" className="h-8 text-xs border-[#e2e8f0]" onClick={() => setEditing(false)}>Annuler</Button>
+            <Button size="sm" className="h-8 text-xs bg-[#2563eb] text-white hover:bg-[#1d4ed8] rounded-lg font-bold shadow-lg shadow-blue-500/15" onClick={handleSave} disabled={updateMutation.isPending}>
               <Save className="h-3 w-3 mr-1.5" /> Enregistrer
             </Button>
           </div>
@@ -111,25 +118,25 @@ function WorkspaceTab() {
 
       <div className="grid grid-cols-2 gap-5">
         {/* Informations generales */}
-        <Card className="rounded-2xl shadow-card border-0">
+        <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-gray-400" /> Informations generales
+            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-[#94a3b8]" /> Informations generales
             </CardTitle>
           </CardHeader>
           <CardContent>
             {editing ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-500">Nom du workspace *</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Nom du workspace *</Label>
                   <Input value={nom} onChange={(e) => setNom(e.target.value)} className="h-9" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-500">Type</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Type</Label>
                   <Input value={typeLabels[ws.type_workspace] || ws.type_workspace} disabled className="h-9 bg-gray-50 text-gray-400" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-500">SIRET</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">SIRET</Label>
                   <Input value={siret} onChange={(e) => setSiret(e.target.value)} placeholder="12345678901234" className="h-9" />
                 </div>
               </div>
@@ -149,21 +156,21 @@ function WorkspaceTab() {
         </Card>
 
         {/* Contact */}
-        <Card className="rounded-2xl shadow-card border-0">
+        <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <AtSign className="h-4 w-4 text-gray-400" /> Contact
+            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
+              <AtSign className="h-4 w-4 text-[#94a3b8]" /> Contact
             </CardTitle>
           </CardHeader>
           <CardContent>
             {editing ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-500">Email de contact</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Email de contact</Label>
                   <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contact@exemple.com" className="h-9" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-500">Telephone</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Telephone</Label>
                   <Input value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="01 23 45 67 89" className="h-9" />
                 </div>
               </div>
@@ -177,26 +184,26 @@ function WorkspaceTab() {
         </Card>
 
         {/* Adresse */}
-        <Card className="rounded-2xl shadow-card border-0">
+        <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-gray-400" /> Adresse
+            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-[#94a3b8]" /> Adresse
             </CardTitle>
           </CardHeader>
           <CardContent>
             {editing ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-500">Adresse</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Adresse</Label>
                   <Input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="12 Rue de la Paix" className="h-9" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-gray-500">Code postal</Label>
+                    <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Code postal</Label>
                     <Input value={codePostal} onChange={(e) => setCodePostal(e.target.value)} placeholder="75001" className="h-9" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-gray-500">Ville</Label>
+                    <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Ville</Label>
                     <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Paris" className="h-9" />
                   </div>
                 </div>
@@ -211,24 +218,24 @@ function WorkspaceTab() {
         </Card>
 
         {/* Branding */}
-        <Card className="rounded-2xl shadow-card border-0">
+        <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <Palette className="h-4 w-4 text-gray-400" /> Branding
+            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
+              <Palette className="h-4 w-4 text-[#94a3b8]" /> Branding
             </CardTitle>
           </CardHeader>
           <CardContent>
             {editing ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-500">Couleur primaire</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Couleur primaire</Label>
                   <div className="flex items-center gap-2">
-                    <input type="color" value={couleurPrimaire || '#d97706'} onChange={(e) => setCouleurPrimaire(e.target.value)} className="h-9 w-12 rounded border border-gray-200 cursor-pointer" />
+                    <input type="color" value={couleurPrimaire || '#d97706'} onChange={(e) => setCouleurPrimaire(e.target.value)} className="h-9 w-12 rounded border border-[#e2e8f0] cursor-pointer" />
                     <Input value={couleurPrimaire} onChange={(e) => setCouleurPrimaire(e.target.value)} placeholder="#d97706" className="h-9 flex-1" />
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-gray-500">Logo URL</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Logo URL</Label>
                   <Input value={ws.logo_url || ''} disabled placeholder="Upload a venir..." className="h-9 bg-gray-50 text-gray-400" />
                   <p className="text-[10px] text-gray-300">L'upload de logo sera disponible prochainement</p>
                 </div>
@@ -291,11 +298,11 @@ function UsersTab() {
   if (isLoading) return <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
 
   return (
-    <Card className="rounded-2xl shadow-card border-0 overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+    <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0]">
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-gray-400" />
-          <h3 className="text-sm font-semibold text-gray-900">Membres</h3>
+          <Users className="h-4 w-4 text-[#94a3b8]" />
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8]">Membres</h3>
           <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{users?.length ?? 0}</Badge>
         </div>
       </div>
@@ -384,26 +391,26 @@ function InvitationsTab() {
 
   return (
     <div className="space-y-5">
-      <Card className="rounded-2xl shadow-card border-0">
+      <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <UserPlus className="h-4 w-4" /> Inviter un utilisateur
+          <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
+            <UserPlus className="h-4 w-4 text-[#94a3b8]" /> Inviter un utilisateur
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex items-end gap-3">
             <div className="flex-1 space-y-1.5">
-              <Label className="text-xs text-gray-500">Email</Label>
+              <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Email</Label>
               <Input type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-9" required />
             </div>
             <div className="w-44 space-y-1.5">
-              <Label className="text-xs text-gray-500">Role</Label>
+              <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Role</Label>
               <Select value={role} onValueChange={(v) => setRole(v as Role)}>
                 <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r} className="text-xs">{roleConfig[r].label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={sendInvitation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4">
+            <Button type="submit" disabled={sendInvitation.isPending} className="bg-[#2563eb] text-white hover:bg-[#1d4ed8] rounded-lg font-bold shadow-lg shadow-blue-500/15 h-9 px-4">
               {sendInvitation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
               Envoyer
             </Button>
@@ -412,11 +419,11 @@ function InvitationsTab() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-2xl shadow-card border-0 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+      <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#e2e8f0]">
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-gray-400" />
-            <h3 className="text-sm font-semibold text-gray-900">Invitations</h3>
+            <Mail className="h-4 w-4 text-[#94a3b8]" />
+            <h3 className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8]">Invitations</h3>
           </div>
           <div className="flex items-center bg-gray-100 rounded-md p-0.5 text-[10px]">
             {([
