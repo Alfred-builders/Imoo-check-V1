@@ -218,7 +218,7 @@ export function PatrimoinePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Parc immobilier</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Parc immobilier</h1>
           <p className="text-xs text-gray-400 mt-0.5">
             {isLoading ? '...' : `${filteredBatiments.length} batiment${filteredBatiments.length > 1 ? 's' : ''}`}
           </p>
@@ -271,7 +271,7 @@ export function PatrimoinePage() {
 
       {/* Table view */}
       {view === 'table' && (
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-card overflow-hidden">
           {/* Header */}
           <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wider select-none">
             <div className="w-6 shrink-0" /> {/* expand */}

@@ -1,19 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, MapPin, Archive, ArchiveRestore, Plus, Building2, Layers, Calendar, Hash, ExternalLink, Pencil, AlertTriangle, ExternalLinkIcon, Home, Armchair, Ruler, ArrowUpCircle } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { Separator } from 'src/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from 'src/components/ui/tabs'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'src/components/ui/table'
 import { Input } from 'src/components/ui/input'
-import { Label } from 'src/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
+import { Textarea } from 'src/components/ui/textarea'
 import { useBatimentDetail, useBatimentLots, useUpdateBatiment, useUpdateAddress, useAddAddress, useDeleteAddress } from '../api'
 import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
+import { InlineField } from '../../../components/shared/inline-field'
+import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
 import { CreateLotModal } from './create-lot-modal'
-import { EditBuildingForm } from './edit-building-form'
 import { formatDate } from '../../../lib/formatters'
 import { toast } from 'sonner'
 import { Trash2, Save, X as XIcon } from 'lucide-react'
@@ -35,6 +35,61 @@ export function BuildingDetailPage() {
   const { data: batiment, isLoading } = useBatimentDetail(id)
   const { data: lots } = useBatimentLots(id)
   const updateMutation = useUpdateBatiment()
+
+  const [formData, setFormData] = useState({
+    designation: '',
+    type: '',
+    nb_etages: '',
+    annee_construction: '',
+    commentaire: '',
+  })
+  const [saving, setSaving] = useState(false)
+
+  // Sync form data when batiment loads or editing starts
+  useEffect(() => {
+    if (batiment) {
+      setFormData({
+        designation: batiment.designation || '',
+        type: batiment.type || '',
+        nb_etages: batiment.nb_etages?.toString() || '',
+        annee_construction: batiment.annee_construction?.toString() || '',
+        commentaire: batiment.commentaire || '',
+      })
+    }
+  }, [batiment, editing])
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      await updateMutation.mutateAsync({
+        id: batiment!.id,
+        designation: formData.designation,
+        type: formData.type,
+        nb_etages: formData.nb_etages ? parseInt(formData.nb_etages) : null,
+        annee_construction: formData.annee_construction ? parseInt(formData.annee_construction) : null,
+        commentaire: formData.commentaire || null,
+      })
+      toast.success('Bâtiment mis à jour')
+      setEditing(false)
+    } catch {
+      toast.error('Erreur')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  function handleCancel() {
+    if (batiment) {
+      setFormData({
+        designation: batiment.designation || '',
+        type: batiment.type || '',
+        nb_etages: batiment.nb_etages?.toString() || '',
+        annee_construction: batiment.annee_construction?.toString() || '',
+        commentaire: batiment.commentaire || '',
+      })
+    }
+    setEditing(false)
+  }
 
   if (isLoading) {
     return (
@@ -70,8 +125,28 @@ export function BuildingDetailPage() {
         </Button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-bold text-gray-900">{batiment.designation}</h1>
-            <Badge variant="outline" className="text-[10px] font-medium">{typeLabels[batiment.type]}</Badge>
+            {editing ? (
+              <Input
+                value={formData.designation}
+                onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))}
+                className="text-xl font-bold h-auto py-1 px-2 border-primary/30 bg-primary/[0.03]"
+              />
+            ) : (
+              <h1 className="text-2xl font-bold text-foreground">{batiment.designation}</h1>
+            )}
+            {editing ? (
+              <Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}>
+                <SelectTrigger className="h-7 w-32 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="immeuble">Immeuble</SelectItem>
+                  <SelectItem value="maison">Maison</SelectItem>
+                  <SelectItem value="local_commercial">Local commercial</SelectItem>
+                  <SelectItem value="mixte">Mixte</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Badge variant="outline" className="capitalize">{typeLabels[batiment.type]}</Badge>
+            )}
             {batiment.est_archive && <Badge variant="destructive" className="text-[10px]">Archivé</Badge>}
           </div>
           {principale && (
@@ -109,7 +184,7 @@ export function BuildingDetailPage() {
           { icon: Hash, label: 'Étages', value: batiment.nb_etages ?? '—', bg: 'bg-emerald-500', text: 'text-white' },
           { icon: Calendar, label: 'Construction', value: batiment.annee_construction ?? '—', bg: 'bg-violet-500', text: 'text-white' },
         ].map(({ icon: Icon, label, value, bg, text }) => (
-          <div key={label} className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl shadow-sm">
+          <div key={label} className="flex items-center gap-3 p-3.5 bg-white rounded-2xl shadow-card">
             <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${bg}`}>
               <Icon className={`h-4 w-4 ${text}`} />
             </div>
@@ -129,25 +204,9 @@ export function BuildingDetailPage() {
         </TabsList>
 
         <TabsContent value="overview" className="mt-4">
-          {/* Edit form inside tab content */}
-          {editing && (
-            <Card className="shadow-sm border-primary/30 bg-primary/5 mb-4">
-              <CardContent className="pt-5">
-                <EditBuildingForm
-                  batiment={batiment}
-                  onSave={async (data) => {
-                    await updateMutation.mutateAsync({ id: batiment.id, ...data })
-                    toast.success('Bâtiment mis à jour')
-                    setEditing(false)
-                  }}
-                  onCancel={() => setEditing(false)}
-                />
-              </CardContent>
-            </Card>
-          )}
             <div className="grid grid-cols-3 gap-4">
               {/* Adresses */}
-              <div className="col-span-2 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+              <div className="col-span-2 bg-white rounded-2xl shadow-card p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Adresses</h2>
                   {!batiment.est_archive && <AddAddressButton batimentId={batiment.id} />}
@@ -160,34 +219,30 @@ export function BuildingDetailPage() {
               </div>
 
               {/* Infos */}
-              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+              <div className="bg-white rounded-2xl shadow-card p-5">
                 <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Informations</h2>
-                <dl className="space-y-3">
-                  {([
-                    ['Étages', batiment.nb_etages],
-                    ['Année', batiment.annee_construction],
-                    ['Créé le', formatDate(batiment.created_at)],
-                  ] as [string, string | number | null | undefined][]).map(([label, val]) => (
-                    <div key={label} className="flex items-center justify-between text-sm">
-                      <dt className="text-gray-400">{label}</dt>
-                      <dd className="font-medium text-gray-800">{val ?? '—'}</dd>
-                    </div>
-                  ))}
-                </dl>
-                {batiment.commentaire && (
-                  <>
-                    <Separator className="my-3" />
-                    <p className="text-xs text-gray-400 mb-1">Commentaire</p>
-                    <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-2.5 border border-gray-100">{batiment.commentaire}</p>
-                  </>
-                )}
+                <div className="space-y-1">
+                  <InlineField label="Étages" editing={editing} value={batiment.nb_etages ?? '—'}>
+                    <Input type="number" value={formData.nb_etages} onChange={(e) => setFormData(prev => ({ ...prev, nb_etages: e.target.value }))} className="h-7 text-sm" />
+                  </InlineField>
+                  <InlineField label="Année" editing={editing} value={batiment.annee_construction ?? '—'}>
+                    <Input type="number" value={formData.annee_construction} onChange={(e) => setFormData(prev => ({ ...prev, annee_construction: e.target.value }))} className="h-7 text-sm" />
+                  </InlineField>
+                  <InlineField label="Créé le" editing={false} value={formatDate(batiment.created_at)}>
+                    <span />
+                  </InlineField>
+                  <Separator className="my-2" />
+                  <InlineField label="Commentaire" editing={editing} value={batiment.commentaire || '—'} horizontal={false}>
+                    <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} className="text-sm min-h-[60px]" />
+                  </InlineField>
+                </div>
               </div>
             </div>
           </TabsContent>
 
           {/* Lots tab */}
           <TabsContent value="lots" className="mt-4">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-card overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <Layers className="h-4 w-4 text-gray-400" />
@@ -242,6 +297,8 @@ export function BuildingDetailPage() {
         preselectedBatimentId={id}
         onCreated={(lotId) => navigate(`/app/patrimoine/lots/${lotId}`)}
       />
+
+      <FloatingSaveBar visible={editing} onSave={handleSave} onCancel={handleCancel} saving={saving} />
     </div>
   )
 }

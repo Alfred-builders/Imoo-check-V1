@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, ChevronDown, Pencil, AlertTriangle, Thermometer, Car, Warehouse, Plus, X, Search, Flame, Droplets, Users } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
@@ -7,8 +7,12 @@ import { Card, CardContent } from 'src/components/ui/card'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { Separator } from 'src/components/ui/separator'
 import { Input } from 'src/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
+import { Textarea } from 'src/components/ui/textarea'
+import { Switch } from 'src/components/ui/switch'
+import { InlineField } from '../../../components/shared/inline-field'
+import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
 import { useLotDetail, useUpdateLot, useSearchTiers, useLinkProprietaire, useUnlinkProprietaire } from '../api'
-import { EditLotForm } from './edit-lot-form'
 import { CreateTiersModal } from '../../tiers/components/create-tiers-modal'
 import { formatDate } from '../../../lib/formatters'
 import { toast } from 'sonner'
@@ -18,14 +22,18 @@ const typeBienLabels: Record<string, string> = {
   local_commercial: 'Local commercial', parking: 'Parking', cave: 'Cave', autre: 'Autre',
 }
 
-function InfoItem({ label, value, className }: { label: string; value: React.ReactNode; className?: string }) {
-  return (
-    <div className={`flex items-center justify-between py-2 ${className ?? ''}`}>
-      <span className="text-xs text-gray-400">{label}</span>
-      <span className="text-sm font-medium text-gray-800">{value || '—'}</span>
-    </div>
-  )
-}
+const typeBienOptions = [
+  { value: 'appartement', label: 'Appartement' },
+  { value: 'maison', label: 'Maison' },
+  { value: 'studio', label: 'Studio' },
+  { value: 'local_commercial', label: 'Local commercial' },
+  { value: 'parking', label: 'Parking' },
+  { value: 'cave', label: 'Cave' },
+  { value: 'autre', label: 'Autre' },
+]
+
+const dpeOptions = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
+const gesOptions = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
 
 export function LotDetailPage() {
   const { id } = useParams()
@@ -33,6 +41,33 @@ export function LotDetailPage() {
   const [editing, setEditing] = useState(false)
   const { data: lot, isLoading } = useLotDetail(id)
   const updateMutation = useUpdateLot()
+
+  const [formData, setFormData] = useState({
+    designation: '', type_bien: '', etage: '', surface: '', nb_pieces: '',
+    meuble: false, emplacement_palier: '', num_cave: '', num_parking: '',
+    dpe_classe: '', ges_classe: '', commentaire: '', reference_interne: '',
+  })
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (lot) {
+      setFormData({
+        designation: lot.designation || '',
+        type_bien: lot.type_bien || '',
+        etage: lot.etage || '',
+        surface: lot.surface?.toString() || '',
+        nb_pieces: lot.nb_pieces || '',
+        meuble: lot.meuble || false,
+        emplacement_palier: lot.emplacement_palier || '',
+        num_cave: lot.num_cave || '',
+        num_parking: lot.num_parking || '',
+        dpe_classe: lot.dpe_classe || '',
+        ges_classe: lot.ges_classe || '',
+        commentaire: lot.commentaire || '',
+        reference_interne: lot.reference_interne || '',
+      })
+    }
+  }, [lot, editing])
 
   if (isLoading) {
     return (
@@ -59,6 +94,38 @@ export function LotDetailPage() {
     }
   }
 
+  function handleCancel() {
+    setEditing(false)
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      await updateMutation.mutateAsync({
+        id: lot!.id,
+        designation: formData.designation,
+        type_bien: formData.type_bien,
+        etage: formData.etage || null,
+        surface: formData.surface ? parseFloat(formData.surface) : null,
+        nb_pieces: formData.nb_pieces || null,
+        meuble: formData.meuble,
+        emplacement_palier: formData.emplacement_palier || null,
+        num_cave: formData.num_cave || null,
+        num_parking: formData.num_parking || null,
+        dpe_classe: formData.dpe_classe || null,
+        ges_classe: formData.ges_classe || null,
+        commentaire: formData.commentaire || null,
+        reference_interne: formData.reference_interne || null,
+      })
+      toast.success('Lot mis à jour')
+      setEditing(false)
+    } catch {
+      toast.error('Erreur')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="p-6 space-y-5 max-w-6xl mx-auto">
       {/* Header */}
@@ -68,7 +135,7 @@ export function LotDetailPage() {
         </Button>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-bold text-gray-900">{lot.designation}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{lot.designation}</h1>
             <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] font-medium">
               {typeBienLabels[lot.type_bien] || lot.type_bien}
             </Badge>
@@ -107,118 +174,211 @@ export function LotDetailPage() {
       )}
 
       {/* Quick stats band */}
-      <div className="flex items-center gap-0 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden divide-x divide-gray-100">
-        {[
-          { icon: Home, label: 'Étage', value: lot.etage || 'RDC', bg: 'bg-blue-500' },
-          { icon: Building2, label: 'Type', value: typeBienLabels[lot.type_bien], bg: 'bg-primary' },
-          { icon: Ruler, label: 'Surface', value: lot.surface ? `${lot.surface} m²` : '—', bg: 'bg-emerald-500' },
-          { icon: BedDouble, label: 'Pièces', value: lot.nb_pieces || '—', bg: 'bg-violet-500' },
-          { icon: Zap, label: 'DPE', value: lot.dpe_classe || '—', bg: 'bg-orange-500' },
-          { icon: Thermometer, label: 'GES', value: lot.ges_classe || '—', bg: 'bg-rose-500' },
-        ].map(({ icon: Icon, label, value, bg }) => (
-          <div key={label} className="flex-1 flex items-center gap-2.5 px-4 py-3">
-            <div className={`h-7 w-7 rounded-md flex items-center justify-center shrink-0 ${bg}`}>
-              <Icon className="h-3.5 w-3.5 text-white" />
-            </div>
-            <div>
-              <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider leading-none">{label}</p>
-              <p className="text-sm font-bold text-gray-900 leading-tight">{value}</p>
-            </div>
+      <div className="flex items-center gap-0 bg-white rounded-2xl shadow-card overflow-hidden divide-x divide-gray-100">
+        {/* Étage */}
+        <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
+          <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-blue-500">
+            <Home className="h-3.5 w-3.5 text-white" />
           </div>
-        ))}
-      </div>
-
-      {/* Edit form */}
-      {editing && (
-        <Card className="shadow-sm border-primary/30 bg-primary/5">
-          <CardContent className="pt-5">
-            <EditLotForm
-              lot={lot}
-              onSave={async (data) => {
-                await updateMutation.mutateAsync({ id: lot.id, ...data })
-                toast.success('Lot mis à jour')
-                setEditing(false)
-              }}
-              onCancel={() => setEditing(false)}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Content — single-page layout */}
-      {!editing && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            {/* Left sidebar — Énergie + Annexes */}
-            <div className="space-y-4">
-              <EnergieSection lot={lot} editing={false} onSave={async (data) => {
-                await updateMutation.mutateAsync({ id: lot.id, ...data })
-                toast.success('Lot mis à jour')
-              }} />
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <button
-                  onClick={() => {}}
-                  className="w-full flex items-center justify-between px-5 py-3.5"
-                >
-                  <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Annexes</h2>
-                </button>
-                <div className="px-5 pb-5 space-y-2">
-                  <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
-                    <Warehouse className="h-4 w-4 text-gray-500" />
-                    <span className="text-xs text-gray-500 flex-1">Cave</span>
-                    <span className="text-sm font-medium text-gray-900">{lot.num_cave || '—'}</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
-                    <Car className="h-4 w-4 text-gray-500" />
-                    <span className="text-xs text-gray-500 flex-1">Parking</span>
-                    <span className="text-sm font-medium text-gray-900">{lot.num_parking || '—'}</span>
-                  </div>
-                </div>
-              </div>
-              <p className="text-[10px] text-gray-300 px-1">
-                Créé {formatDate(lot.created_at)} — Modifié {formatDate(lot.updated_at)}
-              </p>
-            </div>
-
-            {/* Right main — Détails complémentaires */}
-            <div className="col-span-2 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Détails complémentaires</h2>
-              <div className="grid grid-cols-2 gap-x-8 divide-y divide-gray-50">
-                <InfoItem label="Désignation" value={lot.designation} />
-                <InfoItem label="Référence" value={lot.reference_interne} />
-                <InfoItem label="Meublé" value={lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Oui</Badge> : 'Non'} />
-                <InfoItem label="Emplacement palier" value={lot.emplacement_palier} />
-                <InfoItem label="N° cave" value={lot.num_cave} />
-                <InfoItem label="N° parking" value={lot.num_parking} />
-              </div>
-              {lot.commentaire && (
-                <>
-                  <Separator className="my-3" />
-                  <p className="text-xs text-gray-400 mb-1.5">Commentaire</p>
-                  <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-100 leading-relaxed">{lot.commentaire}</p>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Tiers liés */}
-          <TiersLiesSection lotId={lot.id} proprietaires={proprietaires} mandataire={mandataire} isArchived={lot.est_archive} />
-
-          {/* Missions placeholder */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm">
-            <div className="px-5 py-3.5">
-              <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Missions</h2>
-            </div>
-            <div className="py-10 text-center">
-              <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                <Building2 className="h-5 w-5 text-gray-400" />
-              </div>
-              <p className="text-sm font-medium text-gray-500">Aucune mission pour ce lot</p>
-              <p className="text-xs text-gray-400 mt-1">Sprint 3</p>
-            </div>
+          <div>
+            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider leading-none">Étage</p>
+            {editing ? (
+              <Input value={formData.etage} onChange={(e) => setFormData(prev => ({ ...prev, etage: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
+            ) : (
+              <p className="text-sm font-bold text-gray-900 leading-tight">{lot.etage || 'RDC'}</p>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Type */}
+        <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
+          <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-primary">
+            <Building2 className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div>
+            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider leading-none">Type</p>
+            {editing ? (
+              <Select value={formData.type_bien} onValueChange={(val) => setFormData(prev => ({ ...prev, type_bien: val }))}>
+                <SelectTrigger className="h-6 w-28 text-xs mt-0.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {typeBienOptions.map(o => (
+                    <SelectItem key={o.value} value={o.value} className="text-xs">{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="text-sm font-bold text-gray-900 leading-tight">{typeBienLabels[lot.type_bien]}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Surface */}
+        <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
+          <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-emerald-500">
+            <Ruler className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div>
+            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider leading-none">Surface</p>
+            {editing ? (
+              <Input type="number" value={formData.surface} onChange={(e) => setFormData(prev => ({ ...prev, surface: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
+            ) : (
+              <p className="text-sm font-bold text-gray-900 leading-tight">{lot.surface ? `${lot.surface} m²` : '—'}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Pièces */}
+        <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
+          <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-violet-500">
+            <BedDouble className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div>
+            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider leading-none">Pièces</p>
+            {editing ? (
+              <Input value={formData.nb_pieces} onChange={(e) => setFormData(prev => ({ ...prev, nb_pieces: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
+            ) : (
+              <p className="text-sm font-bold text-gray-900 leading-tight">{lot.nb_pieces || '—'}</p>
+            )}
+          </div>
+        </div>
+
+        {/* DPE */}
+        <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
+          <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-orange-500">
+            <Zap className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div>
+            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider leading-none">DPE</p>
+            {editing ? (
+              <Select value={formData.dpe_classe} onValueChange={(val) => setFormData(prev => ({ ...prev, dpe_classe: val }))}>
+                <SelectTrigger className="h-6 w-16 text-xs mt-0.5">
+                  <SelectValue placeholder="—" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dpeOptions.map(o => (
+                    <SelectItem key={o || '__empty'} value={o} className="text-xs">{o || '—'}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="text-sm font-bold text-gray-900 leading-tight">{lot.dpe_classe || '—'}</p>
+            )}
+          </div>
+        </div>
+
+        {/* GES */}
+        <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
+          <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-rose-500">
+            <Thermometer className="h-3.5 w-3.5 text-white" />
+          </div>
+          <div>
+            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider leading-none">GES</p>
+            {editing ? (
+              <Select value={formData.ges_classe} onValueChange={(val) => setFormData(prev => ({ ...prev, ges_classe: val }))}>
+                <SelectTrigger className="h-6 w-16 text-xs mt-0.5">
+                  <SelectValue placeholder="—" />
+                </SelectTrigger>
+                <SelectContent>
+                  {gesOptions.map(o => (
+                    <SelectItem key={o || '__empty'} value={o} className="text-xs">{o || '—'}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <p className="text-sm font-bold text-gray-900 leading-tight">{lot.ges_classe || '—'}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Content — always visible */}
+      <div className="space-y-4">
+        <div className="grid grid-cols-3 gap-4">
+          {/* Left sidebar — Énergie + Annexes */}
+          <div className="space-y-4">
+            <EnergieSection lot={lot} editing={false} onSave={async (data) => {
+              await updateMutation.mutateAsync({ id: lot.id, ...data })
+              toast.success('Lot mis à jour')
+            }} />
+            <div className="bg-white rounded-2xl shadow-card overflow-hidden">
+              <button
+                onClick={() => {}}
+                className="w-full flex items-center justify-between px-5 py-3.5"
+              >
+                <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Annexes</h2>
+              </button>
+              <div className="px-5 pb-5 space-y-2">
+                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                  <Warehouse className="h-4 w-4 text-gray-500" />
+                  <span className="text-xs text-gray-500 flex-1">Cave</span>
+                  <span className="text-sm font-medium text-gray-900">{lot.num_cave || '—'}</span>
+                </div>
+                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 border border-gray-100">
+                  <Car className="h-4 w-4 text-gray-500" />
+                  <span className="text-xs text-gray-500 flex-1">Parking</span>
+                  <span className="text-sm font-medium text-gray-900">{lot.num_parking || '—'}</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-[10px] text-gray-300 px-1">
+              Créé {formatDate(lot.created_at)} — Modifié {formatDate(lot.updated_at)}
+            </p>
+          </div>
+
+          {/* Right main — Détails complémentaires */}
+          <div className="col-span-2 bg-white rounded-2xl p-5 shadow-card">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Détails complémentaires</h2>
+            <div className="grid grid-cols-2 gap-x-8">
+              <InlineField label="Désignation" editing={editing} value={lot.designation}>
+                <Input value={formData.designation} onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))} className="h-7 text-sm" />
+              </InlineField>
+              <InlineField label="Référence" editing={editing} value={lot.reference_interne}>
+                <Input value={formData.reference_interne} onChange={(e) => setFormData(prev => ({ ...prev, reference_interne: e.target.value }))} className="h-7 text-sm" />
+              </InlineField>
+              <InlineField label="Meublé" editing={editing} value={lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Oui</Badge> : 'Non'}>
+                <Switch checked={formData.meuble} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, meuble: checked }))} />
+              </InlineField>
+              <InlineField label="Emplacement palier" editing={editing} value={lot.emplacement_palier}>
+                <Input value={formData.emplacement_palier} onChange={(e) => setFormData(prev => ({ ...prev, emplacement_palier: e.target.value }))} className="h-7 text-sm" />
+              </InlineField>
+              <InlineField label="N° cave" editing={editing} value={lot.num_cave}>
+                <Input value={formData.num_cave} onChange={(e) => setFormData(prev => ({ ...prev, num_cave: e.target.value }))} className="h-7 text-sm" />
+              </InlineField>
+              <InlineField label="N° parking" editing={editing} value={lot.num_parking}>
+                <Input value={formData.num_parking} onChange={(e) => setFormData(prev => ({ ...prev, num_parking: e.target.value }))} className="h-7 text-sm" />
+              </InlineField>
+            </div>
+            <Separator className="my-3" />
+            <InlineField label="Commentaire" editing={editing} value={lot.commentaire ? (
+              <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 border border-gray-100 leading-relaxed">{lot.commentaire}</p>
+            ) : null} horizontal={false}>
+              <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} rows={3} className="text-sm" />
+            </InlineField>
+          </div>
+        </div>
+
+        {/* Tiers liés */}
+        <TiersLiesSection lotId={lot.id} proprietaires={proprietaires} mandataire={mandataire} isArchived={lot.est_archive} />
+
+        {/* Missions placeholder */}
+        <div className="bg-white rounded-2xl shadow-card">
+          <div className="px-5 py-3.5">
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Missions</h2>
+          </div>
+          <div className="py-10 text-center">
+            <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
+              <Building2 className="h-5 w-5 text-gray-400" />
+            </div>
+            <p className="text-sm font-medium text-gray-500">Aucune mission pour ce lot</p>
+            <p className="text-xs text-gray-400 mt-1">Sprint 3</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Floating save bar */}
+      <FloatingSaveBar visible={editing} onSave={handleSave} onCancel={handleCancel} saving={saving} />
     </div>
   )
 }
@@ -280,7 +440,7 @@ function EnergieSection({ lot, editing, onSave }: { lot: any; editing: boolean; 
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-card overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50/50 transition-colors"
@@ -390,7 +550,7 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
   const totalTiers = proprietaires.length + (mandataire ? 1 : 0)
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+    <div className="bg-white rounded-2xl p-5 shadow-card">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-gray-400" />

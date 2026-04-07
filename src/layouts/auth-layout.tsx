@@ -5,9 +5,11 @@ export function AuthLayout() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 via-slate-800 to-primary/20 items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute top-20 -left-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-56 h-56 bg-primary/8 rounded-full blur-2xl" />
         <div className="max-w-md text-center">
-          <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-6">
+          <div className="h-16 w-16 rounded-2xl gradient-accent flex items-center justify-center shadow-lg mx-auto mb-6">
             <Building2 className="h-8 w-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold text-white">ImmoChecker</h1>

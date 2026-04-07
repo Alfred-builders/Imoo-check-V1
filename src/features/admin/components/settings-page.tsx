@@ -30,7 +30,7 @@ export function SettingsPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-gray-900">Parametres</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Parametres</h1>
         <p className="text-xs text-gray-400 mt-0.5">Gerez votre workspace, vos utilisateurs et vos invitations</p>
       </div>
 
@@ -111,7 +111,7 @@ function WorkspaceTab() {
 
       <div className="grid grid-cols-2 gap-5">
         {/* Informations generales */}
-        <Card className="shadow-sm border-gray-200">
+        <Card className="rounded-2xl shadow-card border-0">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <Building2 className="h-4 w-4 text-gray-400" /> Informations generales
@@ -149,7 +149,7 @@ function WorkspaceTab() {
         </Card>
 
         {/* Contact */}
-        <Card className="shadow-sm border-gray-200">
+        <Card className="rounded-2xl shadow-card border-0">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <AtSign className="h-4 w-4 text-gray-400" /> Contact
@@ -177,7 +177,7 @@ function WorkspaceTab() {
         </Card>
 
         {/* Adresse */}
-        <Card className="shadow-sm border-gray-200">
+        <Card className="rounded-2xl shadow-card border-0">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <MapPin className="h-4 w-4 text-gray-400" /> Adresse
@@ -211,7 +211,7 @@ function WorkspaceTab() {
         </Card>
 
         {/* Branding */}
-        <Card className="shadow-sm border-gray-200">
+        <Card className="rounded-2xl shadow-card border-0">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
               <Palette className="h-4 w-4 text-gray-400" /> Branding
@@ -291,7 +291,7 @@ function UsersTab() {
   if (isLoading) return <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
 
   return (
-    <Card className="shadow-sm border-gray-200 overflow-hidden">
+    <Card className="rounded-2xl shadow-card border-0 overflow-hidden">
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-gray-400" />
@@ -384,7 +384,7 @@ function InvitationsTab() {
 
   return (
     <div className="space-y-5">
-      <Card className="shadow-sm border-gray-200">
+      <Card className="rounded-2xl shadow-card border-0">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-semibold text-gray-700 flex items-center gap-2">
             <UserPlus className="h-4 w-4" /> Inviter un utilisateur
@@ -412,7 +412,7 @@ function InvitationsTab() {
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm border-gray-200 overflow-hidden">
+      <Card className="rounded-2xl shadow-card border-0 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <Mail className="h-4 w-4 text-gray-400" />

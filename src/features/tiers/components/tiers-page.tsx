@@ -36,7 +36,7 @@ export function TiersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Tiers</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Tiers</h1>
           <p className="text-xs text-gray-400 mt-0.5">Proprietaires, locataires, mandataires</p>
         </div>
         <Button size="sm" onClick={() => setShowCreate(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 text-xs">
@@ -66,7 +66,7 @@ export function TiersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-card overflow-hidden">
         <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
           <div className="w-8" />
           <div className="flex-1 min-w-[150px]">Nom / Raison sociale</div>

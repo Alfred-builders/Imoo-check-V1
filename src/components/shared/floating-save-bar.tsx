@@ -1,0 +1,35 @@
+import { motion, AnimatePresence } from 'framer-motion'
+import { Button } from '../ui/button'
+import { Loader2 } from 'lucide-react'
+
+interface FloatingSaveBarProps {
+  visible: boolean
+  onSave: () => void
+  onCancel: () => void
+  saving: boolean
+}
+
+export function FloatingSaveBar({ visible, onSave, onCancel, saving }: FloatingSaveBarProps) {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 80, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white rounded-2xl shadow-elevated px-6 py-3 flex items-center gap-4 border border-border/50"
+        >
+          <span className="text-sm text-muted-foreground">Modifications non enregistrées</span>
+          <Button variant="ghost" size="sm" onClick={onCancel} disabled={saving}>
+            Annuler
+          </Button>
+          <Button size="sm" onClick={onSave} disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
+            {saving && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+            Enregistrer
+          </Button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
