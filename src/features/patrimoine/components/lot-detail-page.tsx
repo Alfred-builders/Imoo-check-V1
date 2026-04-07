@@ -9,6 +9,7 @@ import { Separator } from 'src/components/ui/separator'
 import { Input } from 'src/components/ui/input'
 import { useLotDetail, useUpdateLot, useSearchTiers, useLinkProprietaire, useUnlinkProprietaire } from '../api'
 import { EditLotForm } from './edit-lot-form'
+import { CreateTiersModal } from '../../tiers/components/create-tiers-modal'
 import { formatDate } from '../../../lib/formatters'
 import { toast } from 'sonner'
 
@@ -374,6 +375,7 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
   isArchived: boolean
 }) {
   const [showAdd, setShowAdd] = useState(false)
+  const [showCreateTiers, setShowCreateTiers] = useState(false)
   const [searchQ, setSearchQ] = useState('')
   const { data: searchResults } = useSearchTiers(searchQ)
   const linkMutation = useLinkProprietaire()
@@ -397,9 +399,14 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
           </h2>
         </div>
         {!isArchived && (
-          <Button variant="ghost" size="sm" className="h-6 text-xs text-primary hover:text-primary px-2" onClick={() => setShowAdd(!showAdd)}>
-            {showAdd ? 'Fermer' : <><Plus className="h-3 w-3 mr-1" /> Ajouter propriétaire</>}
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="sm" className="h-6 text-xs px-2" onClick={() => setShowCreateTiers(true)}>
+              <Plus className="h-3 w-3 mr-1" /> Nouveau tiers
+            </Button>
+            <Button variant="ghost" size="sm" className="h-6 text-xs text-primary hover:text-primary px-2" onClick={() => setShowAdd(!showAdd)}>
+              {showAdd ? 'Fermer' : <><Plus className="h-3 w-3 mr-1" /> Ajouter propriétaire</>}
+            </Button>
+          </div>
         )}
       </div>
 
@@ -472,6 +479,14 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
           <p className="text-xs text-gray-400">Aucun tiers lié</p>
         </div>
       )}
+
+      <CreateTiersModal
+        open={showCreateTiers}
+        onOpenChange={setShowCreateTiers}
+        onCreated={() => {
+          toast.success('Tiers créé — vous pouvez maintenant le lier au lot')
+        }}
+      />
     </div>
   )
 }

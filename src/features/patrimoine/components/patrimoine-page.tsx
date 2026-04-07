@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus, Upload } from 'lucide-react'
 import { Input } from 'src/components/ui/input'
 import { Badge } from 'src/components/ui/badge'
@@ -51,6 +51,46 @@ const typeIcons: Record<string, typeof Building2> = {
 
 const typeLabels: Record<string, string> = {
   immeuble: 'Immeuble', maison: 'Maison', local_commercial: 'Local commercial', mixte: 'Mixte', autre: 'Autre',
+}
+
+const DEFAULT_COL_WIDTHS: Record<string, number> = {
+  designation: 200,
+  type: 112,
+  adresse: 192,
+  nb_lots: 56,
+  nb_etages: 56,
+  annee_construction: 64,
+  derniere_mission: 96,
+  missions_a_venir: 64,
+  created_at: 96,
+}
+
+function ResizeHandle({ colId, onResizeStart, onResize }: {
+  colId: string
+  onResizeStart: () => void
+  onResize: (id: string, delta: number) => void
+}) {
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const startX = e.clientX
+    onResizeStart()
+    const onMouseMove = (ev: MouseEvent) => {
+      onResize(colId, ev.clientX - startX)
+    }
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }
+  return (
+    <div
+      onMouseDown={handleMouseDown}
+      className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/30 active:bg-primary/40 transition-colors z-10"
+    />
+  )
 }
 
 function useDebounce(value: string, delay: number) {
@@ -111,6 +151,20 @@ export function PatrimoinePage() {
   const [showCreateLot, setShowCreateLot] = useState(false)
   const [showImportCSV, setShowImportCSV] = useState(false)
   const [maisonBatimentId, setMaisonBatimentId] = useState<string | null>(null)
+  const [colWidths, setColWidths] = useState<Record<string, number>>({ ...DEFAULT_COL_WIDTHS })
+  const startWidths = useRef<Record<string, number>>({})
+
+  const handleResizeStart = useCallback(() => {
+    startWidths.current = { ...colWidths }
+  }, [colWidths])
+
+  const handleResize = useCallback((colId: string, delta: number) => {
+    setColWidths(prev => ({
+      ...prev,
+      [colId]: Math.max(40, (startWidths.current[colId] || prev[colId]) + delta),
+    }))
+  }, [])
+
   const debouncedSearch = useDebounce(search, 300)
   const navigate = useNavigate()
   const location = useLocation()
@@ -219,17 +273,62 @@ export function PatrimoinePage() {
       {view === 'table' && (
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
           {/* Header */}
-          <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-            <div className="w-6" /> {/* expand */}
-            {isCol('designation') && <div className="flex-1 min-w-[150px]">Désignation</div>}
-            {isCol('type') && <div className="w-28">Type</div>}
-            {isCol('adresse') && <div className="w-48">Adresse</div>}
-            {isCol('nb_lots') && <div className="w-14 text-center">Lots</div>}
-            {isCol('nb_etages') && <div className="w-14 text-center">Étages</div>}
-            {isCol('annee_construction') && <div className="w-16 text-center">Année</div>}
-            {isCol('derniere_mission') && <div className="w-24">Dern. mission</div>}
-            {isCol('missions_a_venir') && <div className="w-16 text-center">À venir</div>}
-            {isCol('created_at') && <div className="w-24">Créé le</div>}
+          <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 border-b border-gray-100 text-[10px] font-semibold text-gray-400 uppercase tracking-wider select-none">
+            <div className="w-6 shrink-0" /> {/* expand */}
+            {isCol('designation') && (
+              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.designation, minWidth: 40 }}>
+                Désignation
+                <ResizeHandle colId="designation" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
+            {isCol('type') && (
+              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.type, minWidth: 40 }}>
+                Type
+                <ResizeHandle colId="type" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
+            {isCol('adresse') && (
+              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.adresse, minWidth: 40 }}>
+                Adresse
+                <ResizeHandle colId="adresse" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
+            {isCol('nb_lots') && (
+              <div className="relative overflow-visible shrink-0 text-center" style={{ width: colWidths.nb_lots, minWidth: 40 }}>
+                Lots
+                <ResizeHandle colId="nb_lots" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
+            {isCol('nb_etages') && (
+              <div className="relative overflow-visible shrink-0 text-center" style={{ width: colWidths.nb_etages, minWidth: 40 }}>
+                Étages
+                <ResizeHandle colId="nb_etages" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
+            {isCol('annee_construction') && (
+              <div className="relative overflow-visible shrink-0 text-center" style={{ width: colWidths.annee_construction, minWidth: 40 }}>
+                Année
+                <ResizeHandle colId="annee_construction" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
+            {isCol('derniere_mission') && (
+              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.derniere_mission, minWidth: 40 }}>
+                Dern. mission
+                <ResizeHandle colId="derniere_mission" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
+            {isCol('missions_a_venir') && (
+              <div className="relative overflow-visible shrink-0 text-center" style={{ width: colWidths.missions_a_venir, minWidth: 40 }}>
+                À venir
+                <ResizeHandle colId="missions_a_venir" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
+            {isCol('created_at') && (
+              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.created_at, minWidth: 40 }}>
+                Créé le
+                <ResizeHandle colId="created_at" onResizeStart={handleResizeStart} onResize={handleResize} />
+              </div>
+            )}
           </div>
 
           {isLoading && (
@@ -252,7 +351,7 @@ export function PatrimoinePage() {
           )}
 
           {!isLoading && filteredBatiments.map((bat) => (
-            <BatimentRow key={bat.id} batiment={bat} visibleCols={visibleCols} />
+            <BatimentRow key={bat.id} batiment={bat} visibleCols={visibleCols} colWidths={colWidths} />
           ))}
         </div>
       )}
@@ -262,7 +361,7 @@ export function PatrimoinePage() {
   )
 }
 
-function BatimentRow({ batiment, visibleCols }: { batiment: Batiment; visibleCols: string[] }) {
+function BatimentRow({ batiment, visibleCols, colWidths }: { batiment: Batiment; visibleCols: string[]; colWidths: Record<string, number> }) {
   const [expanded, setExpanded] = useState(false)
   const navigate = useNavigate()
   const Icon = typeIcons[batiment.type] || Building2
@@ -282,37 +381,37 @@ function BatimentRow({ batiment, visibleCols }: { batiment: Batiment; visibleCol
           {expanded ? <ChevronDown className="h-3.5 w-3.5 text-gray-400" /> : <ChevronRight className="h-3.5 w-3.5 text-gray-400" />}
         </button>
         {isCol('designation') && (
-          <div className="flex-1 min-w-[150px] flex items-center gap-2 min-w-0">
+          <div className="shrink-0 flex items-center gap-2 min-w-0 overflow-hidden" style={{ width: colWidths.designation }}>
             <Icon className="h-4 w-4 shrink-0 text-gray-400" />
             <span className="font-medium text-gray-900 truncate">{batiment.designation}</span>
             {batiment.est_archive && <Badge variant="outline" className="text-[9px] text-gray-400 border-gray-200">Archive</Badge>}
           </div>
         )}
         {isCol('type') && (
-          <div className="w-28">
+          <div className="shrink-0" style={{ width: colWidths.type }}>
             <Badge variant="outline" className="text-[10px] font-normal capitalize">{typeLabels[batiment.type]}</Badge>
           </div>
         )}
         {isCol('adresse') && (
-          <div className="w-48 text-xs text-gray-500 truncate">
+          <div className="shrink-0 text-xs text-gray-500 truncate" style={{ width: colWidths.adresse }}>
             {adresse ? `${adresse.rue}, ${adresse.ville}` : '—'}
           </div>
         )}
-        {isCol('nb_lots') && <div className="w-14 text-center"><Badge variant="outline" className="text-[10px] font-medium">{batiment.nb_lots}</Badge></div>}
-        {isCol('nb_etages') && <div className="w-14 text-center text-gray-500 text-xs">{batiment.nb_etages ?? '—'}</div>}
-        {isCol('annee_construction') && <div className="w-16 text-center text-gray-500 text-xs">{batiment.annee_construction ?? '—'}</div>}
+        {isCol('nb_lots') && <div className="shrink-0 text-center" style={{ width: colWidths.nb_lots }}><Badge variant="outline" className="text-[10px] font-medium">{batiment.nb_lots}</Badge></div>}
+        {isCol('nb_etages') && <div className="shrink-0 text-center text-gray-500 text-xs" style={{ width: colWidths.nb_etages }}>{batiment.nb_etages ?? '—'}</div>}
+        {isCol('annee_construction') && <div className="shrink-0 text-center text-gray-500 text-xs" style={{ width: colWidths.annee_construction }}>{batiment.annee_construction ?? '—'}</div>}
         {isCol('derniere_mission') && (
-          <div className="w-24 text-xs text-gray-500">{batiment.derniere_mission ? formatDate(batiment.derniere_mission) : '—'}</div>
+          <div className="shrink-0 text-xs text-gray-500" style={{ width: colWidths.derniere_mission }}>{batiment.derniere_mission ? formatDate(batiment.derniere_mission) : '—'}</div>
         )}
         {isCol('missions_a_venir') && (
-          <div className="w-16 text-center">
+          <div className="shrink-0 text-center" style={{ width: colWidths.missions_a_venir }}>
             {batiment.missions_a_venir > 0 ? (
               <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">{batiment.missions_a_venir}</Badge>
             ) : <span className="text-xs text-gray-300">—</span>}
           </div>
         )}
         {isCol('created_at') && (
-          <div className="w-24 text-xs text-gray-400">{formatDate(batiment.created_at)}</div>
+          <div className="shrink-0 text-xs text-gray-400" style={{ width: colWidths.created_at }}>{formatDate(batiment.created_at)}</div>
         )}
       </div>
 

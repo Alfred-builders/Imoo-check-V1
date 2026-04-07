@@ -290,10 +290,7 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
           }}
         />
         <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complément..." className="h-8 text-xs" />
-        <div className="grid grid-cols-2 gap-2">
-          <Input value={cp} onChange={(e) => setCp(e.target.value)} placeholder="Code postal" className="h-8 text-xs" />
-          <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
-        </div>
+        <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
         <div className="flex justify-end gap-1.5">
           <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditing(false)}>
             <XIcon className="h-3 w-3 mr-1" /> Annuler
@@ -397,10 +394,7 @@ function AddAddressButton({ batimentId }: { batimentId: string }) {
         }}
       />
       <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Complément..." className="h-8 text-xs" />
-      <div className="grid grid-cols-2 gap-2">
-        <Input value={cp} onChange={(e) => setCp(e.target.value)} placeholder="Code postal" className="h-8 text-xs" />
-        <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
-      </div>
+      <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ville" className="h-8 text-xs" />
       <div className="flex justify-end gap-1.5">
         <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setAdding(false)}>Annuler</Button>
         <Button size="sm" className="h-7 text-xs bg-primary text-primary-foreground hover:bg-primary/90" onClick={handleAdd} disabled={addAddr.isPending}>
