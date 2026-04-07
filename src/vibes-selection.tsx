@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import {
   LayoutDashboard, Building2, Users, Users2, ClipboardList, Settings,
   Plus, Download, Search, MoreHorizontal, MoreVertical, Home, TrendingUp,
-  ArrowUpRight, ArrowDownRight, Bell, ChevronRight, Filter, MapPin, LayoutGrid
+  ArrowUpRight, ArrowDownRight, Bell, ChevronRight, Filter, MapPin, LayoutGrid,
+  Zap, BarChart3
 } from 'lucide-react'
 
 /* ═══════════════════════════════════════════════════════════════
@@ -142,11 +143,413 @@ function VibeB() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   VIBE D — "Rounded Pastel"
+   VIBE C — "Dark Elite"
+   Dark sidebar with purple glow, expanding hover, Apple+Vercel
+   ═══════════════════════════════════════════════════════════════ */
+
+function VibeC() {
+  const NAV = [
+    { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { id: 'properties', label: 'Parc immobilier', icon: Building2 },
+    { id: 'tiers', label: 'Tiers', icon: Users },
+    { id: 'missions', label: 'Missions', icon: ClipboardList },
+    { id: 'settings', label: 'Paramètres', icon: Settings },
+  ]
+  const active = 'properties'
+  const KPI = [
+    { label: 'Bâtiments', value: '24', icon: Building2 },
+    { label: 'Lots', value: '156', icon: Home },
+    { label: 'Missions', value: '8', icon: ClipboardList },
+    { label: 'Occupation', value: '92%', icon: TrendingUp },
+  ]
+  const BLDG = [
+    { name: 'Résidence Horizon', type: 'Immeuble', address: '12 Rue de la Paix, Paris', lots: 42, status: 'Actif' },
+    { name: 'Villa des Pins', type: 'Maison', address: '5 Av. des Fleurs, Nice', lots: 1, status: 'Actif' },
+    { name: 'Le Cristal', type: 'Immeuble', address: '45 Blvd Haussmann, Paris', lots: 82, status: 'Maintenance' },
+    { name: 'Logis Vert', type: 'Immeuble', address: '8 Rue Verte, Nantes', lots: 36, status: 'Actif' },
+    { name: "L'Alcôve", type: 'Maison', address: '22 Chemin du Roy, Bordeaux', lots: 1, status: 'Vacance' },
+  ]
+
+  return (
+    <div className="flex min-h-[700px] bg-[#f5f5f7] font-sans antialiased text-slate-900">
+      {/* Dark sidebar — hover expands from w-20 to w-64 */}
+      <aside className="group/sidebar w-20 hover:w-64 bg-[#0c0f1a] flex flex-col shrink-0 transition-all duration-300 overflow-hidden">
+        <div className="p-4 flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 shrink-0 bg-gradient-to-br from-purple-500 to-violet-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-purple-500/30">
+            <Building2 size={22} />
+          </div>
+          <span className="text-white font-bold text-lg whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">ImmoChecker</span>
+        </div>
+        <nav className="flex-1 px-3 space-y-1">
+          {NAV.map(item => {
+            const isA = active === item.id
+            return (
+              <button key={item.id} className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all whitespace-nowrap ${isA ? 'bg-purple-600/20 text-purple-400' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}>
+                <item.icon size={20} className={`shrink-0 ${isA ? 'text-purple-400' : ''}`} />
+                <span className={`text-sm opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 ${isA ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
+                {isA && <div className="ml-auto w-2 h-2 rounded-full bg-purple-400 shrink-0 opacity-0 group-hover/sidebar:opacity-100 transition-opacity" />}
+              </button>
+            )
+          })}
+        </nav>
+        <div className="p-4 border-t border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-slate-700 flex items-center justify-center text-white text-sm font-bold">ML</div>
+            <div className="whitespace-nowrap opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300">
+              <p className="text-sm font-semibold text-white">Marie Laurent</p>
+              <p className="text-xs text-slate-500">Admin</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="flex-1 overflow-y-auto">
+        <header className="h-16 bg-white/80 backdrop-blur-md px-8 flex items-center justify-between border-b border-slate-200/50">
+          <h1 className="text-xl font-bold text-slate-900">Parc immobilier</h1>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input placeholder="Rechercher..." className="bg-slate-100 rounded-lg pl-9 pr-4 py-2 text-sm w-56 outline-none focus:ring-2 focus:ring-purple-500/20" />
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2 bg-[#0c0f1a] text-white rounded-lg text-sm font-semibold hover:bg-[#1a1f35] active:scale-95">
+              <Plus size={16} />Ajouter
+            </button>
+          </div>
+        </header>
+
+        <div className="p-8 space-y-8">
+          {/* KPI with dark icon circles */}
+          <div className="grid grid-cols-4 gap-6">
+            {KPI.map((k, i) => (
+              <div key={i} className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-11 h-11 bg-slate-900 rounded-xl flex items-center justify-center">
+                    <k.icon size={20} className="text-white" />
+                  </div>
+                  <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+5%</span>
+                </div>
+                <p className="text-sm text-slate-500 font-medium">{k.label}</p>
+                <h3 className="text-2xl font-bold text-slate-900 mt-1">{k.value}</h3>
+              </div>
+            ))}
+          </div>
+
+          {/* Table with alternating rows + status dots */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+            <div className="px-6 py-5 flex items-center justify-between border-b border-slate-100">
+              <h2 className="font-bold text-slate-800">Liste des bâtiments</h2>
+              <button className="text-xs font-semibold text-slate-500 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50"><Download size={14} className="inline mr-1.5" />Exporter</button>
+            </div>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                  <th className="px-6 py-4">Désignation</th><th className="px-6 py-4">Type</th><th className="px-6 py-4">Adresse</th><th className="px-6 py-4 text-center">Lots</th><th className="px-6 py-4">Statut</th><th className="px-6 py-4"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {BLDG.map((b, i) => (
+                  <tr key={i} className={`${i % 2 === 1 ? 'bg-slate-50/60' : ''} hover:bg-slate-100/50 transition-colors`}>
+                    <td className="px-6 py-4 font-semibold text-slate-900">{b.name}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600">{b.type}</td>
+                    <td className="px-6 py-4 text-sm text-slate-500">{b.address}</td>
+                    <td className="px-6 py-4 text-center text-sm font-medium text-slate-700">{b.lots}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${b.status === 'Actif' ? 'bg-emerald-500' : b.status === 'Maintenance' ? 'bg-amber-500' : 'bg-slate-400'}`} />
+                        <span className="text-sm text-slate-600">{b.status}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right"><button className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"><MoreHorizontal size={16} /></button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+              <span>5 sur 24</span>
+              <div className="flex gap-2">
+                <button disabled className="px-3 py-1 rounded-lg border border-slate-200 opacity-50 text-sm">Précédent</button>
+                <button className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 text-sm">Suivant</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VIBE D — "Stripe Refined"
+   Pure white sidebar, text-only nav, Stripe purple-blue, sparklines
+   ═══════════════════════════════════════════════════════════════ */
+
+function VibeD_Stripe() {
+  const NAV = [
+    { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { id: 'properties', label: 'Parc immobilier', icon: Building2 },
+    { id: 'tiers', label: 'Tiers', icon: Users },
+    { id: 'missions', label: 'Missions', icon: ClipboardList },
+    { id: 'settings', label: 'Paramètres', icon: Settings },
+  ]
+  const active = 'properties'
+  const KPI = [
+    { label: 'Bâtiments', value: '24', pct: 72 },
+    { label: 'Lots', value: '156', pct: 85 },
+    { label: 'Missions', value: '8', pct: 45 },
+    { label: 'Occupation', value: '92%', pct: 92 },
+  ]
+  const BLDG = [
+    { name: 'Résidence Horizon', address: '12 Rue de la Paix, Paris', lots: 42, status: 'Actif' },
+    { name: 'Villa des Pins', address: '5 Av. des Fleurs, Nice', lots: 1, status: 'Actif' },
+    { name: 'Le Cristal', address: '45 Blvd Haussmann, Paris', lots: 82, status: 'Maintenance' },
+    { name: 'Logis Vert', address: '8 Rue Verte, Nantes', lots: 36, status: 'Actif' },
+    { name: "L'Alcôve", address: '22 Chemin du Roy, Bordeaux', lots: 1, status: 'Vacance' },
+  ]
+
+  return (
+    <div className="flex min-h-[700px] bg-[#f7f7f8] font-sans antialiased text-slate-900">
+      {/* Pure white sidebar, text-only nav */}
+      <aside className="w-60 bg-white flex flex-col shrink-0 border-r border-slate-200">
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-8 h-8 bg-[#635bff] rounded-md flex items-center justify-center text-white text-sm font-bold shadow-sm">IC</div>
+          <span className="text-lg font-semibold tracking-tight text-slate-800">ImmoChecker</span>
+        </div>
+        <nav className="flex-1 mt-2 px-3 space-y-0.5">
+          {NAV.map(item => {
+            const isA = active === item.id
+            return (
+              <button key={item.id} className={`group w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-md transition-all relative ${isA ? 'font-semibold text-[#635bff]' : 'text-slate-500 hover:text-slate-800'}`}>
+                {isA && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#635bff] rounded-r" />}
+                <item.icon size={18} className={`${isA ? 'text-[#635bff]' : 'text-slate-400 opacity-0 group-hover:opacity-100'} transition-opacity`} />
+                <span>{item.label}</span>
+              </button>
+            )
+          })}
+        </nav>
+        <div className="p-5 border-t border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-[#635bff]/10 flex items-center justify-center text-[#635bff] text-xs font-bold">PD</div>
+            <div><p className="text-sm font-medium text-slate-700">Pierre Duval</p><p className="text-xs text-slate-400">Admin</p></div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="flex-1 overflow-y-auto">
+        <header className="h-14 bg-white px-8 flex items-center justify-between border-b border-slate-200">
+          <h1 className="text-base font-semibold text-slate-800">Parc immobilier</h1>
+          <div className="flex items-center gap-3">
+            <button className="text-slate-400 hover:text-slate-600"><Search size={18} /></button>
+            <button className="flex items-center gap-2 px-4 py-2 bg-[#635bff] text-white rounded-md text-sm font-medium hover:bg-[#524de8] active:scale-95"><Plus size={16} />Ajouter</button>
+          </div>
+        </header>
+
+        <div className="p-8 space-y-8">
+          {/* Stat cards with sparkline progress bars */}
+          <div className="grid grid-cols-4 gap-5">
+            {KPI.map((k, i) => (
+              <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 hover:border-[#635bff]/30 transition-colors">
+                <p className="text-sm text-slate-500 mb-1">{k.label}</p>
+                <h3 className="text-2xl font-bold text-slate-900 mb-3">{k.value}</h3>
+                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#635bff] rounded-full transition-all" style={{ width: `${k.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Table with no header bg, just border */}
+          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            <div className="px-6 py-4 flex items-center justify-between">
+              <h2 className="font-semibold text-slate-800">Liste des bâtiments</h2>
+              <div className="flex gap-2">
+                <button className="text-xs text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded border border-slate-200 hover:border-slate-300">Filtrer</button>
+                <button className="text-xs text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded border border-slate-200 hover:border-slate-300">Exporter</button>
+              </div>
+            </div>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-t border-b border-slate-200">
+                  <th className="px-6 py-3 text-xs font-medium text-slate-500">Désignation</th>
+                  <th className="px-6 py-3 text-xs font-medium text-slate-500">Adresse</th>
+                  <th className="px-6 py-3 text-xs font-medium text-slate-500 text-center">Lots</th>
+                  <th className="px-6 py-3 text-xs font-medium text-slate-500">Statut</th>
+                  <th className="px-6 py-3"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {BLDG.map((b, i) => (
+                  <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-medium text-slate-900">{b.name}</td>
+                    <td className="px-6 py-4 text-sm text-slate-500">{b.address}</td>
+                    <td className="px-6 py-4 text-sm text-center text-slate-700">{b.lots}</td>
+                    <td className="px-6 py-4">
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${b.status === 'Actif' ? 'text-emerald-700 bg-emerald-50' : b.status === 'Maintenance' ? 'text-amber-700 bg-amber-50' : 'text-slate-600 bg-slate-100'}`}>{b.status}</span>
+                    </td>
+                    <td className="px-6 py-4 text-right"><button className="p-1 text-slate-400 hover:text-slate-700"><MoreHorizontal size={16} /></button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between text-sm text-slate-500">
+              <span>5 sur 24</span>
+              <div className="flex gap-2">
+                <button disabled className="px-3 py-1 text-sm border border-slate-200 rounded opacity-50">Précédent</button>
+                <button className="px-3 py-1 text-sm border border-slate-200 rounded hover:border-slate-300">Suivant</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VIBE E — "Warm Neutral"
+   Warm white sidebar, stone palette, orange primary, Airbnb energy
+   ═══════════════════════════════════════════════════════════════ */
+
+function VibeE() {
+  const NAV = [
+    { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+    { id: 'properties', label: 'Parc immobilier', icon: Building2 },
+    { id: 'tiers', label: 'Tiers', icon: Users },
+    { id: 'missions', label: 'Missions', icon: ClipboardList },
+    { id: 'settings', label: 'Paramètres', icon: Settings },
+  ]
+  const active = 'properties'
+  const KPI = [
+    { label: 'Bâtiments', value: '24', icon: Building2, pct: 72 },
+    { label: 'Lots', value: '156', icon: Home, pct: 85 },
+    { label: 'Missions actives', value: '8', icon: ClipboardList, pct: 45 },
+    { label: 'Taux occupation', value: '92%', icon: TrendingUp, pct: 92 },
+  ]
+  const BLDG = [
+    { name: 'Résidence Horizon', type: 'Immeuble', address: '12 Rue de la Paix, Paris', lots: 42, health: 95 },
+    { name: 'Villa des Pins', type: 'Maison', address: '5 Av. des Fleurs, Nice', lots: 1, health: 88 },
+    { name: 'Le Cristal', type: 'Immeuble', address: '45 Blvd Haussmann, Paris', lots: 82, health: 72 },
+    { name: 'Logis Vert', type: 'Immeuble', address: '8 Rue Verte, Nantes', lots: 36, health: 91 },
+    { name: "L'Alcôve", type: 'Maison', address: '22 Chemin du Roy, Bordeaux', lots: 1, health: 60 },
+  ]
+
+  return (
+    <div className="flex min-h-[700px] bg-stone-50 font-sans antialiased text-stone-900">
+      {/* Warm white sidebar */}
+      <aside className="w-64 bg-[#fefdfb] flex flex-col shrink-0 border-r border-stone-200">
+        <div className="p-6 flex items-center gap-3">
+          <div className="w-9 h-9 bg-orange-600 rounded-lg flex items-center justify-center text-white shadow-sm">
+            <Building2 size={20} />
+          </div>
+          <span className="text-lg font-bold tracking-tight text-stone-800">ImmoChecker</span>
+        </div>
+        <nav className="flex-1 mt-4 px-3 space-y-1">
+          {NAV.map(item => {
+            const isA = active === item.id
+            return (
+              <button key={item.id} className={`w-full flex items-center gap-3 px-4 py-3 text-sm rounded-lg transition-all relative ${isA ? 'bg-stone-100 text-stone-900 font-semibold' : 'text-stone-500 hover:text-stone-800 hover:bg-stone-50'}`}>
+                {isA && <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-orange-500 rounded-full" />}
+                <item.icon size={18} className={isA ? 'text-orange-600' : 'text-stone-400'} />
+                <span>{item.label}</span>
+              </button>
+            )
+          })}
+        </nav>
+        <div className="p-5 border-t border-stone-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 text-sm font-bold">AL</div>
+            <div><p className="text-sm font-semibold text-stone-700">Anne Leclerc</p><p className="text-xs text-stone-400">Gestionnaire</p></div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="flex-1 overflow-y-auto">
+        <header className="h-16 bg-[#fefdfb]/80 backdrop-blur-md px-8 flex items-center justify-between border-b border-stone-200/50">
+          <div>
+            <h1 className="text-xl font-bold text-stone-900">Parc immobilier</h1>
+            <p className="text-xs text-stone-400">Vos actifs en un coup d'oeil</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
+              <input placeholder="Rechercher..." className="bg-stone-100 rounded-lg pl-9 pr-4 py-2 text-sm w-56 outline-none focus:ring-2 focus:ring-orange-500/20" />
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-orange-600 text-white rounded-lg text-sm font-semibold hover:bg-orange-700 active:scale-95"><Plus size={16} />Ajouter</button>
+          </div>
+        </header>
+
+        <div className="p-8 space-y-8">
+          {/* KPI as horizontal bars */}
+          <div className="grid grid-cols-4 gap-5">
+            {KPI.map((k, i) => (
+              <div key={i} className="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-stone-100 rounded-lg flex items-center justify-center">
+                    <k.icon size={18} className="text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-stone-900">{k.value}</h3>
+                    <p className="text-xs text-stone-500">{k.label}</p>
+                  </div>
+                </div>
+                <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-orange-500 rounded-full" style={{ width: `${k.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Table with warm stone colors + health bars */}
+          <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+            <div className="px-6 py-5 flex items-center justify-between border-b border-stone-100">
+              <h2 className="font-bold text-stone-800">Liste des bâtiments</h2>
+              <button className="text-xs font-medium text-stone-500 px-3 py-1.5 rounded-lg border border-stone-200 hover:bg-stone-50"><Download size={14} className="inline mr-1.5" />Exporter</button>
+            </div>
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-[11px] font-bold uppercase tracking-wider text-stone-400 border-b border-stone-100">
+                  <th className="px-6 py-4">Désignation</th><th className="px-6 py-4">Type</th><th className="px-6 py-4">Adresse</th><th className="px-6 py-4 text-center">Lots</th><th className="px-6 py-4">Santé</th><th className="px-6 py-4"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100">
+                {BLDG.map((b, i) => (
+                  <tr key={i} className="hover:bg-stone-50/50 transition-colors">
+                    <td className="px-6 py-4 font-semibold text-stone-900">{b.name}</td>
+                    <td className="px-6 py-4"><span className={`text-xs font-medium px-2 py-0.5 rounded ${b.type === 'Immeuble' ? 'bg-orange-50 text-orange-700' : 'bg-stone-100 text-stone-600'}`}>{b.type}</span></td>
+                    <td className="px-6 py-4 text-sm text-stone-500">{b.address}</td>
+                    <td className="px-6 py-4 text-center text-sm font-medium text-stone-700">{b.lots}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full ${b.health >= 90 ? 'bg-emerald-500' : b.health >= 75 ? 'bg-orange-400' : 'bg-rose-500'}`} style={{ width: `${b.health}%` }} />
+                        </div>
+                        <span className="text-xs text-stone-500">{b.health}%</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right"><button className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100"><MoreHorizontal size={16} /></button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="px-6 py-4 border-t border-stone-100 flex items-center justify-between text-sm text-stone-500">
+              <span>5 sur 24</span>
+              <div className="flex gap-2">
+                <button disabled className="px-3 py-1 rounded-lg border border-stone-200 opacity-50 text-sm">Précédent</button>
+                <button className="px-3 py-1 rounded-lg border border-stone-200 hover:bg-stone-50 text-sm">Suivant</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VIBE F — "Rounded Pastel"
    Violet primary, pastel KPI cards, very rounded, playful
    ═══════════════════════════════════════════════════════════════ */
 
-function VibeD() {
+function VibeF() {
   const NAV = [{ id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard, color: 'text-blue-500', pill: 'bg-blue-50' }, { id: 'properties', label: 'Parc immobilier', icon: Building2, color: 'text-violet-500', pill: 'bg-violet-50' }, { id: 'tiers', label: 'Tiers', icon: Users2, color: 'text-emerald-500', pill: 'bg-emerald-50' }, { id: 'missions', label: 'Missions', icon: ClipboardList, color: 'text-amber-500', pill: 'bg-amber-50' }, { id: 'settings', label: 'Paramètres', icon: Settings, color: 'text-gray-500', pill: 'bg-gray-50' }]
   const KPI = [{ label: 'Bâtiments', value: 24, icon: Building2, bg: 'bg-blue-50', ic: 'text-blue-600' }, { label: 'Lots', value: 156, icon: Home, bg: 'bg-emerald-50', ic: 'text-emerald-600' }, { label: 'Missions', value: 8, icon: ClipboardList, bg: 'bg-violet-50', ic: 'text-violet-600' }, { label: 'Occupation', value: '92%', icon: Users2, bg: 'bg-amber-50', ic: 'text-amber-600' }]
   const BLDG = [{ name: 'Résidence Horizon', address: '12 Rue de la Paix, Paris', units: 42, type: 'Résidentiel', status: 'Complet' }, { name: 'Espace Lumière', address: '45 Av. des Champs, Lyon', units: 12, type: 'Commercial', status: 'Maintenance' }, { name: 'Le Belvédère', address: '8 Blvd de la Mer, Marseille', units: 28, type: 'Mixte', status: 'Partiel' }, { name: 'Villa Jade', address: '5 Impasse des Pins, Nice', units: 4, type: 'Résidentiel', status: 'Complet' }, { name: 'Technopole Sud', address: "300 Rue de l'Innovation, Toulouse", units: 65, type: 'Commercial', status: 'Complet' }]
@@ -197,18 +600,21 @@ function VibeD() {
 export default function VibesSelection() {
   const [selected, setSelected] = useState<string | null>(null)
   const vibes = [
-    { id: 'A', name: 'Zaant Modern', desc: 'Blue primary, gradient icons, multi-layer shadows, sticky header, Intercom/Linear energy', color: 'ring-blue-500' },
-    { id: 'B', name: 'Notion Clean', desc: 'Ultra-minimal, whitespace-heavy, indigo accent, typography-driven, Vercel/Cal.com energy', color: 'ring-indigo-500' },
-    { id: 'D', name: 'Rounded Pastel', desc: 'Violet primary, pastel KPI cards, very rounded (32px), colorful icon pills, Figma/Loom energy', color: 'ring-violet-500' },
+    { id: '1', name: 'Zaant Modern', desc: 'Blue primary, gradient icons, multi-layer shadows, sticky header, Intercom/Linear energy', color: 'ring-blue-500' },
+    { id: '2', name: 'Notion Clean', desc: 'Ultra-minimal, whitespace-heavy, indigo accent, typography-driven, Vercel/Cal.com energy', color: 'ring-indigo-500' },
+    { id: '3', name: 'Dark Elite', desc: 'Dark expanding sidebar, purple glow, dark icon circles, alternating rows, Apple/Vercel energy', color: 'ring-purple-500' },
+    { id: '4', name: 'Stripe Refined', desc: 'Pure white sidebar, text-only nav, sparkline progress bars, ultra-polished, Stripe energy', color: 'ring-[#635bff]' },
+    { id: '5', name: 'Warm Neutral', desc: 'Warm stone palette, orange primary, health percentage bars, horizontal KPI, Airbnb energy', color: 'ring-orange-500' },
+    { id: '6', name: 'Rounded Pastel', desc: 'Violet primary, pastel KPI cards, very rounded (32px), colorful icon pills, Figma/Loom energy', color: 'ring-violet-500' },
   ]
-  const components: Record<string, React.FC> = { A: VibeA, B: VibeB, D: VibeD }
+  const components: Record<string, React.FC> = { '1': VibeA, '2': VibeB, '3': VibeC, '4': VibeD_Stripe, '5': VibeE, '6': VibeF }
 
   return (
     <div className="min-h-screen bg-gray-950 text-white p-8 font-sans">
       <div className="max-w-[1400px] mx-auto space-y-12">
         <div className="text-center space-y-3 pt-8">
           <h1 className="text-4xl font-bold">Choisissez votre Design System</h1>
-          <p className="text-gray-400 text-lg">Cliquez sur le design qui vous plaît. Chaque vibe montre le layout complet (sidebar + dashboard + table).</p>
+          <p className="text-gray-400 text-lg">Cliquez sur le design qui vous plait. Chaque vibe montre le layout complet (sidebar + dashboard + table).</p>
         </div>
 
         {vibes.map(vibe => {
@@ -220,7 +626,7 @@ export default function VibesSelection() {
                   <span className="bg-gray-700 text-white text-sm font-bold px-3 py-1 rounded-lg">Vibe {vibe.id}</span>
                   <span className="text-sm font-bold">{vibe.name}</span>
                 </div>
-                <span className="text-xs text-gray-400">{vibe.desc}</span>
+                <span className="text-xs text-gray-400 max-w-[50%] text-right">{vibe.desc}</span>
               </div>
               <Comp />
             </div>
@@ -229,8 +635,8 @@ export default function VibesSelection() {
 
         {selected && (
           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white text-gray-900 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 z-50 animate-bounce">
-            <span className="font-bold text-lg">Vibe {selected} sélectionnée</span>
-            <span className="text-gray-500">→ Dites-moi "vibe {selected}" pour l'appliquer à toute l'app</span>
+            <span className="font-bold text-lg">Vibe {selected} selectionnee</span>
+            <span className="text-gray-500">-- Dites-moi de l'appliquer a toute l'app</span>
           </div>
         )}
       </div>
