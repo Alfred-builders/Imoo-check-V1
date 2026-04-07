@@ -12,6 +12,7 @@ import { BuildingDetailPage } from './features/patrimoine/components/building-de
 import { LotDetailPage } from './features/patrimoine/components/lot-detail-page'
 import { SettingsPage } from './features/admin/components/settings-page'
 import { TiersPage } from './features/tiers/components/tiers-page'
+import VibesSelection from './vibes-selection'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth()
@@ -42,6 +43,7 @@ function AppRoutes() {
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       </Route>
       <Route path="/workspace-select" element={<WorkspaceSelectPage />} />
+      <Route path="/vibes" element={<VibesSelection />} />
 
       {/* Protected routes */}
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
