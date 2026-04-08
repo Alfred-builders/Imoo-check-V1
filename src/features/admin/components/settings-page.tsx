@@ -18,7 +18,7 @@ type Role = (typeof ROLES)[number]
 
 const roleConfig: Record<Role, { label: string; color: string; bg: string; border: string; description: string }> = {
   admin: { label: 'Admin', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200', description: 'Acces complet' },
-  gestionnaire: { label: 'Gestionnaire', color: 'text-blue-700', bg: 'bg-blue-50', border: 'border-blue-200', description: 'Back-office' },
+  gestionnaire: { label: 'Gestionnaire', color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20', description: 'Back-office' },
   technicien: { label: 'Technicien', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', description: 'App mobile' },
 }
 
@@ -30,19 +30,19 @@ export function SettingsPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-[12px] text-[#94a3b8]">
+      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
         <span>Administration</span>
         <span>/</span>
-        <span className="text-[#1e293b] font-medium">Parametres</span>
+        <span className="text-foreground font-medium">Parametres</span>
       </div>
 
       <div>
-        <h1 className="text-[28px] font-bold tracking-[-0.5px] text-gray-900">Parametres</h1>
-        <p className="text-xs text-gray-400 mt-0.5">Gerez votre workspace, vos utilisateurs et vos invitations</p>
+        <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">Parametres</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">Gerez votre workspace, vos utilisateurs et vos invitations</p>
       </div>
 
       <Tabs defaultValue="workspace" className="w-full">
-        <TabsList className="bg-gray-100 p-0.5 h-9">
+        <TabsList className="bg-muted p-0.5 h-9">
           <TabsTrigger value="workspace" className="text-xs h-8 px-4"><Building2 className="h-3.5 w-3.5 mr-1.5" /> Workspace</TabsTrigger>
           <TabsTrigger value="utilisateurs" className="text-xs h-8 px-4"><Users className="h-3.5 w-3.5 mr-1.5" /> Utilisateurs</TabsTrigger>
           <TabsTrigger value="invitations" className="text-xs h-8 px-4"><Mail className="h-3.5 w-3.5 mr-1.5" /> Invitations</TabsTrigger>
@@ -96,20 +96,20 @@ function WorkspaceTab() {
   }
 
   if (isLoading) return <div className="space-y-4">{[1,2].map(i => <Skeleton key={i} className="h-40 rounded-xl" />)}</div>
-  if (!ws) return <p className="text-gray-400">Workspace introuvable</p>
+  if (!ws) return <p className="text-muted-foreground">Workspace introuvable</p>
 
   return (
     <div className="space-y-5">
       {/* Header actions */}
       <div className="flex justify-end">
         {!editing ? (
-          <Button variant="outline" size="sm" className="h-8 text-xs border-[#e2e8f0]" onClick={startEdit}>
+          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={startEdit}>
             <Pencil className="h-3 w-3 mr-1.5" /> Modifier
           </Button>
         ) : (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-8 text-xs border-[#e2e8f0]" onClick={() => setEditing(false)}>Annuler</Button>
-            <Button size="sm" className="h-8 text-xs bg-[#2563eb] text-white hover:bg-[#1d4ed8] rounded-lg font-bold shadow-lg shadow-blue-500/15" onClick={handleSave} disabled={updateMutation.isPending}>
+            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setEditing(false)}>Annuler</Button>
+            <Button size="sm" className="h-8 text-xs rounded-lg font-bold shadow-lg shadow-primary/15" onClick={handleSave} disabled={updateMutation.isPending}>
               <Save className="h-3 w-3 mr-1.5" /> Enregistrer
             </Button>
           </div>
@@ -118,25 +118,25 @@ function WorkspaceTab() {
 
       <div className="grid grid-cols-2 gap-5">
         {/* Informations generales */}
-        <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-[#94a3b8]" /> Informations generales
+            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-muted-foreground" /> Informations generales
             </CardTitle>
           </CardHeader>
           <CardContent>
             {editing ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Nom du workspace *</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Nom du workspace *</Label>
                   <Input value={nom} onChange={(e) => setNom(e.target.value)} className="h-9" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Type</Label>
-                  <Input value={typeLabels[ws.type_workspace] || ws.type_workspace} disabled className="h-9 bg-gray-50 text-gray-400" />
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Type</Label>
+                  <Input value={typeLabels[ws.type_workspace] || ws.type_workspace} disabled className="h-9 bg-muted text-muted-foreground" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">SIRET</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">SIRET</Label>
                   <Input value={siret} onChange={(e) => setSiret(e.target.value)} placeholder="12345678901234" className="h-9" />
                 </div>
               </div>
@@ -156,21 +156,21 @@ function WorkspaceTab() {
         </Card>
 
         {/* Contact */}
-        <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
-              <AtSign className="h-4 w-4 text-[#94a3b8]" /> Contact
+            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <AtSign className="h-4 w-4 text-muted-foreground" /> Contact
             </CardTitle>
           </CardHeader>
           <CardContent>
             {editing ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Email de contact</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Email de contact</Label>
                   <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contact@exemple.com" className="h-9" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Telephone</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Telephone</Label>
                   <Input value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="01 23 45 67 89" className="h-9" />
                 </div>
               </div>
@@ -184,26 +184,26 @@ function WorkspaceTab() {
         </Card>
 
         {/* Adresse */}
-        <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-[#94a3b8]" /> Adresse
+            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-muted-foreground" /> Adresse
             </CardTitle>
           </CardHeader>
           <CardContent>
             {editing ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Adresse</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Adresse</Label>
                   <Input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="12 Rue de la Paix" className="h-9" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Code postal</Label>
+                    <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Code postal</Label>
                     <Input value={codePostal} onChange={(e) => setCodePostal(e.target.value)} placeholder="75001" className="h-9" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Ville</Label>
+                    <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Ville</Label>
                     <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Paris" className="h-9" />
                   </div>
                 </div>
@@ -218,44 +218,44 @@ function WorkspaceTab() {
         </Card>
 
         {/* Branding */}
-        <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+        <Card className="shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
-              <Palette className="h-4 w-4 text-[#94a3b8]" /> Branding
+            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <Palette className="h-4 w-4 text-muted-foreground" /> Branding
             </CardTitle>
           </CardHeader>
           <CardContent>
             {editing ? (
               <div className="space-y-3">
                 <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Couleur primaire</Label>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Couleur primaire</Label>
                   <div className="flex items-center gap-2">
-                    <input type="color" value={couleurPrimaire || '#d97706'} onChange={(e) => setCouleurPrimaire(e.target.value)} className="h-9 w-12 rounded border border-[#e2e8f0] cursor-pointer" />
+                    <input type="color" value={couleurPrimaire || '#d97706'} onChange={(e) => setCouleurPrimaire(e.target.value)} className="h-9 w-12 rounded border border-border cursor-pointer" />
                     <Input value={couleurPrimaire} onChange={(e) => setCouleurPrimaire(e.target.value)} placeholder="#d97706" className="h-9 flex-1" />
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Logo URL</Label>
-                  <Input value={ws.logo_url || ''} disabled placeholder="Upload a venir..." className="h-9 bg-gray-50 text-gray-400" />
-                  <p className="text-[10px] text-gray-300">L'upload de logo sera disponible prochainement</p>
+                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Logo URL</Label>
+                  <Input value={ws.logo_url || ''} disabled placeholder="Upload a venir..." className="h-9 bg-muted text-muted-foreground" />
+                  <p className="text-[10px] text-muted-foreground/50">L'upload de logo sera disponible prochainement</p>
                 </div>
               </div>
             ) : (
               <dl className="space-y-3">
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-xs text-gray-400 flex items-center gap-1.5"><Palette className="h-3.5 w-3.5" /> Couleur</span>
+                  <span className="text-xs text-muted-foreground flex items-center gap-1.5"><Palette className="h-3.5 w-3.5" /> Couleur</span>
                   <div className="flex items-center gap-2">
                     {ws.couleur_primaire ? (
                       <>
-                        <div className="h-5 w-5 rounded border border-gray-200" style={{ background: ws.couleur_primaire }} />
-                        <span className="text-xs font-mono text-gray-600">{ws.couleur_primaire}</span>
+                        <div className="h-5 w-5 rounded border border-border" style={{ background: ws.couleur_primaire }} />
+                        <span className="text-xs font-mono text-foreground/70">{ws.couleur_primaire}</span>
                       </>
-                    ) : <span className="text-xs text-gray-300">Par defaut</span>}
+                    ) : <span className="text-xs text-muted-foreground/50">Par defaut</span>}
                   </div>
                 </div>
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-xs text-gray-400">Logo</span>
-                  <span className="text-xs text-gray-300">{ws.logo_url ? 'Configure' : 'Non configure'}</span>
+                  <span className="text-xs text-muted-foreground">Logo</span>
+                  <span className="text-xs text-muted-foreground/50">{ws.logo_url ? 'Configure' : 'Non configure'}</span>
                 </div>
               </dl>
             )}
@@ -264,7 +264,7 @@ function WorkspaceTab() {
       </div>
 
       {/* Meta */}
-      <p className="text-[10px] text-gray-300">
+      <p className="text-[10px] text-muted-foreground/50">
         Cree le {new Date(ws.created_at).toLocaleDateString('fr-FR')} — Derniere modification {new Date(ws.updated_at).toLocaleDateString('fr-FR')}
       </p>
     </div>
@@ -274,8 +274,8 @@ function WorkspaceTab() {
 function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between py-2">
-      <span className="text-xs text-gray-400 flex items-center gap-1.5"><Icon className="h-3.5 w-3.5" /> {label}</span>
-      <span className="text-sm font-medium text-gray-800">{value || <span className="text-gray-300">—</span>}</span>
+      <span className="text-xs text-muted-foreground flex items-center gap-1.5"><Icon className="h-3.5 w-3.5" /> {label}</span>
+      <span className="text-sm font-medium text-foreground">{value || <span className="text-muted-foreground/50">—</span>}</span>
     </div>
   )
 }
@@ -298,26 +298,26 @@ function UsersTab() {
   if (isLoading) return <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
 
   return (
-    <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e2e8f0]">
+    <Card className="shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-[#94a3b8]" />
-          <h3 className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8]">Membres</h3>
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Membres</h3>
           <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{users?.length ?? 0}</Badge>
         </div>
       </div>
       {users && users.length > 0 ? (
-        <div className="divide-y divide-gray-50">
+        <div className="divide-y divide-border/30">
           {users.map((user) => {
             const rc = roleConfig[user.role]
             return (
               <div key={user.id} className="flex items-center gap-4 px-5 py-3">
-                <div className="h-9 w-9 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-gray-600">{user.prenom[0]}{user.nom[0]}</span>
+                <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-foreground/70">{user.prenom[0]}{user.nom[0]}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{user.prenom} {user.nom}</p>
-                  <p className="text-xs text-gray-400">{user.email}</p>
+                  <p className="text-sm font-medium text-foreground">{user.prenom} {user.nom}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
                 <Badge className={`${rc.bg} ${rc.color} ${rc.border} text-[10px]`}>{rc.label}</Badge>
                 <Select value={user.role} onValueChange={(v) => handleRoleChange(user, v)}>
@@ -327,7 +327,7 @@ function UsersTab() {
                       <SelectItem key={r} value={r} className="text-xs">
                         <div className="flex items-center gap-2">
                           <Shield className="h-3 w-3" /> {roleConfig[r].label}
-                          <span className="text-gray-400 text-[10px]">— {roleConfig[r].description}</span>
+                          <span className="text-muted-foreground text-[10px]">— {roleConfig[r].description}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -338,7 +338,7 @@ function UsersTab() {
           })}
         </div>
       ) : (
-        <div className="py-8 text-center text-gray-400 text-sm">Aucun membre</div>
+        <div className="py-8 text-center text-muted-foreground text-sm">Aucun membre</div>
       )}
     </Card>
   )
@@ -391,41 +391,41 @@ function InvitationsTab() {
 
   return (
     <div className="space-y-5">
-      <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+      <Card className="shadow-sm">
         <CardHeader className="pb-3">
-          <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8] flex items-center gap-2">
-            <UserPlus className="h-4 w-4 text-[#94a3b8]" /> Inviter un utilisateur
+          <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+            <UserPlus className="h-4 w-4 text-muted-foreground" /> Inviter un utilisateur
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex items-end gap-3">
             <div className="flex-1 space-y-1.5">
-              <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Email</Label>
+              <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
               <Input type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-9" required />
             </div>
             <div className="w-44 space-y-1.5">
-              <Label className="text-[12px] font-bold uppercase tracking-wider text-slate-500">Role</Label>
+              <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Role</Label>
               <Select value={role} onValueChange={(v) => setRole(v as Role)}>
                 <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r} className="text-xs">{roleConfig[r].label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={sendInvitation.isPending} className="bg-[#2563eb] text-white hover:bg-[#1d4ed8] rounded-lg font-bold shadow-lg shadow-blue-500/15 h-9 px-4">
+            <Button type="submit" disabled={sendInvitation.isPending} className="rounded-lg font-bold shadow-lg shadow-primary/15 h-9 px-4">
               {sendInvitation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
               Envoyer
             </Button>
           </form>
-          <p className="text-[10px] text-gray-400 mt-2">L'invitation expire apres 7 jours.</p>
+          <p className="text-[10px] text-muted-foreground mt-2">L'invitation expire apres 7 jours.</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[#e2e8f0]">
+      <Card className="shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border">
           <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-[#94a3b8]" />
-            <h3 className="text-[11px] font-bold uppercase tracking-widest text-[#94a3b8]">Invitations</h3>
+            <Mail className="h-4 w-4 text-muted-foreground" />
+            <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Invitations</h3>
           </div>
-          <div className="flex items-center bg-gray-100 rounded-md p-0.5 text-[10px]">
+          <div className="flex items-center bg-muted rounded-md p-0.5 text-[10px]">
             {([
               { key: 'all' as const, label: 'Toutes' },
               { key: 'pending' as const, label: 'En attente' },
@@ -433,8 +433,8 @@ function InvitationsTab() {
               { key: 'expired' as const, label: 'Expirees' },
             ]).map(({ key, label }) => (
               <button key={key} onClick={() => setFilter(key)}
-                className={`px-2.5 py-1 rounded transition-colors font-medium ${filter === key ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}>
-                {label} {counts[key] > 0 && <span className="text-gray-400 ml-0.5">{counts[key]}</span>}
+                className={`px-2.5 py-1 rounded transition-colors font-medium ${filter === key ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}>
+                {label} {counts[key] > 0 && <span className="text-muted-foreground/60 ml-0.5">{counts[key]}</span>}
               </button>
             ))}
           </div>
@@ -443,11 +443,11 @@ function InvitationsTab() {
         {isLoading && <div className="p-5 space-y-3">{[1,2].map(i => <Skeleton key={i} className="h-14 rounded" />)}</div>}
 
         {!isLoading && filtered.length === 0 && (
-          <div className="py-8 text-center"><Mail className="h-8 w-8 text-gray-300 mx-auto mb-2" /><p className="text-sm text-gray-400">Aucune invitation</p></div>
+          <div className="py-8 text-center"><Mail className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" /><p className="text-sm text-muted-foreground">Aucune invitation</p></div>
         )}
 
         {filtered.length > 0 && (
-          <div className="divide-y divide-gray-50">
+          <div className="divide-y divide-border/30">
             {filtered.map((inv) => {
               const rc = roleConfig[inv.role as Role] || roleConfig.gestionnaire
               const isExpired = !inv.accepted_at && new Date(inv.expires_at) < new Date()
@@ -455,13 +455,13 @@ function InvitationsTab() {
               const isPending = !isAccepted && !isExpired
 
               return (
-                <div key={inv.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50/50 transition-colors">
+                <div key={inv.id} className="flex items-center gap-3 px-5 py-3 hover:bg-accent/50 transition-colors">
                   <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${isAccepted ? 'bg-emerald-100' : isExpired ? 'bg-red-50' : 'bg-primary/5'}`}>
                     {isAccepted ? <CheckCircle className="h-4 w-4 text-emerald-600" /> : isExpired ? <AlertCircle className="h-4 w-4 text-red-400" /> : <Clock className="h-4 w-4 text-primary" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{inv.email}</p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-sm font-medium text-foreground">{inv.email}</p>
+                    <p className="text-[10px] text-muted-foreground">
                       {new Date(inv.created_at).toLocaleDateString('fr-FR')}
                       {inv.invited_by_nom && ` — par ${inv.invited_by_prenom} ${inv.invited_by_nom}`}
                       {isPending && ` — expire le ${new Date(inv.expires_at).toLocaleDateString('fr-FR')}`}
@@ -474,15 +474,15 @@ function InvitationsTab() {
                   <div className="flex items-center gap-1 shrink-0">
                     {isPending && (
                       <>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-gray-400" onClick={() => copyInviteLink(inv.token)}><Copy className="h-3 w-3 mr-0.5" /> Lien</Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-blue-500" onClick={() => resendInvitation.mutate(inv.id, { onSuccess: () => toast.success('Relance envoyee') })}><Send className="h-3 w-3 mr-0.5" /> Relancer</Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-1.5 text-red-400" onClick={() => cancelInvitation.mutate(inv.id, { onSuccess: () => toast.success('Annulee') })}><X className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-muted-foreground" onClick={() => copyInviteLink(inv.token)}><Copy className="h-3 w-3 mr-0.5" /> Lien</Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-primary" onClick={() => resendInvitation.mutate(inv.id, { onSuccess: () => toast.success('Relance envoyee') })}><Send className="h-3 w-3 mr-0.5" /> Relancer</Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-1.5 text-destructive" onClick={() => cancelInvitation.mutate(inv.id, { onSuccess: () => toast.success('Annulee') })}><X className="h-3 w-3" /></Button>
                       </>
                     )}
                     {isExpired && (
                       <>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-blue-500" onClick={() => resendInvitation.mutate(inv.id, { onSuccess: () => toast.success('Relance envoyee') })}><Send className="h-3 w-3 mr-0.5" /> Relancer</Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-1.5 text-red-400" onClick={() => cancelInvitation.mutate(inv.id, { onSuccess: () => toast.success('Annulee') })}><X className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-primary" onClick={() => resendInvitation.mutate(inv.id, { onSuccess: () => toast.success('Relance envoyee') })}><Send className="h-3 w-3 mr-0.5" /> Relancer</Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-1.5 text-destructive" onClick={() => cancelInvitation.mutate(inv.id, { onSuccess: () => toast.success('Annulee') })}><X className="h-3 w-3" /></Button>
                       </>
                     )}
                   </div>

@@ -107,7 +107,7 @@ export function AddressAutocomplete({ value, onChange, placeholder = 'Rechercher
   return (
     <div ref={containerRef} className={cn('relative', className)}>
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           value={input}
           onChange={(e) => handleInputChange(e.target.value)}
@@ -115,22 +115,22 @@ export function AddressAutocomplete({ value, onChange, placeholder = 'Rechercher
           className="pl-9 pr-8"
           onFocus={() => { if (suggestions.length > 0) setIsOpen(true) }}
         />
-        {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin" />}
+        {loading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground animate-spin" />}
       </div>
 
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
           {suggestions.map((feat, i) => (
             <button
               key={i}
               type="button"
-              className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-b-0"
+              className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left hover:bg-accent transition-colors border-b border-border/30 last:border-b-0"
               onClick={() => handleSelect(feat)}
             >
               <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{feat.text}{feat.address ? ` ${feat.address}` : ''}</p>
-                <p className="text-xs text-gray-500 truncate">{feat.place_name}</p>
+                <p className="text-sm font-medium text-foreground truncate">{feat.text}{feat.address ? ` ${feat.address}` : ''}</p>
+                <p className="text-xs text-muted-foreground truncate">{feat.place_name}</p>
               </div>
             </button>
           ))}
@@ -138,7 +138,7 @@ export function AddressAutocomplete({ value, onChange, placeholder = 'Rechercher
       )}
 
       {!MAPBOX_TOKEN && (
-        <p className="text-[10px] text-gray-400 mt-1">Saisie manuelle — autocomplete non disponible</p>
+        <p className="text-[10px] text-muted-foreground mt-1">Saisie manuelle — autocomplete non disponible</p>
       )}
     </div>
   )

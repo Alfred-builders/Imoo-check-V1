@@ -36,8 +36,8 @@ const dpeOptions = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
 const gesOptions = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
 
 // Option A card style
-const cardClass = 'bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
-const labelClass = 'text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]'
+const cardClass = 'bg-card rounded-xl border border-border shadow-sm'
+const labelClass = 'text-[11px] font-bold uppercase tracking-wider text-muted-foreground'
 
 export function LotDetailPage() {
   const { id } = useParams()
@@ -89,7 +89,7 @@ export function LotDetailPage() {
     )
   }
 
-  if (!lot) return <div className="p-6"><p className="text-gray-400">Lot introuvable</p></div>
+  if (!lot) return <div className="p-6"><p className="text-muted-foreground">Lot introuvable</p></div>
 
   const proprietaires = lot.proprietaires ?? []
   const mandataire = lot.mandataire
@@ -168,7 +168,7 @@ export function LotDetailPage() {
   return (
     <div className="p-6 space-y-5 max-w-6xl mx-auto">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-[12px] text-[#94a3b8]">
+      <nav className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
         <button onClick={() => navigate('/app/patrimoine')} className="hover:text-foreground transition-colors">Referentiel</button>
         <ChevronRight className="h-3 w-3" />
         <button onClick={() => navigate('/app/patrimoine')} className="hover:text-foreground transition-colors">Parc immobilier</button>
@@ -221,7 +221,7 @@ export function LotDetailPage() {
 
       {/* Quick stats band */}
       <motion.div layout>
-        <div data-card className="bg-slate-50 rounded-lg border border-slate-100 flex items-center gap-0 overflow-hidden divide-x divide-slate-200/60">
+        <div data-card className="bg-muted/50 rounded-lg border border-border/50 flex items-center gap-0 overflow-hidden divide-x divide-slate-200/60">
           {/* Etage */}
           <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
             <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-blue-500">
@@ -232,7 +232,7 @@ export function LotDetailPage() {
               {editing ? (
                 <Input value={formData.etage} onChange={(e) => setFormData(prev => ({ ...prev, etage: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
               ) : (
-                <p className="text-sm font-bold text-gray-900 leading-tight">{lot.etage || 'RDC'}</p>
+                <p className="text-sm font-bold text-foreground leading-tight">{lot.etage || 'RDC'}</p>
               )}
             </div>
           </div>
@@ -256,7 +256,7 @@ export function LotDetailPage() {
                   </SelectContent>
                 </Select>
               ) : (
-                <p className="text-sm font-bold text-gray-900 leading-tight">{typeBienLabels[lot.type_bien]}</p>
+                <p className="text-sm font-bold text-foreground leading-tight">{typeBienLabels[lot.type_bien]}</p>
               )}
             </div>
           </div>
@@ -271,7 +271,7 @@ export function LotDetailPage() {
               {editing ? (
                 <Input type="number" value={formData.surface} onChange={(e) => setFormData(prev => ({ ...prev, surface: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
               ) : (
-                <p className="text-sm font-bold text-gray-900 leading-tight">{lot.surface ? `${lot.surface} m2` : '\u2014'}</p>
+                <p className="text-sm font-bold text-foreground leading-tight">{lot.surface ? `${lot.surface} m2` : '\u2014'}</p>
               )}
             </div>
           </div>
@@ -286,7 +286,7 @@ export function LotDetailPage() {
               {editing ? (
                 <Input value={formData.nb_pieces} onChange={(e) => setFormData(prev => ({ ...prev, nb_pieces: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
               ) : (
-                <p className="text-sm font-bold text-gray-900 leading-tight">{lot.nb_pieces || '\u2014'}</p>
+                <p className="text-sm font-bold text-foreground leading-tight">{lot.nb_pieces || '\u2014'}</p>
               )}
             </div>
           </div>
@@ -310,7 +310,7 @@ export function LotDetailPage() {
                   </SelectContent>
                 </Select>
               ) : (
-                <p className="text-sm font-bold text-gray-900 leading-tight">{lot.dpe_classe || '\u2014'}</p>
+                <p className="text-sm font-bold text-foreground leading-tight">{lot.dpe_classe || '\u2014'}</p>
               )}
             </div>
           </div>
@@ -334,7 +334,7 @@ export function LotDetailPage() {
                   </SelectContent>
                 </Select>
               ) : (
-                <p className="text-sm font-bold text-gray-900 leading-tight">{lot.ges_classe || '\u2014'}</p>
+                <p className="text-sm font-bold text-foreground leading-tight">{lot.ges_classe || '\u2014'}</p>
               )}
             </div>
           </div>
@@ -353,28 +353,28 @@ export function LotDetailPage() {
                 <h2 className={labelClass}>Annexes</h2>
               </div>
               <div className="px-5 pb-5 space-y-2">
-                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-                  <Warehouse className="h-4 w-4 text-gray-500" />
-                  <span className="text-xs text-gray-500 flex-1">Cave</span>
+                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
+                  <Warehouse className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground flex-1">Cave</span>
                   {editing ? (
                     <Input value={formData.num_cave} onChange={(e) => setFormData(prev => ({ ...prev, num_cave: e.target.value }))} className="h-6 w-20 text-xs text-right" />
                   ) : (
-                    <span className="text-sm font-medium text-gray-900">{lot.num_cave || '\u2014'}</span>
+                    <span className="text-sm font-medium text-foreground">{lot.num_cave || '\u2014'}</span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-                  <Car className="h-4 w-4 text-gray-500" />
-                  <span className="text-xs text-gray-500 flex-1">Parking</span>
+                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
+                  <Car className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground flex-1">Parking</span>
                   {editing ? (
                     <Input value={formData.num_parking} onChange={(e) => setFormData(prev => ({ ...prev, num_parking: e.target.value }))} className="h-6 w-20 text-xs text-right" />
                   ) : (
-                    <span className="text-sm font-medium text-gray-900">{lot.num_parking || '\u2014'}</span>
+                    <span className="text-sm font-medium text-foreground">{lot.num_parking || '\u2014'}</span>
                   )}
                 </div>
               </div>
             </div>
 
-            <p className="text-[10px] text-gray-300 px-1">
+            <p className="text-[10px] text-muted-foreground/50 px-1">
               Cree {formatDate(lot.created_at)} — Modifie {formatDate(lot.updated_at)}
             </p>
           </div>
@@ -404,7 +404,7 @@ export function LotDetailPage() {
             </div>
             <Separator className="my-3" />
             <InlineField label="Commentaire" editing={editing} value={lot.commentaire ? (
-              <p className="text-sm text-gray-700 bg-slate-50 rounded-lg p-3 border border-slate-100 leading-relaxed">{lot.commentaire}</p>
+              <p className="text-sm text-foreground bg-muted/50 rounded-lg p-3 border border-border/50 leading-relaxed">{lot.commentaire}</p>
             ) : null} horizontal={false}>
               <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} rows={3} className="text-sm" />
             </InlineField>
@@ -420,11 +420,11 @@ export function LotDetailPage() {
             <h2 className={labelClass}>Missions</h2>
           </div>
           <div className="py-10 text-center">
-            <div className="h-12 w-12 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-              <Building2 className="h-5 w-5 text-gray-400" />
+            <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
+              <Building2 className="h-5 w-5 text-muted-foreground" />
             </div>
-            <p className="text-sm font-medium text-gray-500">Aucune mission pour ce lot</p>
-            <p className="text-xs text-gray-400 mt-1">Sprint 3</p>
+            <p className="text-sm font-medium text-muted-foreground">Aucune mission pour ce lot</p>
+            <p className="text-xs text-muted-foreground mt-1">Sprint 3</p>
           </div>
         </div>
       </motion.div>
@@ -471,52 +471,52 @@ function EnergieSection({ lot, editing, formData, setFormData }: {
         <h2 className={labelClass}>Energie</h2>
       </div>
       <div className="px-5 pb-5 space-y-2">
-        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
           <Zap className="h-4 w-4 text-orange-500" />
-          <span className="text-xs text-gray-500 flex-1">DPE</span>
-          <span className="text-sm font-bold text-gray-900">{lot.dpe_classe || '\u2014'}</span>
+          <span className="text-xs text-muted-foreground flex-1">DPE</span>
+          <span className="text-sm font-bold text-foreground">{lot.dpe_classe || '\u2014'}</span>
         </div>
-        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 border border-slate-100">
+        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
           <Thermometer className="h-4 w-4 text-rose-500" />
-          <span className="text-xs text-gray-500 flex-1">GES</span>
-          <span className="text-sm font-bold text-gray-900">{lot.ges_classe || '\u2014'}</span>
+          <span className="text-xs text-muted-foreground flex-1">GES</span>
+          <span className="text-sm font-bold text-foreground">{lot.ges_classe || '\u2014'}</span>
         </div>
 
         {/* Eau chaude */}
-        <div className={`flex items-center gap-3 p-2.5 rounded-lg border ${editing ? 'bg-primary/5 border-primary/30' : 'bg-slate-50 border-slate-100'}`}>
+        <div className={`flex items-center gap-3 p-2.5 rounded-lg border ${editing ? 'bg-primary/5 border-primary/30' : 'bg-muted/50 border-border/50'}`}>
           <Droplets className="h-4 w-4 text-blue-500 shrink-0" />
-          <span className="text-xs text-gray-500 shrink-0">Eau chaude</span>
+          <span className="text-xs text-muted-foreground shrink-0">Eau chaude</span>
           {editing ? (
             <div className="flex-1 flex items-center gap-1.5 justify-end">
-              <select value={formData.eau_chaude_type} onChange={(e) => setFormData((prev: any) => ({ ...prev, eau_chaude_type: e.target.value }))} className="h-7 text-xs rounded-md border border-gray-200 bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
+              <select value={formData.eau_chaude_type} onChange={(e) => setFormData((prev: any) => ({ ...prev, eau_chaude_type: e.target.value }))} className="h-7 text-xs rounded-md border border-border bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
                 {ENERGY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
-              <select value={formData.eau_chaude_mode} onChange={(e) => setFormData((prev: any) => ({ ...prev, eau_chaude_mode: e.target.value }))} className="h-7 text-xs rounded-md border border-gray-200 bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
+              <select value={formData.eau_chaude_mode} onChange={(e) => setFormData((prev: any) => ({ ...prev, eau_chaude_mode: e.target.value }))} className="h-7 text-xs rounded-md border border-border bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
                 {ENERGY_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
           ) : (
-            <span className="text-sm font-medium text-gray-900 flex-1 text-right">
+            <span className="text-sm font-medium text-foreground flex-1 text-right">
               {lot.eau_chaude_type ? `${energyLabels[lot.eau_chaude_type] || lot.eau_chaude_type}${lot.eau_chaude_mode ? ` (${energyLabels[lot.eau_chaude_mode] || lot.eau_chaude_mode})` : ''}` : '\u2014'}
             </span>
           )}
         </div>
 
         {/* Chauffage */}
-        <div className={`flex items-center gap-3 p-2.5 rounded-lg border ${editing ? 'bg-primary/5 border-primary/30' : 'bg-slate-50 border-slate-100'}`}>
+        <div className={`flex items-center gap-3 p-2.5 rounded-lg border ${editing ? 'bg-primary/5 border-primary/30' : 'bg-muted/50 border-border/50'}`}>
           <Flame className="h-4 w-4 text-red-500 shrink-0" />
-          <span className="text-xs text-gray-500 shrink-0">Chauffage</span>
+          <span className="text-xs text-muted-foreground shrink-0">Chauffage</span>
           {editing ? (
             <div className="flex-1 flex items-center gap-1.5 justify-end">
-              <select value={formData.chauffage_type} onChange={(e) => setFormData((prev: any) => ({ ...prev, chauffage_type: e.target.value }))} className="h-7 text-xs rounded-md border border-gray-200 bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
+              <select value={formData.chauffage_type} onChange={(e) => setFormData((prev: any) => ({ ...prev, chauffage_type: e.target.value }))} className="h-7 text-xs rounded-md border border-border bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
                 {ENERGY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
-              <select value={formData.chauffage_mode} onChange={(e) => setFormData((prev: any) => ({ ...prev, chauffage_mode: e.target.value }))} className="h-7 text-xs rounded-md border border-gray-200 bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
+              <select value={formData.chauffage_mode} onChange={(e) => setFormData((prev: any) => ({ ...prev, chauffage_mode: e.target.value }))} className="h-7 text-xs rounded-md border border-border bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
                 {ENERGY_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
           ) : (
-            <span className="text-sm font-medium text-gray-900 flex-1 text-right">
+            <span className="text-sm font-medium text-foreground flex-1 text-right">
               {lot.chauffage_type ? `${energyLabels[lot.chauffage_type] || lot.chauffage_type}${lot.chauffage_mode ? ` (${energyLabels[lot.chauffage_mode] || lot.chauffage_mode})` : ''}` : '\u2014'}
             </span>
           )}
@@ -552,7 +552,7 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
     <div data-card className={`${cardClass} p-5`}>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-[#94a3b8]" />
+          <Users className="h-4 w-4 text-muted-foreground" />
           <h2 className={labelClass}>
             Tiers lies ({totalTiers})
           </h2>
@@ -572,15 +572,15 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
       {showAdd && (
         <div className="mb-4 p-3 bg-primary/5 border border-primary/30 rounded-lg space-y-2">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="Rechercher un tiers..." className="pl-8 h-8 text-xs" autoFocus />
           </div>
           {searchResults && searchResults.length > 0 && (
             <div className="max-h-32 overflow-y-auto space-y-1">
               {searchResults.filter(t => !proprietaires.some(p => p.id === t.id)).map(t => (
                 <button key={t.id} onClick={() => handleLink(t.id)} className="w-full flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-primary/10 rounded transition-colors text-left">
-                  <User className="h-3 w-3 text-gray-400 shrink-0" />
-                  <span className="font-medium text-gray-800">{t.prenom ? `${t.prenom} ${t.nom}` : t.raison_sociale || t.nom}</span>
+                  <User className="h-3 w-3 text-muted-foreground shrink-0" />
+                  <span className="font-medium text-foreground">{t.prenom ? `${t.prenom} ${t.nom}` : t.raison_sociale || t.nom}</span>
                 </button>
               ))}
             </div>
@@ -592,22 +592,22 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
         <div className="grid grid-cols-2 gap-3">
           {/* Proprietaire cards */}
           {proprietaires.map((p) => (
-            <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg border border-[#e2e8f0] hover:border-primary/30 transition-colors group">
+            <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary/30 transition-colors group">
               <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <span className="text-xs font-bold text-primary">{(p.prenom?.[0] || p.nom[0]).toUpperCase()}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-medium text-gray-900 truncate">{p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}</p>
                   {p.est_principal && <Badge className="bg-primary/5 text-primary border-primary/30 text-[9px] shrink-0">Principal</Badge>}
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px] font-medium">Proprietaire</Badge>
-                  <span className="text-xs text-gray-400 truncate">{p.email || p.tel || ''}</span>
+                  <span className="text-xs text-muted-foreground truncate">{p.email || p.tel || ''}</span>
                 </div>
               </div>
               {!isArchived && (
-                <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: p.id })} className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition-all shrink-0" title="Retirer">
+                <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: p.id })} className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 transition-all shrink-0" title="Retirer">
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
@@ -616,17 +616,17 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
 
           {/* Mandataire card */}
           {mandataire && (
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-[#e2e8f0] hover:border-blue-200 transition-colors">
+            <div className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-blue-200 transition-colors">
               <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                 <span className="text-xs font-bold text-blue-700">{(mandataire.nom[0]).toUpperCase()}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {mandataire.prenom ? `${mandataire.prenom} ${mandataire.nom}` : mandataire.raison_sociale || mandataire.nom}
                 </p>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[9px] font-medium">Mandataire</Badge>
-                  <span className="text-xs text-gray-400 truncate">{mandataire.email || ''}</span>
+                  <span className="text-xs text-muted-foreground truncate">{mandataire.email || ''}</span>
                 </div>
               </div>
             </div>
@@ -634,8 +634,8 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
         </div>
       ) : (
         <div className="text-center py-6">
-          <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-2"><Users className="h-4 w-4 text-gray-400" /></div>
-          <p className="text-xs text-gray-400">Aucun tiers lie</p>
+          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mx-auto mb-2"><Users className="h-4 w-4 text-muted-foreground" /></div>
+          <p className="text-xs text-muted-foreground">Aucun tiers lie</p>
         </div>
       )}
 

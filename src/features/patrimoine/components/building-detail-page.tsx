@@ -111,7 +111,7 @@ export function BuildingDetailPage() {
     )
   }
 
-  if (!batiment) return <div className="p-6"><p className="text-gray-400">Batiment introuvable</p></div>
+  if (!batiment) return <div className="p-6"><p className="text-muted-foreground">Batiment introuvable</p></div>
 
   const adresses = batiment.adresses ?? []
   const principale = adresses.find(a => a.type === 'principale')
@@ -133,18 +133,18 @@ export function BuildingDetailPage() {
         <BreadcrumbList className="text-xs">
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/app/patrimoine" className="text-[#94a3b8] hover:text-slate-600">Referentiel</Link>
+              <Link to="/app/patrimoine" className="text-muted-foreground hover:text-foreground">Referentiel</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link to="/app/patrimoine" className="text-[#94a3b8] hover:text-slate-600">Parc immobilier</Link>
+              <Link to="/app/patrimoine" className="text-muted-foreground hover:text-foreground">Parc immobilier</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="text-slate-700 font-medium">{batiment.designation}</BreadcrumbPage>
+            <BreadcrumbPage className="text-foreground font-medium">{batiment.designation}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -180,7 +180,7 @@ export function BuildingDetailPage() {
             {batiment.est_archive && <Badge variant="destructive" className="text-[10px]">Archive</Badge>}
           </div>
           {principale && (
-            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
               <MapPin className="h-3 w-3" />
               {principale.rue}, {principale.ville}
             </p>
@@ -219,14 +219,14 @@ export function BuildingDetailPage() {
             layout
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             data-card
-            className="flex items-center gap-3 p-3.5 bg-slate-50 rounded-lg border border-slate-100"
+            className="flex items-center gap-3 p-3.5 bg-muted/50 rounded-lg border border-border/50"
           >
-            <div className="h-9 w-9 rounded-lg bg-white border border-slate-100 flex items-center justify-center shrink-0">
-              <Icon className="h-4 w-4 text-slate-400" />
+            <div className="h-9 w-9 rounded-lg bg-white border border-border/50 flex items-center justify-center shrink-0">
+              <Icon className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">{label}</p>
-              <p className="text-[14px] font-bold text-slate-700 -mt-0.5">{value}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+              <p className="text-[14px] font-bold text-foreground -mt-0.5">{value}</p>
             </div>
           </motion.div>
         ))}
@@ -234,7 +234,7 @@ export function BuildingDetailPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-gray-100 p-0.5 h-9">
+        <TabsList className="bg-muted p-0.5 h-9">
           <TabsTrigger value="overview" className="text-xs h-8 px-4">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="lots" className="text-xs h-8 px-4">Lots ({lots?.length ?? 0})</TabsTrigger>
         </TabsList>
@@ -250,10 +250,10 @@ export function BuildingDetailPage() {
               layout
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               data-card
-              className="col-span-2 bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-5"
+              className="col-span-2 bg-card rounded-xl border border-border shadow-sm p-5"
             >
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8]">Adresses</h2>
+                <h2 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Adresses</h2>
                 {!batiment.est_archive && <AddAddressButton batimentId={batiment.id} />}
               </div>
               <div className="space-y-2">
@@ -268,9 +268,9 @@ export function BuildingDetailPage() {
               layout
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               data-card
-              className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-5"
+              className="bg-card rounded-xl border border-border shadow-sm p-5"
             >
-              <h2 className="text-[11px] font-bold uppercase tracking-wider text-[#94a3b8] mb-3">Informations</h2>
+              <h2 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Informations</h2>
               <div className="space-y-1">
                 <InlineField label="Etages" editing={editing} value={batiment.nb_etages ?? '---'}>
                   <Input type="number" value={formData.nb_etages} onChange={(e) => setFormData(prev => ({ ...prev, nb_etages: e.target.value }))} className="h-7 text-sm" />
@@ -292,11 +292,11 @@ export function BuildingDetailPage() {
 
         {/* Lots tab */}
         <TabsContent value="lots" className="mt-4">
-          <div data-card className="bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div data-card className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
               <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-900">Lots</h3>
+                <Layers className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-foreground">Lots</h3>
                 <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{lots?.length ?? 0}</Badge>
               </div>
               <Button size="sm" onClick={() => setShowCreateLot(true)} className="bg-primary text-primary-foreground hover:bg-primary/90 h-7 text-xs px-3">
@@ -304,7 +304,7 @@ export function BuildingDetailPage() {
               </Button>
             </div>
             {lots && lots.length > 0 ? (
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-border/30">
                 {lots.map((lot) => {
                   const propLabel = lot.proprietaires?.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom).join(', ') || '---'
                   const LotIcon = typeBienIcons[lot.type_bien] || Building2
@@ -314,12 +314,12 @@ export function BuildingDetailPage() {
                       className="flex items-center gap-4 px-4 py-3 hover:bg-muted/50 cursor-pointer transition-colors"
                       onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
                     >
-                      <div className="h-9 w-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                        <LotIcon className="h-4 w-4 text-gray-500" />
+                      <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                        <LotIcon className="h-4 w-4 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{lot.designation}</p>
-                        <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
+                        <p className="text-sm font-medium text-foreground">{lot.designation}</p>
+                        <div className="flex items-center gap-3 mt-0.5 text-xs text-muted-foreground">
                           <span className="capitalize">{lot.type_bien.replace('_', ' ')}</span>
                           {lot.etage && <span>Et. {lot.etage}</span>}
                           {lot.surface && <span>{lot.surface} m2</span>}
@@ -327,15 +327,15 @@ export function BuildingDetailPage() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px] h-5">Meuble</Badge>}
-                        <span className="text-xs text-gray-400 max-w-[120px] truncate">{propLabel}</span>
-                        <ExternalLink className="h-3.5 w-3.5 text-gray-300" />
+                        <span className="text-xs text-muted-foreground max-w-[120px] truncate">{propLabel}</span>
+                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/50" />
                       </div>
                     </div>
                   )
                 })}
               </div>
             ) : (
-              <div className="py-10 text-center text-gray-400 text-sm">Aucun lot</div>
+              <div className="py-10 text-center text-muted-foreground text-sm">Aucun lot</div>
             )}
           </div>
         </TabsContent>
@@ -411,22 +411,22 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
   }
 
   return (
-    <div className="p-3.5 rounded-lg border border-gray-100 hover:border-gray-200 transition-colors group">
+    <div className="p-3.5 rounded-lg border border-border/50 hover:border-border transition-colors group">
       <div className="flex items-start gap-3">
-        <div className="h-9 w-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-          <MapPin className="h-4 w-4 text-blue-600" />
+        <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <MapPin className="h-4 w-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold text-gray-900">{a.rue}</p>
+            <p className="text-sm font-semibold text-foreground">{a.rue}</p>
             <Badge variant="outline" className="text-[9px] capitalize shrink-0">{a.type}</Badge>
           </div>
-          {a.complement && <p className="text-xs text-gray-500 mt-0.5">{a.complement}</p>}
-          <p className="text-xs text-gray-500 mt-0.5">{a.ville}</p>
+          {a.complement && <p className="text-xs text-muted-foreground mt-0.5">{a.complement}</p>}
+          <p className="text-xs text-muted-foreground mt-0.5">{a.ville}</p>
         </div>
         {!isArchived && (
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-gray-400 hover:text-gray-700" onClick={() => setEditing(true)}>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground" onClick={() => setEditing(true)}>
               <Pencil className="h-3 w-3 mr-1" /> Modifier
             </Button>
             {totalAddresses > 1 && (
@@ -441,15 +441,15 @@ function AddressCard({ address: a, batimentId, isArchived, totalAddresses }: { a
       <div className="flex items-center gap-4 mt-2 pl-12 text-[11px]">
         {a.latitude && a.longitude ? (
           <a href={`https://maps.google.com/?q=${a.latitude},${a.longitude}`} target="_blank" rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-700 flex items-center gap-0.5">
+            className="text-primary hover:text-primary/80 flex items-center gap-0.5">
             <ExternalLinkIcon className="h-3 w-3" /> Voir sur Google Maps
           </a>
         ) : (
-          <span className="text-gray-300">Coordonnees GPS non disponibles --- saisie manuelle</span>
+          <span className="text-muted-foreground/50">Coordonnees GPS non disponibles --- saisie manuelle</span>
         )}
         {!isArchived && a.type === 'secondaire' && (
           <>
-            {a.latitude && a.longitude && <span className="text-gray-300">|</span>}
+            {a.latitude && a.longitude && <span className="text-muted-foreground/50">|</span>}
             <button
               className="text-primary hover:text-primary/80 flex items-center gap-0.5 font-medium cursor-pointer"
               onClick={handleSetPrimary}
@@ -494,7 +494,7 @@ function AddAddressButton({ batimentId }: { batimentId: string }) {
 
   return (
     <div className="w-full mt-2 p-3 rounded-lg border border-primary/30 bg-primary/5 space-y-2">
-      <p className="text-xs font-medium text-gray-600">Nouvelle adresse secondaire</p>
+      <p className="text-xs font-medium text-foreground/70">Nouvelle adresse secondaire</p>
       <AddressAutocomplete
         onChange={(addr) => {
           if (addr) { setRue(addr.rue); setCp(addr.code_postal); setVille(addr.ville); setLat(addr.latitude); setLng(addr.longitude) }

@@ -100,11 +100,11 @@ export function DynamicFilter({ fields, filters, onChange }: DynamicFilterProps)
             : f.value
 
         return (
-          <Badge key={i} variant="secondary" className="h-7 gap-1 pl-2 pr-1 text-xs font-normal bg-blue-50 text-blue-700 border-blue-200">
+          <Badge key={i} variant="secondary" className="h-7 gap-1 pl-2 pr-1 text-xs font-normal bg-primary/10 text-primary border-primary/20">
             <span className="font-medium">{fieldDef?.label}</span>
-            <span className="text-blue-400">{opLabel}</span>
+            <span className="text-primary/60">{opLabel}</span>
             <span className="font-medium">{valLabel || '...'}</span>
-            <button onClick={() => removeFilter(i)} className="ml-0.5 p-0.5 rounded hover:bg-blue-100">
+            <button onClick={() => removeFilter(i)} className="ml-0.5 p-0.5 rounded hover:bg-primary/20">
               <X className="h-3 w-3" />
             </button>
           </Badge>
@@ -121,7 +121,7 @@ export function DynamicFilter({ fields, filters, onChange }: DynamicFilterProps)
         </PopoverTrigger>
         <PopoverContent align="start" className="w-auto p-3 space-y-3">
           {filters.length === 0 && (
-            <p className="text-xs text-gray-400 mb-2">Ajoutez un filtre pour affiner les resultats</p>
+            <p className="text-xs text-muted-foreground mb-2">Ajoutez un filtre pour affiner les resultats</p>
           )}
 
           {filters.map((f, i) => {
@@ -171,14 +171,14 @@ export function DynamicFilter({ fields, filters, onChange }: DynamicFilterProps)
                   />
                 )}
 
-                <button onClick={() => removeFilter(i)} className="p-1 text-gray-400 hover:text-red-500 transition-colors">
+                <button onClick={() => removeFilter(i)} className="p-1 text-muted-foreground hover:text-red-500 transition-colors">
                   <X className="h-3.5 w-3.5" />
                 </button>
               </div>
             )
           })}
 
-          <Button variant="ghost" size="sm" className="h-7 text-xs w-full justify-start gap-1 text-gray-500" onClick={addFilter}>
+          <Button variant="ghost" size="sm" className="h-7 text-xs w-full justify-start gap-1 text-muted-foreground" onClick={addFilter}>
             <Plus className="h-3 w-3" /> Ajouter un filtre
           </Button>
         </PopoverContent>
