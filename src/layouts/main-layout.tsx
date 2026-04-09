@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, Building2, Users, Settings, LogOut, ChevronRight, Bell, PanelLeftClose, PanelLeft } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, Building2, Users, Settings, LogOut, ChevronRight, Bell, PanelLeftClose, PanelLeft, ChevronsUpDown, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../hooks/use-auth'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '../lib/api-client'
 
 const SIDEBAR_COLLAPSED_W = 64
 const SIDEBAR_EXPANDED_W = 240
@@ -164,8 +166,12 @@ export function MainLayout() {
           ))}
         </nav>
 
-        {/* User section */}
-        <div className={`border-t border-border py-3 ${ICON_PL} pr-3`}>
+        {/* Workspace switcher + User section */}
+        <div className={`border-t border-border py-3 ${ICON_PL} pr-3 space-y-2`}>
+          {/* Workspace switcher */}
+          <WorkspaceSwitcher expanded={expanded} />
+
+          {/* User */}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[11px] shrink-0">
               {initials}
@@ -175,16 +181,13 @@ export function MainLayout() {
                 <p className="text-[13px] font-semibold text-foreground truncate">
                   {user?.prenom} {user?.nom}
                 </p>
-                <p className="text-[11px] text-muted-foreground truncate">
-                  {workspace?.nom}
-                </p>
               </div>
             )}
           </div>
           {expanded && (
             <button
               onClick={handleLogout}
-              className="mt-2 w-full flex items-center gap-2 px-1 py-1.5 text-[12px] text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-md transition-colors"
+              className="w-full flex items-center gap-2 px-1 py-1.5 text-[12px] text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-md transition-colors"
             >
               <LogOut size={14} strokeWidth={1.5} />
               <span>Déconnexion</span>
@@ -233,6 +236,71 @@ export function MainLayout() {
           </AnimatePresence>
         </main>
       </div>
+    </div>
+  )
+}
+
+/* ── Workspace Switcher ── */
+interface WsItem { id: string; nom: string; type_workspace: string; logo_url: string | null; role: string }
+
+function WorkspaceSwitcher({ expanded }: { expanded: boolean }) {
+  const { workspace, switchWorkspace } = useAuth()
+  const [open, setOpen] = useState(false)
+  const { data: workspaces } = useQuery<WsItem[]>({
+    queryKey: ['workspaces'],
+    queryFn: () => api<WsItem[]>('/auth/me/workspaces'),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  if (!workspaces || workspaces.length <= 1) {
+    // Single workspace — just show name
+    if (!expanded) return null
+    return (
+      <div className="flex items-center gap-2 px-1 py-1">
+        <span className="text-[11px] text-muted-foreground truncate">{workspace?.nom}</span>
+      </div>
+    )
+  }
+
+  async function handleSwitch(wsId: string) {
+    setOpen(false)
+    if (wsId !== workspace?.id) {
+      await switchWorkspace(wsId)
+      window.location.reload()
+    }
+  }
+
+  if (!expanded) {
+    return (
+      <button onClick={() => setOpen(!open)} className="w-8 h-8 rounded-md bg-accent/50 flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors" title={workspace?.nom}>
+        <ChevronsUpDown size={14} />
+      </button>
+    )
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent transition-colors text-left"
+      >
+        <span className="text-[12px] font-medium text-foreground truncate flex-1">{workspace?.nom}</span>
+        <ChevronsUpDown size={12} className="text-muted-foreground shrink-0" />
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-0 right-0 mb-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden z-50">
+          {workspaces.map((ws) => (
+            <button
+              key={ws.id}
+              onClick={() => handleSwitch(ws.id)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent transition-colors text-[12px]"
+            >
+              <span className="flex-1 truncate font-medium text-foreground">{ws.nom}</span>
+              {ws.id === workspace?.id && <Check size={14} className="text-primary shrink-0" />}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

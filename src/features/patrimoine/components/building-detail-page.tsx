@@ -12,6 +12,7 @@ import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
 import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
 import { ResizeHandle, useResizableColumns } from '../../../components/shared/resizable-columns'
 import { CreateLotModal } from './create-lot-modal'
+import { ConfirmDialog } from '../../../components/shared/confirm-dialog'
 import { toast } from 'sonner'
 
 const typeLabels: Record<string, string> = {
@@ -49,6 +50,7 @@ export function BuildingDetailPage() {
   })
   const [addrForms, setAddrForms] = useState<AddressForm[]>([])
   const [saving, setSaving] = useState(false)
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
 
   // Sync form data when batiment loads or editing starts
   useEffect(() => {
@@ -186,7 +188,7 @@ export function BuildingDetailPage() {
           )}
           <Button variant="outline" size="sm"
             className={batiment.est_archive ? 'gap-1.5 border-border hover:border-foreground/20 hover:bg-accent' : 'gap-1.5 border-destructive/30 text-destructive/80 hover:text-destructive hover:bg-destructive/5 hover:border-destructive/50'}
-            onClick={handleArchive}
+            onClick={() => setShowArchiveConfirm(true)}
           >
             {batiment.est_archive ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
             {batiment.est_archive ? 'Restaurer' : 'Archiver'}
@@ -336,6 +338,17 @@ export function BuildingDetailPage() {
 
       <CreateLotModal open={showCreateLot} onOpenChange={setShowCreateLot} preselectedBatimentId={id} onCreated={(lotId) => navigate(`/app/patrimoine/lots/${lotId}`)} />
       <FloatingSaveBar visible={editing} onSave={handleSave} onCancel={handleCancel} saving={saving} />
+      <ConfirmDialog
+        open={showArchiveConfirm}
+        onOpenChange={setShowArchiveConfirm}
+        title={batiment.est_archive ? 'Restaurer ce bâtiment ?' : 'Archiver ce bâtiment ?'}
+        description={batiment.est_archive
+          ? 'Le bâtiment et ses lots redeviendront visibles dans les listes et les recherches.'
+          : 'Le bâtiment et ses lots seront masqués des listes, recherches et pickers. Les missions existantes restent consultables.'}
+        confirmLabel={batiment.est_archive ? 'Restaurer' : 'Archiver'}
+        variant={batiment.est_archive ? 'default' : 'destructive'}
+        onConfirm={handleArchive}
+      />
     </div>
   )
 }

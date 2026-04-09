@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 's
 import { Textarea } from 'src/components/ui/textarea'
 import { Switch } from 'src/components/ui/switch'
 import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
+import { ConfirmDialog } from '../../../components/shared/confirm-dialog'
 import { ResizeHandle, useResizableColumns } from '../../../components/shared/resizable-columns'
 import { useLotDetail, useUpdateLot, useSearchTiers, useLinkProprietaire, useUnlinkProprietaire } from '../api'
 import { CreateTiersModal } from '../../tiers/components/create-tiers-modal'
@@ -58,6 +59,7 @@ export function LotDetailPage() {
   const [editing, setEditing] = useState(false)
   const { data: lot, isLoading } = useLotDetail(id)
   const updateMutation = useUpdateLot()
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false)
 
   // Collapsible section states
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -217,7 +219,7 @@ export function LotDetailPage() {
             className={lot.est_archive
               ? 'gap-1.5 border-border hover:border-foreground/20 hover:bg-accent'
               : 'gap-1.5 border-destructive/30 text-destructive/80 hover:text-destructive hover:bg-destructive/5 hover:border-destructive/50'}
-            onClick={handleArchive}
+            onClick={() => setShowArchiveConfirm(true)}
           >
             {lot.est_archive ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
             {lot.est_archive ? 'Restaurer' : 'Archiver'}
@@ -333,6 +335,17 @@ export function LotDetailPage() {
       </p>
 
       <FloatingSaveBar visible={editing} onSave={handleSave} onCancel={handleCancel} saving={saving} />
+      <ConfirmDialog
+        open={showArchiveConfirm}
+        onOpenChange={setShowArchiveConfirm}
+        title={lot.est_archive ? 'Restaurer ce lot ?' : 'Archiver ce lot ?'}
+        description={lot.est_archive
+          ? 'Le lot redeviendra visible dans les listes et les recherches.'
+          : 'Le lot sera masqué des listes, recherches et pickers. Les missions existantes restent consultables.'}
+        confirmLabel={lot.est_archive ? 'Restaurer' : 'Archiver'}
+        variant={lot.est_archive ? 'default' : 'destructive'}
+        onConfirm={handleArchive}
+      />
     </div>
   )
 }

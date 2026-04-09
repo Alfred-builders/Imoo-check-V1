@@ -192,6 +192,24 @@ router.get('/me', verifyToken, async (req, res) => {
   }
 })
 
+// List all workspaces for current user (for workspace switcher)
+router.get('/me/workspaces', verifyToken, async (req, res) => {
+  try {
+    const db = await import('../db/index.js')
+    const { rows } = await db.query(
+      `SELECT w.id, w.nom, w.type_workspace, w.logo_url, wu.role
+       FROM workspace_user wu
+       JOIN workspace w ON w.id = wu.workspace_id
+       WHERE wu.user_id = $1
+       ORDER BY w.nom ASC`,
+      [req.user!.userId]
+    )
+    sendSuccess(res, rows)
+  } catch (error) {
+    sendError(res, error)
+  }
+})
+
 // Forgot password
 router.post('/forgot-password', async (req, res) => {
   try {
