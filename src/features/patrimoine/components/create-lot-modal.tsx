@@ -48,7 +48,6 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
   // Building creation fields (inline sub-form)
   const [batDesignation, setBatDesignation] = useState('')
   const [batType, setBatType] = useState('immeuble')
-  const [batNumBatiment, setBatNumBatiment] = useState('')
   const [batNbEtages, setBatNbEtages] = useState('')
   const [batAnneeConstruction, setBatAnneeConstruction] = useState('')
   const [batCommentaire, setBatCommentaire] = useState('')
@@ -87,7 +86,7 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
   }
 
   function resetBat() {
-    setBatDesignation(''); setBatType('immeuble'); setBatNumBatiment(''); setBatNbEtages('')
+    setBatDesignation(''); setBatType('immeuble'); setBatNbEtages('')
     setBatAnneeConstruction(''); setBatCommentaire(''); setBatRue(''); setBatCP(''); setBatVille('')
     setBatComplement(''); setBatLat(undefined); setBatLng(undefined)
   }
@@ -97,7 +96,6 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
     try {
       const result = await createBatMutation.mutateAsync({
         designation: batDesignation, type: batType,
-        num_batiment: batNumBatiment || undefined,
         nb_etages: batNbEtages ? parseInt(batNbEtages) : undefined,
         annee_construction: batAnneeConstruction ? parseInt(batAnneeConstruction) : undefined,
         commentaire: batCommentaire || undefined,
@@ -343,10 +341,6 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                       )}
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">N° bâtiment</Label>
-                  <Input value={batNumBatiment} onChange={(e) => setBatNumBatiment(e.target.value)} placeholder="A, B, C..." className="h-9" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Nb étages</Label>

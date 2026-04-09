@@ -25,7 +25,6 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
   const [complement, setComplement] = useState('')
   const [latitude, setLatitude] = useState<number | undefined>()
   const [longitude, setLongitude] = useState<number | undefined>()
-  const [numBatiment, setNumBatiment] = useState('')
   const [nbEtages, setNbEtages] = useState('')
   const [anneeConstruction, setAnneeConstruction] = useState('')
   const [commentaire, setCommentaire] = useState('')
@@ -41,7 +40,7 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
   function reset() {
     setDesignation(''); setType('immeuble'); setRue(''); setCodePostal(''); setVille('')
     setComplement(''); setNbEtages(''); setAnneeConstruction(''); setCommentaire('')
-    setNumBatiment(''); setLatitude(undefined); setLongitude(undefined)
+    setLatitude(undefined); setLongitude(undefined)
     setShowSecondary(false); setSecRue(''); setSecCodePostal(''); setSecVille('')
   }
 
@@ -51,7 +50,6 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
       const result = await createMutation.mutateAsync({
         designation,
         type,
-        num_batiment: numBatiment || undefined,
         nb_etages: nbEtages ? parseInt(nbEtages) : undefined,
         annee_construction: anneeConstruction ? parseInt(anneeConstruction) : undefined,
         commentaire: commentaire || undefined,
@@ -86,7 +84,7 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
               <Label className="text-xs">Désignation *</Label>
               <Input value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="Résidence Les Lilas" required className="h-9" />
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Type *</Label>
                 <Select value={type} onValueChange={setType}>
@@ -99,10 +97,6 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
                     <SelectItem value="autre">Autre</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">N° bâtiment</Label>
-                <Input value={numBatiment} onChange={(e) => setNumBatiment(e.target.value)} placeholder="A, B, C..." className="h-9" />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Nb étages</Label>
@@ -128,7 +122,7 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Complément</Label>
-              <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Bât. A, Entrée 2" className="h-9" />
+              <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Bât. A, Entrée 2, N° bâtiment..." className="h-9" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
