@@ -1,13 +1,10 @@
 import { useState } from 'react'
-import { Users, Mail, Send, Loader2, Shield, Building2, UserPlus, Clock, CheckCircle, AlertCircle, Copy, X, Pencil, Save, MapPin, Phone, AtSign, Hash, Palette } from 'lucide-react'
+import { Users, Mail, Send, Loader2, Shield, Building2, UserPlus, Clock, CheckCircle, AlertCircle, Copy, X, Save, MapPin, Phone, AtSign, Hash, Palette, ChevronRight, Globe } from 'lucide-react'
 import { toast } from 'sonner'
-import { Card, CardContent, CardHeader, CardTitle } from 'src/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from 'src/components/ui/tabs'
 import { Badge } from 'src/components/ui/badge'
 import { Button } from 'src/components/ui/button'
 import { Input } from 'src/components/ui/input'
 import { Label } from 'src/components/ui/label'
-import { Separator } from 'src/components/ui/separator'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
 import { useWorkspaceDetails, useUpdateWorkspace, useWorkspaceUsers, useInvitations, useSendInvitation, useChangeRole, useResendInvitation, useCancelInvitation } from '../api'
@@ -16,41 +13,68 @@ import type { WorkspaceUser, Invitation } from '../api'
 const ROLES = ['admin', 'gestionnaire', 'technicien'] as const
 type Role = (typeof ROLES)[number]
 
-const roleConfig: Record<Role, { label: string; color: string; bg: string; border: string; description: string }> = {
-  admin: { label: 'Admin', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200', description: 'Acces complet' },
-  gestionnaire: { label: 'Gestionnaire', color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20', description: 'Back-office' },
-  technicien: { label: 'Technicien', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', description: 'App mobile' },
+const roleConfig: Record<Role, { label: string; color: string; bg: string; border: string; description: string; icon: string }> = {
+  admin: { label: 'Admin', color: 'text-red-700', bg: 'bg-red-50', border: 'border-red-200', description: 'Acces complet', icon: '🔴' },
+  gestionnaire: { label: 'Gestionnaire', color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20', description: 'Back-office', icon: '🔵' },
+  technicien: { label: 'Technicien', color: 'text-emerald-700', bg: 'bg-emerald-50', border: 'border-emerald-200', description: 'App mobile', icon: '🟢' },
 }
 
 const typeLabels: Record<string, string> = {
   societe_edl: 'Societe EDL', bailleur: 'Bailleur', agence: 'Agence immobiliere',
 }
 
+type Section = 'general' | 'users' | 'invitations'
+
+const NAV_ITEMS: { key: Section; label: string; icon: typeof Building2; description: string }[] = [
+  { key: 'general', label: 'General', icon: Building2, description: 'Informations du workspace' },
+  { key: 'users', label: 'Membres', icon: Users, description: 'Gerer les utilisateurs' },
+  { key: 'invitations', label: 'Invitations', icon: Mail, description: 'Inviter des collaborateurs' },
+]
+
 export function SettingsPage() {
+  const [section, setSection] = useState<Section>('general')
+
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">Parametres</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Gerez votre workspace, vos utilisateurs et vos invitations</p>
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Parametres</h1>
+        <p className="text-sm text-muted-foreground mt-1">Configurez votre workspace et gerez votre equipe</p>
       </div>
 
-      <Tabs defaultValue="workspace" className="w-full">
-        <TabsList className="bg-surface-sunken p-0.5 h-9">
-          <TabsTrigger value="workspace" className="text-xs h-8 px-4"><Building2 className="h-3.5 w-3.5 mr-1.5" /> Workspace</TabsTrigger>
-          <TabsTrigger value="utilisateurs" className="text-xs h-8 px-4"><Users className="h-3.5 w-3.5 mr-1.5" /> Utilisateurs</TabsTrigger>
-          <TabsTrigger value="invitations" className="text-xs h-8 px-4"><Mail className="h-3.5 w-3.5 mr-1.5" /> Invitations</TabsTrigger>
-        </TabsList>
+      <div className="flex gap-8">
+        {/* Left sidebar nav */}
+        <nav className="w-56 shrink-0">
+          <div className="space-y-1 sticky top-20">
+            {NAV_ITEMS.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setSection(key)}
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  section === key
+                    ? 'bg-primary/8 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </nav>
 
-        <TabsContent value="workspace" className="mt-4"><WorkspaceTab /></TabsContent>
-        <TabsContent value="utilisateurs" className="mt-4"><UsersTab /></TabsContent>
-        <TabsContent value="invitations" className="mt-4"><InvitationsTab /></TabsContent>
-      </Tabs>
+        {/* Content area */}
+        <div className="flex-1 min-w-0">
+          {section === 'general' && <GeneralSection />}
+          {section === 'users' && <UsersSection />}
+          {section === 'invitations' && <InvitationsSection />}
+        </div>
+      </div>
     </div>
   )
 }
 
-// ── Workspace Tab ──
-function WorkspaceTab() {
+// ── General Section ──
+function GeneralSection() {
   const { data: ws, isLoading } = useWorkspaceDetails()
   const updateMutation = useUpdateWorkspace()
   const [editing, setEditing] = useState(false)
@@ -88,193 +112,185 @@ function WorkspaceTab() {
     } catch (err: any) { toast.error(err.message || 'Erreur') }
   }
 
-  if (isLoading) return <div className="space-y-4">{[1,2].map(i => <Skeleton key={i} className="h-40 rounded-xl" />)}</div>
+  if (isLoading) return <div className="space-y-6">{[1,2,3].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}</div>
   if (!ws) return <p className="text-muted-foreground">Workspace introuvable</p>
 
   return (
-    <div className="space-y-5">
-      {/* Header actions */}
-      <div className="flex justify-end">
+    <div className="space-y-8">
+      {/* Section header + actions */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Informations generales</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">Identite et coordonnees de votre workspace</p>
+        </div>
         {!editing ? (
-          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={startEdit}>
-            <Pencil className="h-3 w-3 mr-1.5" /> Modifier
-          </Button>
+          <Button variant="outline" size="sm" onClick={startEdit}>Modifier</Button>
         ) : (
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setEditing(false)}>Annuler</Button>
-            <Button size="sm" className="h-8 text-xs rounded-lg font-bold shadow-elevation-raised shadow-primary/15" onClick={handleSave} disabled={updateMutation.isPending}>
-              <Save className="h-3 w-3 mr-1.5" /> Enregistrer
+            <Button variant="outline" size="sm" onClick={() => setEditing(false)}>Annuler</Button>
+            <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
+              Enregistrer
             </Button>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-5">
-        {/* Informations generales */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-muted-foreground" /> Informations generales
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {editing ? (
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Nom du workspace *</Label>
-                  <Input value={nom} onChange={(e) => setNom(e.target.value)} className="h-9" />
+      {/* Identity block */}
+      <SettingsBlock title="Identite" icon={Building2}>
+        {editing ? (
+          <div className="space-y-4">
+            <FieldRow label="Nom du workspace" required>
+              <Input value={nom} onChange={(e) => setNom(e.target.value)} className="max-w-md" />
+            </FieldRow>
+            <FieldRow label="Type">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="capitalize">{typeLabels[ws.type_workspace] || ws.type_workspace}</Badge>
+                <span className="text-xs text-muted-foreground">Non modifiable</span>
+              </div>
+            </FieldRow>
+            <FieldRow label="SIRET">
+              <Input value={siret} onChange={(e) => setSiret(e.target.value)} placeholder="12345678901234" className="max-w-xs" />
+            </FieldRow>
+          </div>
+        ) : (
+          <div className="space-y-0 divide-y divide-border/50">
+            <DisplayRow label="Nom" value={ws.nom} />
+            <DisplayRow label="Type" value={<Badge variant="outline" className="capitalize">{typeLabels[ws.type_workspace] || ws.type_workspace}</Badge>} />
+            <DisplayRow label="SIRET" value={ws.siret} />
+            <DisplayRow label="Statut" value={
+              <Badge className={ws.statut === 'actif' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : ''}>{ws.statut}</Badge>
+            } />
+          </div>
+        )}
+      </SettingsBlock>
+
+      {/* Contact block */}
+      <SettingsBlock title="Contact" icon={AtSign}>
+        {editing ? (
+          <div className="space-y-4">
+            <FieldRow label="Email">
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contact@exemple.com" className="max-w-md" />
+            </FieldRow>
+            <FieldRow label="Telephone">
+              <Input value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="01 23 45 67 89" className="max-w-xs" />
+            </FieldRow>
+          </div>
+        ) : (
+          <div className="space-y-0 divide-y divide-border/50">
+            <DisplayRow label="Email" value={ws.email} />
+            <DisplayRow label="Telephone" value={ws.telephone} />
+          </div>
+        )}
+      </SettingsBlock>
+
+      {/* Address block */}
+      <SettingsBlock title="Adresse" icon={MapPin}>
+        {editing ? (
+          <div className="space-y-4">
+            <FieldRow label="Adresse">
+              <Input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="12 Rue de la Paix" className="max-w-lg" />
+            </FieldRow>
+            <div className="grid grid-cols-[120px_1fr] gap-3 max-w-md">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Code postal</Label>
+                <Input value={codePostal} onChange={(e) => setCodePostal(e.target.value)} placeholder="75001" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Ville</Label>
+                <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Paris" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-0 divide-y divide-border/50">
+            <DisplayRow label="Adresse" value={ws.adresse} />
+            <DisplayRow label="Ville" value={ws.code_postal || ws.ville ? `${ws.code_postal || ''} ${ws.ville || ''}`.trim() : null} />
+          </div>
+        )}
+      </SettingsBlock>
+
+      {/* Branding block */}
+      <SettingsBlock title="Apparence" icon={Palette}>
+        {editing ? (
+          <div className="space-y-4">
+            <FieldRow label="Couleur primaire">
+              <div className="flex items-center gap-3">
+                <input type="color" value={couleurPrimaire || '#2563eb'} onChange={(e) => setCouleurPrimaire(e.target.value)} className="h-9 w-12 rounded-lg border border-border cursor-pointer" />
+                <Input value={couleurPrimaire} onChange={(e) => setCouleurPrimaire(e.target.value)} placeholder="#2563eb" className="max-w-[140px] font-mono text-sm" />
+              </div>
+            </FieldRow>
+            <FieldRow label="Logo">
+              <div className="flex items-center gap-3">
+                <div className="h-12 w-12 rounded-xl bg-surface-sunken border border-dashed border-border flex items-center justify-center">
+                  <Globe className="h-5 w-5 text-muted-foreground/40" />
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Type</Label>
-                  <Input value={typeLabels[ws.type_workspace] || ws.type_workspace} disabled className="h-9 bg-muted text-muted-foreground" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">SIRET</Label>
-                  <Input value={siret} onChange={(e) => setSiret(e.target.value)} placeholder="12345678901234" className="h-9" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Upload bientot disponible</p>
                 </div>
               </div>
-            ) : (
-              <dl className="space-y-3">
-                <InfoRow icon={Building2} label="Nom" value={ws.nom} />
-                <InfoRow icon={Hash} label="Type" value={
-                  <Badge variant="outline" className="text-[10px] capitalize">{typeLabels[ws.type_workspace] || ws.type_workspace}</Badge>
-                } />
-                <InfoRow icon={Hash} label="SIRET" value={ws.siret} />
-                <InfoRow icon={Hash} label="Statut" value={
-                  <Badge className={ws.statut === 'actif' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]' : 'text-[10px]'}>{ws.statut}</Badge>
-                } />
-              </dl>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Contact */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <AtSign className="h-4 w-4 text-muted-foreground" /> Contact
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {editing ? (
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Email de contact</Label>
-                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contact@exemple.com" className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Telephone</Label>
-                  <Input value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="01 23 45 67 89" className="h-9" />
-                </div>
+            </FieldRow>
+          </div>
+        ) : (
+          <div className="space-y-0 divide-y divide-border/50">
+            <div className="flex items-center justify-between py-3">
+              <span className="text-sm text-muted-foreground">Couleur primaire</span>
+              <div className="flex items-center gap-2.5">
+                <div className="h-6 w-6 rounded-md border border-border shadow-xs" style={{ background: ws.couleur_primaire || '#2563eb' }} />
+                <span className="text-sm font-mono text-foreground/70">{ws.couleur_primaire || 'Par defaut'}</span>
               </div>
-            ) : (
-              <dl className="space-y-3">
-                <InfoRow icon={AtSign} label="Email" value={ws.email} />
-                <InfoRow icon={Phone} label="Telephone" value={ws.telephone} />
-              </dl>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+            <DisplayRow label="Logo" value={ws.logo_url ? 'Configure' : 'Non configure'} />
+          </div>
+        )}
+      </SettingsBlock>
 
-        {/* Adresse */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-muted-foreground" /> Adresse
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {editing ? (
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Adresse</Label>
-                  <Input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="12 Rue de la Paix" className="h-9" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Code postal</Label>
-                    <Input value={codePostal} onChange={(e) => setCodePostal(e.target.value)} placeholder="75001" className="h-9" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Ville</Label>
-                    <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Paris" className="h-9" />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <dl className="space-y-3">
-                <InfoRow icon={MapPin} label="Adresse" value={ws.adresse} />
-                <InfoRow icon={MapPin} label="CP / Ville" value={ws.code_postal || ws.ville ? `${ws.code_postal || ''} ${ws.ville || ''}`.trim() : null} />
-              </dl>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Branding */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-              <Palette className="h-4 w-4 text-muted-foreground" /> Branding
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {editing ? (
-              <div className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Couleur primaire</Label>
-                  <div className="flex items-center gap-2">
-                    <input type="color" value={couleurPrimaire || '#d97706'} onChange={(e) => setCouleurPrimaire(e.target.value)} className="h-9 w-12 rounded border border-border cursor-pointer" />
-                    <Input value={couleurPrimaire} onChange={(e) => setCouleurPrimaire(e.target.value)} placeholder="#d97706" className="h-9 flex-1" />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Logo URL</Label>
-                  <Input value={ws.logo_url || ''} disabled placeholder="Upload a venir..." className="h-9 bg-muted text-muted-foreground" />
-                  <p className="text-[10px] text-muted-foreground/50">L'upload de logo sera disponible prochainement</p>
-                </div>
-              </div>
-            ) : (
-              <dl className="space-y-3">
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-xs text-muted-foreground flex items-center gap-1.5"><Palette className="h-3.5 w-3.5" /> Couleur</span>
-                  <div className="flex items-center gap-2">
-                    {ws.couleur_primaire ? (
-                      <>
-                        <div className="h-5 w-5 rounded border border-border" style={{ background: ws.couleur_primaire }} />
-                        <span className="text-xs font-mono text-foreground/70">{ws.couleur_primaire}</span>
-                      </>
-                    ) : <span className="text-xs text-muted-foreground/50">Par defaut</span>}
-                  </div>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-xs text-muted-foreground">Logo</span>
-                  <span className="text-xs text-muted-foreground/50">{ws.logo_url ? 'Configure' : 'Non configure'}</span>
-                </div>
-              </dl>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Meta */}
-      <p className="text-[10px] text-muted-foreground/50">
-        Cree le {new Date(ws.created_at).toLocaleDateString('fr-FR')} — Derniere modification {new Date(ws.updated_at).toLocaleDateString('fr-FR')}
+      {/* Footer meta */}
+      <p className="text-xs text-muted-foreground/60 pt-2">
+        Cree le {new Date(ws.created_at).toLocaleDateString('fr-FR')} — Derniere modification le {new Date(ws.updated_at).toLocaleDateString('fr-FR')}
       </p>
     </div>
   )
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value: React.ReactNode }) {
+// ── Settings building blocks ──
+
+function SettingsBlock({ title, icon: Icon, children }: { title: string; icon: typeof Building2; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-2">
-      <span className="text-xs text-muted-foreground flex items-center gap-1.5"><Icon className="h-3.5 w-3.5" /> {label}</span>
-      <span className="text-sm font-medium text-foreground">{value || <span className="text-muted-foreground/50">—</span>}</span>
+    <div className="elevation-raised rounded-xl">
+      <div className="flex items-center gap-2.5 px-6 py-4 border-b border-border">
+        <div className="h-7 w-7 rounded-lg bg-surface-sunken flex items-center justify-center">
+          <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+        </div>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      </div>
+      <div className="px-6 py-4">{children}</div>
     </div>
   )
 }
 
-// ── Users Tab ──
-function UsersTab() {
+function FieldRow({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-6">
+      <Label className="text-sm text-muted-foreground w-36 pt-2 shrink-0">
+        {label}{required && <span className="text-destructive ml-0.5">*</span>}
+      </Label>
+      <div className="flex-1">{children}</div>
+    </div>
+  )
+}
+
+function DisplayRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between py-3">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium text-foreground">{value || <span className="text-muted-foreground/40">—</span>}</span>
+    </div>
+  )
+}
+
+// ── Users Section ──
+function UsersSection() {
   const { data: users, isLoading } = useWorkspaceUsers()
   const changeRole = useChangeRole()
 
@@ -288,57 +304,67 @@ function UsersTab() {
     )
   }
 
-  if (isLoading) return <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
-
   return (
-    <Card className="shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
-        <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Membres</h3>
-          <Badge variant="secondary" className="text-[10px] h-5 px-1.5">{users?.length ?? 0}</Badge>
-        </div>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Membres</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">Gerez les utilisateurs et leurs permissions</p>
       </div>
-      {users && users.length > 0 ? (
-        <div className="divide-y divide-border/30">
-          {users.map((user) => {
-            const rc = roleConfig[user.role]
-            return (
-              <div key={user.id} className="flex items-center gap-4 px-5 py-3">
-                <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-foreground/70">{user.prenom[0]}{user.nom[0]}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{user.prenom} {user.nom}</p>
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
-                </div>
-                <Badge className={`${rc.bg} ${rc.color} ${rc.border} text-[10px]`}>{rc.label}</Badge>
-                <Select value={user.role} onValueChange={(v) => handleRoleChange(user, v)}>
-                  <SelectTrigger className="w-36 h-8 text-xs"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {ROLES.map((r) => (
-                      <SelectItem key={r} value={r} className="text-xs">
-                        <div className="flex items-center gap-2">
-                          <Shield className="h-3 w-3" /> {roleConfig[r].label}
-                          <span className="text-muted-foreground text-[10px]">— {roleConfig[r].description}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )
-          })}
+
+      {isLoading && <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>}
+
+      {!isLoading && users && (
+        <div className="elevation-raised rounded-xl overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-3 bg-surface-sunken border-b border-border">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {users.length} membre{users.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+
+          {/* User rows */}
+          {users.length > 0 ? (
+            <div className="divide-y divide-border/40">
+              {users.map((user) => {
+                const rc = roleConfig[user.role]
+                return (
+                  <div key={user.id} className="flex items-center gap-4 px-6 py-3.5 hover:bg-accent/30 transition-colors">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0 ring-1 ring-border">
+                      <span className="text-xs font-bold text-primary/70">{user.prenom[0]}{user.nom[0]}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">{user.prenom} {user.nom}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                    </div>
+                    <Badge className={`${rc.bg} ${rc.color} ${rc.border} text-[10px]`}>{rc.label}</Badge>
+                    <Select value={user.role} onValueChange={(v) => handleRoleChange(user, v)}>
+                      <SelectTrigger className="w-40 h-8 text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {ROLES.map((r) => (
+                          <SelectItem key={r} value={r} className="text-xs">
+                            <div className="flex items-center gap-2">
+                              <Shield className="h-3 w-3" /> {roleConfig[r].label}
+                              <span className="text-muted-foreground text-[10px]">— {roleConfig[r].description}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <EmptyState icon={Users} message="Aucun membre dans ce workspace" />
+          )}
         </div>
-      ) : (
-        <div className="py-8 text-center text-muted-foreground text-sm">Aucun membre</div>
       )}
-    </Card>
+    </div>
   )
 }
 
-// ── Invitations Tab ──
-function InvitationsTab() {
+// ── Invitations Section ──
+function InvitationsSection() {
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<Role>('gestionnaire')
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'expired'>('all')
@@ -382,65 +408,75 @@ function InvitationsTab() {
     expired: (invitations || []).filter(i => !i.accepted_at && new Date(i.expires_at) < new Date()).length,
   }
 
+  const filters: { key: typeof filter; label: string }[] = [
+    { key: 'all', label: 'Toutes' },
+    { key: 'pending', label: 'En attente' },
+    { key: 'accepted', label: 'Acceptees' },
+    { key: 'expired', label: 'Expirees' },
+  ]
+
   return (
-    <div className="space-y-5">
-      <Card className="shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <UserPlus className="h-4 w-4 text-muted-foreground" /> Inviter un utilisateur
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex items-end gap-3">
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-lg font-semibold text-foreground">Invitations</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">Invitez de nouveaux membres dans votre workspace</p>
+      </div>
+
+      {/* Invite form */}
+      <div className="elevation-raised rounded-xl">
+        <div className="flex items-center gap-2.5 px-6 py-4 border-b border-border">
+          <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+            <UserPlus className="h-3.5 w-3.5 text-primary" />
+          </div>
+          <h3 className="text-sm font-semibold text-foreground">Nouvelle invitation</h3>
+        </div>
+        <form onSubmit={handleSubmit} className="px-6 py-5">
+          <div className="flex items-end gap-3">
             <div className="flex-1 space-y-1.5">
-              <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
-              <Input type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} className="h-9" required />
+              <Label className="text-xs text-muted-foreground">Adresse email</Label>
+              <Input type="email" placeholder="nom@exemple.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="w-44 space-y-1.5">
-              <Label className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">Role</Label>
+              <Label className="text-xs text-muted-foreground">Role</Label>
               <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-                <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="text-xs"><SelectValue /></SelectTrigger>
                 <SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r} className="text-xs">{roleConfig[r].label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={sendInvitation.isPending} className="rounded-lg font-bold shadow-elevation-raised shadow-primary/15 h-9 px-4">
+            <Button type="submit" disabled={sendInvitation.isPending}>
               {sendInvitation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
               Envoyer
             </Button>
-          </form>
-          <p className="text-[10px] text-muted-foreground mt-2">L'invitation expire apres 7 jours.</p>
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            <h3 className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Invitations</h3>
           </div>
-          <div className="flex items-center bg-muted rounded-md p-0.5 text-[10px]">
-            {([
-              { key: 'all' as const, label: 'Toutes' },
-              { key: 'pending' as const, label: 'En attente' },
-              { key: 'accepted' as const, label: 'Acceptees' },
-              { key: 'expired' as const, label: 'Expirees' },
-            ]).map(({ key, label }) => (
+          <p className="text-xs text-muted-foreground/60 mt-3">L'invitation expire automatiquement apres 7 jours.</p>
+        </form>
+      </div>
+
+      {/* Invitations list */}
+      <div className="elevation-raised rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-3 bg-surface-sunken border-b border-border">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Historique</span>
+          <div className="flex items-center bg-background rounded-lg p-0.5 text-xs border border-border/60">
+            {filters.map(({ key, label }) => (
               <button key={key} onClick={() => setFilter(key)}
-                className={`px-2.5 py-1 rounded transition-colors font-medium ${filter === key ? 'bg-surface-raised shadow-elevation-raised text-foreground' : 'text-muted-foreground'}`}>
-                {label} {counts[key] > 0 && <span className="text-muted-foreground/60 ml-0.5">{counts[key]}</span>}
+                className={`px-2.5 py-1 rounded-md transition-colors font-medium ${
+                  filter === key ? 'bg-surface-raised shadow-elevation-raised text-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}>
+                {label}
+                {counts[key] > 0 && <span className="text-muted-foreground/50 ml-1">{counts[key]}</span>}
               </button>
             ))}
           </div>
         </div>
 
-        {isLoading && <div className="p-5 space-y-3">{[1,2].map(i => <Skeleton key={i} className="h-14 rounded" />)}</div>}
+        {isLoading && <div className="p-6 space-y-3">{[1,2].map(i => <Skeleton key={i} className="h-14 rounded" />)}</div>}
 
         {!isLoading && filtered.length === 0 && (
-          <div className="py-8 text-center"><Mail className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" /><p className="text-sm text-muted-foreground">Aucune invitation</p></div>
+          <EmptyState icon={Mail} message="Aucune invitation" />
         )}
 
         {filtered.length > 0 && (
-          <div className="divide-y divide-border/30">
+          <div className="divide-y divide-border/40">
             {filtered.map((inv) => {
               const rc = roleConfig[inv.role as Role] || roleConfig.gestionnaire
               const isExpired = !inv.accepted_at && new Date(inv.expires_at) < new Date()
@@ -448,13 +484,15 @@ function InvitationsTab() {
               const isPending = !isAccepted && !isExpired
 
               return (
-                <div key={inv.id} className="flex items-center gap-3 px-5 py-3 hover:bg-accent/50 transition-colors">
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${isAccepted ? 'bg-emerald-100' : isExpired ? 'bg-red-50' : 'bg-primary/5'}`}>
+                <div key={inv.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-accent/30 transition-colors">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
+                    isAccepted ? 'bg-emerald-50 ring-1 ring-emerald-200' : isExpired ? 'bg-red-50 ring-1 ring-red-200' : 'bg-primary/5 ring-1 ring-primary/20'
+                  }`}>
                     {isAccepted ? <CheckCircle className="h-4 w-4 text-emerald-600" /> : isExpired ? <AlertCircle className="h-4 w-4 text-red-400" /> : <Clock className="h-4 w-4 text-primary" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-foreground">{inv.email}</p>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {new Date(inv.created_at).toLocaleDateString('fr-FR')}
                       {inv.invited_by_nom && ` — par ${inv.invited_by_prenom} ${inv.invited_by_nom}`}
                       {isPending && ` — expire le ${new Date(inv.expires_at).toLocaleDateString('fr-FR')}`}
@@ -467,15 +505,15 @@ function InvitationsTab() {
                   <div className="flex items-center gap-1 shrink-0">
                     {isPending && (
                       <>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-muted-foreground" onClick={() => copyInviteLink(inv.token)}><Copy className="h-3 w-3 mr-0.5" /> Lien</Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-primary" onClick={() => resendInvitation.mutate(inv.id, { onSuccess: () => toast.success('Relance envoyee') })}><Send className="h-3 w-3 mr-0.5" /> Relancer</Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-1.5 text-destructive" onClick={() => cancelInvitation.mutate(inv.id, { onSuccess: () => toast.success('Annulee') })}><X className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => copyInviteLink(inv.token)}><Copy className="h-3 w-3 mr-1" /> Lien</Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary" onClick={() => resendInvitation.mutate(inv.id, { onSuccess: () => toast.success('Relance envoyee') })}><Send className="h-3 w-3 mr-1" /> Relancer</Button>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => cancelInvitation.mutate(inv.id, { onSuccess: () => toast.success('Annulee') })}><X className="h-3.5 w-3.5" /></Button>
                       </>
                     )}
-                    {isExpired && (
+                    {isExpired && !isPending && (
                       <>
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] text-primary" onClick={() => resendInvitation.mutate(inv.id, { onSuccess: () => toast.success('Relance envoyee') })}><Send className="h-3 w-3 mr-0.5" /> Relancer</Button>
-                        <Button variant="ghost" size="sm" className="h-7 px-1.5 text-destructive" onClick={() => cancelInvitation.mutate(inv.id, { onSuccess: () => toast.success('Annulee') })}><X className="h-3 w-3" /></Button>
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-primary" onClick={() => resendInvitation.mutate(inv.id, { onSuccess: () => toast.success('Relance envoyee') })}><Send className="h-3 w-3 mr-1" /> Relancer</Button>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive" onClick={() => cancelInvitation.mutate(inv.id, { onSuccess: () => toast.success('Annulee') })}><X className="h-3.5 w-3.5" /></Button>
                       </>
                     )}
                   </div>
@@ -484,7 +522,19 @@ function InvitationsTab() {
             })}
           </div>
         )}
-      </Card>
+      </div>
+    </div>
+  )
+}
+
+// ── Shared ──
+function EmptyState({ icon: Icon, message }: { icon: typeof Mail; message: string }) {
+  return (
+    <div className="py-12 text-center">
+      <div className="h-12 w-12 rounded-xl bg-surface-sunken flex items-center justify-center mx-auto mb-3">
+        <Icon className="h-5 w-5 text-muted-foreground/40" />
+      </div>
+      <p className="text-sm text-muted-foreground">{message}</p>
     </div>
   )
 }
