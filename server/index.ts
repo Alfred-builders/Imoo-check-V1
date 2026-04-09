@@ -16,11 +16,13 @@ import { AppError } from './utils/errors.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') })
+// Don't let .env override Railway's environment variables
+dotenv.config({ path: path.resolve(__dirname, '..', '.env'), override: false })
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '3001', 10)
-const isDev = process.env.NODE_ENV === 'development'
+const isRailway = !!process.env.RAILWAY_ENVIRONMENT
+const isDev = !isRailway && process.env.NODE_ENV === 'development'
 
 // Middleware
 app.use(cors({
