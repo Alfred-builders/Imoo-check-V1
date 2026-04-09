@@ -257,14 +257,27 @@ export function PatrimoinePage() {
       </nav>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">Parc immobilier</h1>
-          <p className="text-[13px] text-muted-foreground mt-0.5">
-            {isLoading ? '...' : `${filteredBatiments.length} bâtiment${filteredBatiments.length > 1 ? 's' : ''}`}
-          </p>
-        </div>
+      <div>
+        <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">Parc immobilier</h1>
+        <p className="text-[13px] text-muted-foreground mt-0.5">
+          {isLoading ? '...' : `${filteredBatiments.length} bâtiment${filteredBatiments.length > 1 ? 's' : ''}`}
+        </p>
+      </div>
+
+      {/* Search + Filters + Actions — single row */}
+      <div className="space-y-2">
         <div className="flex items-center gap-2">
+          <div className="relative w-72">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8 h-8 text-xs"
+            />
+          </div>
+          <DynamicFilter fields={FILTER_FIELDS} filters={dynamicFilters} onChange={setDynamicFilters} />
+          <div className="flex-1" />
           <Button
             variant="outline"
             size="sm"
@@ -286,7 +299,7 @@ export function PatrimoinePage() {
             visibleColumns={visibleCols}
             onColumnsChange={setVisibleCols}
           />
-          <div className="flex items-center bg-muted rounded-lg p-0.5 ml-1">
+          <div className="flex items-center bg-muted rounded-lg p-0.5">
             <button
               onClick={() => setView('table')}
               className={`p-1.5 rounded-md transition-colors ${view === 'table' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
@@ -300,22 +313,6 @@ export function PatrimoinePage() {
               <Map className="h-3.5 w-3.5" />
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Search + Dynamic filters */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <div className="relative w-72">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 h-8 text-xs"
-            />
-          </div>
-          <DynamicFilter fields={FILTER_FIELDS} filters={dynamicFilters} onChange={setDynamicFilters} />
         </div>
       </div>
 
