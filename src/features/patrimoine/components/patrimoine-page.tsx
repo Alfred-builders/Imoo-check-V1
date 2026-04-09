@@ -277,7 +277,7 @@ export function PatrimoinePage() {
       {view === 'table' && (
         <div className="elevation-raised rounded-xl overflow-hidden">
           {/* Table header */}
-          <div className="flex items-center gap-4 px-4 py-2.5 bg-surface-sunken border-b border-border text-[11px] font-bold text-muted-foreground uppercase tracking-wider select-none">
+          <div className="flex items-center gap-4 px-5 py-3 bg-surface-sunken border-b border-border text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest select-none">
             <div className="w-6 shrink-0" /> {/* expand */}
             {isCol('designation') && (
               <div className="relative overflow-visible shrink-0" style={{ width: colWidths.designation, minWidth: 40 }}>
@@ -387,21 +387,23 @@ function BatimentRow({ batiment, visibleCols, colWidths }: { batiment: Batiment;
   const isCol = (id: string) => visibleCols.includes(id)
 
   return (
-    <div className="border-b border-border/50 last:border-b-0">
+    <div className="border-b border-border/40 last:border-b-0 group/row">
       <div
-        className="flex items-center gap-4 px-4 py-2.5 hover:bg-accent/50 transition-colors cursor-pointer text-sm"
+        className="flex items-center gap-4 px-5 py-3 hover:bg-accent/40 transition-all cursor-pointer text-[13px]"
         onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batiment.designation }] } })}
       >
         <button
           onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
-          className="w-6 shrink-0 flex items-center justify-center p-0.5 rounded hover:bg-muted"
+          className="w-6 shrink-0 flex items-center justify-center p-0.5 rounded-md hover:bg-muted transition-colors"
         >
-          {expanded ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+          <ChevronRight className={`h-3.5 w-3.5 text-muted-foreground/60 transition-transform duration-150 ${expanded ? 'rotate-90' : ''}`} />
         </button>
         {isCol('designation') && (
-          <div className="shrink-0 flex items-center gap-2 min-w-0 overflow-hidden group" style={{ width: colWidths.designation }}>
-            <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="font-bold text-foreground group-hover:text-primary truncate transition-colors">{batiment.designation}</span>
+          <div className="shrink-0 flex items-center gap-2.5 min-w-0 overflow-hidden" style={{ width: colWidths.designation }}>
+            <div className="h-7 w-7 rounded-lg bg-surface-sunken flex items-center justify-center shrink-0">
+              <Icon className="h-3.5 w-3.5 text-muted-foreground/70" />
+            </div>
+            <span className="font-semibold text-foreground group-hover/row:text-primary truncate transition-colors">{batiment.designation}</span>
             {batiment.est_archive && <Badge variant="outline" className="text-[9px] text-muted-foreground">Archive</Badge>}
           </div>
         )}
@@ -411,25 +413,29 @@ function BatimentRow({ batiment, visibleCols, colWidths }: { batiment: Batiment;
           </div>
         )}
         {isCol('adresse') && (
-          <div className="shrink-0 text-xs text-muted-foreground truncate" style={{ width: colWidths.adresse }}>
-            {adresse ? `${adresse.rue}, ${adresse.ville}` : '—'}
+          <div className="shrink-0 text-[13px] text-muted-foreground truncate" style={{ width: colWidths.adresse }}>
+            {adresse ? `${adresse.rue}, ${adresse.ville}` : <span className="text-muted-foreground/30">—</span>}
           </div>
         )}
-        {isCol('nb_lots') && <div className="shrink-0 text-center" style={{ width: colWidths.nb_lots }}><Badge variant="outline" className="text-[10px] font-medium">{batiment.nb_lots}</Badge></div>}
-        {isCol('nb_etages') && <div className="shrink-0 text-center text-muted-foreground text-xs" style={{ width: colWidths.nb_etages }}>{batiment.nb_etages ?? '—'}</div>}
-        {isCol('annee_construction') && <div className="shrink-0 text-center text-muted-foreground text-xs" style={{ width: colWidths.annee_construction }}>{batiment.annee_construction ?? '—'}</div>}
+        {isCol('nb_lots') && (
+          <div className="shrink-0 text-center" style={{ width: colWidths.nb_lots }}>
+            <span className="inline-flex items-center justify-center h-6 min-w-6 px-1.5 rounded-md bg-surface-sunken text-xs font-semibold text-foreground/70">{batiment.nb_lots}</span>
+          </div>
+        )}
+        {isCol('nb_etages') && <div className="shrink-0 text-center text-muted-foreground/70 text-[13px]" style={{ width: colWidths.nb_etages }}>{batiment.nb_etages ?? <span className="text-muted-foreground/30">—</span>}</div>}
+        {isCol('annee_construction') && <div className="shrink-0 text-center text-muted-foreground/70 text-[13px]" style={{ width: colWidths.annee_construction }}>{batiment.annee_construction ?? <span className="text-muted-foreground/30">—</span>}</div>}
         {isCol('derniere_mission') && (
-          <div className="shrink-0 text-xs text-muted-foreground" style={{ width: colWidths.derniere_mission }}>{batiment.derniere_mission ? formatDate(batiment.derniere_mission) : '—'}</div>
+          <div className="shrink-0 text-[13px] text-muted-foreground/70" style={{ width: colWidths.derniere_mission }}>{batiment.derniere_mission ? formatDate(batiment.derniere_mission) : <span className="text-muted-foreground/30">—</span>}</div>
         )}
         {isCol('missions_a_venir') && (
           <div className="shrink-0 text-center" style={{ width: colWidths.missions_a_venir }}>
             {batiment.missions_a_venir > 0 ? (
               <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">{batiment.missions_a_venir}</Badge>
-            ) : <span className="text-xs text-muted-foreground/50">—</span>}
+            ) : <span className="text-muted-foreground/30">—</span>}
           </div>
         )}
         {isCol('created_at') && (
-          <div className="shrink-0 text-xs text-muted-foreground" style={{ width: colWidths.created_at }}>{formatDate(batiment.created_at)}</div>
+          <div className="shrink-0 text-[13px] text-muted-foreground/70" style={{ width: colWidths.created_at }}>{formatDate(batiment.created_at)}</div>
         )}
       </div>
 
@@ -459,7 +465,7 @@ function LotSubRows({ batimentId, batimentName }: { batimentId: string; batiment
   return (
     <div className="bg-surface-sunken border-t border-border">
       {/* Sub-row column headers */}
-      <div className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border/60">
+      <div className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-12 pr-5 py-2 text-[9px] font-semibold text-muted-foreground/60 uppercase tracking-widest border-b border-border/50">
         <div>Lot</div>
         <div>Type</div>
         <div>Etage</div>
@@ -472,18 +478,20 @@ function LotSubRows({ batimentId, batimentName }: { batimentId: string; batiment
         return (
           <div
             key={lot.id}
-            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-accent/50 cursor-pointer transition-colors text-xs border-b border-border/30 last:border-b-0 items-center"
+            className="group grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-12 pr-5 py-2.5 hover:bg-accent/40 cursor-pointer transition-all text-[12px] border-b border-border/30 last:border-b-0 items-center"
             onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batimentName, href: `/app/patrimoine/batiments/${batimentId}` }, { label: lot.designation }] } })}
           >
-            <div className="flex items-center gap-2 min-w-0 group">
-              <Home className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-              <span className="font-bold text-foreground group-hover:text-primary truncate transition-colors">{lot.designation}</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-5 w-5 rounded bg-background flex items-center justify-center shrink-0 border border-border/60">
+                <Home className="h-2.5 w-2.5 text-muted-foreground/50" />
+              </div>
+              <span className="font-semibold text-foreground/80 group-hover:text-primary truncate transition-colors">{lot.designation}</span>
             </div>
             <div><Badge variant="outline" className="text-[9px] capitalize font-normal">{lot.type_bien.replace('_', ' ')}</Badge></div>
-            <div className="text-muted-foreground">{lot.etage || '—'}</div>
-            <div className="text-muted-foreground">{lot.surface ? `${lot.surface} m²` : '—'}</div>
-            <div>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meublé</Badge> : <span className="text-muted-foreground/50">—</span>}</div>
-            <div className="text-muted-foreground truncate">{propLabel}</div>
+            <div className="text-muted-foreground/70">{lot.etage || <span className="text-muted-foreground/30">—</span>}</div>
+            <div className="text-muted-foreground/70">{lot.surface ? `${lot.surface} m²` : <span className="text-muted-foreground/30">—</span>}</div>
+            <div>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meuble</Badge> : <span className="text-muted-foreground/30">—</span>}</div>
+            <div className="text-muted-foreground/70 truncate">{propLabel}</div>
           </div>
         )
       })}

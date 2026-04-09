@@ -71,7 +71,7 @@ export function TiersPage() {
 
       {/* Table */}
       <div className="elevation-raised rounded-xl overflow-hidden">
-        <div className="flex items-center gap-4 px-4 py-2.5 bg-surface-sunken border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
+        <div className="flex items-center gap-4 px-5 py-3 bg-surface-sunken border-b border-border text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-widest select-none">
           <div className="shrink-0" style={{ width: colWidths.avatar }} />
           <div className="relative shrink-0" style={{ width: colWidths.nom, minWidth: 40 }}>
             Nom / Raison sociale
@@ -130,19 +130,19 @@ function TiersRow({ tiers: t, colWidths, onClick }: { tiers: Tiers; colWidths: R
 
   return (
     <div
-      className="flex items-center gap-4 px-4 py-2.5 hover:bg-accent/50 cursor-pointer transition-colors text-sm border-b border-border/30 last:border-b-0"
+      className="group flex items-center gap-4 px-5 py-3 hover:bg-accent/40 cursor-pointer transition-all text-[13px] border-b border-border/40 last:border-b-0"
       onClick={onClick}
     >
       <div className="shrink-0 flex justify-center" style={{ width: colWidths.avatar }}>
-        <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${t.type_personne === 'morale' ? 'bg-emerald-100' : 'bg-primary/10'}`}>
+        <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ring-1 ${t.type_personne === 'morale' ? 'bg-emerald-50 ring-emerald-200' : 'bg-primary/5 ring-primary/20'}`}>
           {t.type_personne === 'morale'
-            ? <Building2 className="h-3.5 w-3.5 text-emerald-700" />
-            : <span className="text-[10px] font-bold text-primary">{(t.prenom?.[0] || t.nom[0]).toUpperCase()}</span>
+            ? <Building2 className="h-3.5 w-3.5 text-emerald-600" />
+            : <span className="text-[10px] font-bold text-primary/70">{(t.prenom?.[0] || t.nom[0]).toUpperCase()}</span>
           }
         </div>
       </div>
       <div className="shrink-0 min-w-0" style={{ width: colWidths.nom }}>
-        <p className="font-medium text-foreground truncate">{displayName}</p>
+        <p className="font-semibold text-foreground group-hover:text-primary truncate transition-colors">{displayName}</p>
         {t.est_archive && <Badge variant="outline" className="text-[9px] text-muted-foreground">Archive</Badge>}
       </div>
       <div className="shrink-0" style={{ width: colWidths.type }}>
