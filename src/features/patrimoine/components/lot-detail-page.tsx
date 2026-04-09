@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, Archive, ArchiveRestore, User, Building2, Home, Ruler, BedDouble, Zap, ChevronRight, Pencil, AlertTriangle, Thermometer, Car, Warehouse, Plus, X, Search, Flame, Droplets, Users } from 'lucide-react'
+import { Archive, ArchiveRestore, User, Building2, Home, ChevronRight, ChevronUp, ChevronDown, Pencil, AlertTriangle, Plus, X, Search, Users, ClipboardList } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Skeleton } from 'src/components/ui/skeleton'
-import { Separator } from 'src/components/ui/separator'
 import { Input } from 'src/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
 import { Textarea } from 'src/components/ui/textarea'
 import { Switch } from 'src/components/ui/switch'
-import { InlineField } from '../../../components/shared/inline-field'
 import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
 import { useLotDetail, useUpdateLot, useSearchTiers, useLinkProprietaire, useUnlinkProprietaire } from '../api'
 import { CreateTiersModal } from '../../tiers/components/create-tiers-modal'
@@ -33,11 +30,28 @@ const typeBienOptions = [
 ]
 
 const dpeOptions = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
-const gesOptions = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
 
-// Option A card style
-const cardClass = 'bg-card rounded-xl border border-border shadow-sm'
-const labelClass = 'text-[11px] font-bold uppercase tracking-wider text-muted-foreground'
+const ENERGY_TYPE_OPTIONS = [
+  { value: '', label: '\u2014' },
+  { value: 'electrique', label: 'Électrique' },
+  { value: 'gaz', label: 'Gaz' },
+  { value: 'fioul', label: 'Fioul' },
+  { value: 'bois', label: 'Bois' },
+  { value: 'pompe_a_chaleur', label: 'Pompe à chaleur' },
+  { value: 'autre', label: 'Autre' },
+]
+
+const ENERGY_MODE_OPTIONS = [
+  { value: '', label: '\u2014' },
+  { value: 'individuel', label: 'Individuel' },
+  { value: 'collectif', label: 'Collectif' },
+]
+
+const energyLabels: Record<string, string> = {
+  individuel: 'Individuel', collectif: 'Collectif',
+  gaz: 'Gaz', electrique: 'Électrique', fioul: 'Fioul', bois: 'Bois',
+  pompe_a_chaleur: 'Pompe à chaleur', autre: 'Autre',
+}
 
 export function LotDetailPage() {
   const { id } = useParams()
@@ -45,6 +59,19 @@ export function LotDetailPage() {
   const [editing, setEditing] = useState(false)
   const { data: lot, isLoading } = useLotDetail(id)
   const updateMutation = useUpdateLot()
+
+  // Collapsible section states
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    general: true,
+    energie: false,
+    annexes: false,
+    tiers: false,
+    commentaire: false,
+  })
+
+  function toggleSection(key: string) {
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }))
+  }
 
   const [formData, setFormData] = useState({
     designation: '', type_bien: '', etage: '', surface: '', nb_pieces: '',
@@ -80,11 +107,11 @@ export function LotDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-5 max-w-6xl mx-auto">
-        <Skeleton className="h-4 w-64" />
-        <Skeleton className="h-10 w-72" />
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <div className="grid grid-cols-3 gap-4"><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-64 rounded-xl" /><Skeleton className="h-64 rounded-xl" /></div>
+      <div className="p-6 space-y-5 max-w-4xl mx-auto">
+        <Skeleton className="h-12 w-72" />
+        <Skeleton className="h-64 rounded-xl" />
+        <Skeleton className="h-14 rounded-xl" />
+        <Skeleton className="h-14 rounded-xl" />
       </div>
     )
   }
@@ -98,7 +125,7 @@ export function LotDetailPage() {
     if (!id) return
     try {
       await updateMutation.mutateAsync({ id, est_archive: !lot!.est_archive })
-      toast.success(lot!.est_archive ? 'Lot restaure' : 'Lot archive')
+      toast.success(lot!.est_archive ? 'Lot restauré' : 'Lot archivé')
     } catch (err: any) {
       toast.error(err.message || 'Erreur')
     }
@@ -152,11 +179,7 @@ export function LotDetailPage() {
         chauffage_type: formData.chauffage_type || null,
         chauffage_mode: formData.chauffage_mode || null,
       })
-      toast.success('Lot mis a jour')
-      document.querySelectorAll('[data-card]').forEach(c => {
-        c.classList.add('animate-save-success')
-        setTimeout(() => c.classList.remove('animate-save-success'), 600)
-      })
+      toast.success('Lot mis à jour')
       setTimeout(() => setEditing(false), 400)
     } catch {
       toast.error('Erreur')
@@ -166,368 +189,187 @@ export function LotDetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-5 max-w-6xl mx-auto">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-        <button onClick={() => navigate('/app/patrimoine')} className="hover:text-foreground transition-colors">Referentiel</button>
-        <ChevronRight className="h-3 w-3" />
-        <button onClick={() => navigate('/app/patrimoine')} className="hover:text-foreground transition-colors">Parc immobilier</button>
-        {lot.batiment && (
-          <>
-            <ChevronRight className="h-3 w-3" />
-            <button onClick={() => navigate(`/app/patrimoine/batiments/${lot.batiment!.id}`)} className="hover:text-foreground transition-colors">{lot.batiment.designation}</button>
-          </>
-        )}
-        <ChevronRight className="h-3 w-3" />
-        <span className="text-foreground font-medium">{lot.designation}</span>
-      </nav>
-
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+    <div className="p-6 space-y-5 max-w-4xl mx-auto">
+      {/* Header — icon + name + badge + actions */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <ClipboardList className="h-6 w-6 text-primary" />
+          </div>
           <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">{lot.designation}</h1>
-              <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px] font-medium">
+            <h1 className="text-xl font-bold text-foreground">{lot.designation}</h1>
+            <div className="mt-1 flex items-center gap-2">
+              <Badge className="bg-primary/10 text-primary border-primary/20 capitalize">
                 {typeBienLabels[lot.type_bien] || lot.type_bien}
               </Badge>
-              {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Meuble</Badge>}
-              {lot.est_archive && <Badge variant="destructive" className="text-[10px]">Archive</Badge>}
+              {lot.meuble && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Meublé</Badge>}
+              {lot.est_archive && <Badge variant="destructive" className="text-[10px]">Archivé</Badge>}
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {!lot.est_archive && (
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => editing ? handleCancel() : setEditing(true)}>
-              <Pencil className="h-3 w-3 mr-1" /> {editing ? 'Annuler' : 'Modifier'}
+
+        <div className="flex items-center gap-2 shrink-0">
+          {!lot.est_archive && !editing && (
+            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+              <Pencil className="h-3.5 w-3.5 mr-1.5" /> Modifier
             </Button>
           )}
-          <Button variant="outline" size="sm" className="h-8 text-xs" onClick={handleArchive}>
-            {lot.est_archive ? <ArchiveRestore className="h-3 w-3 mr-1" /> : <Archive className="h-3 w-3 mr-1" />}
+          <Button variant="outline" size="sm" className={lot.est_archive ? '' : 'text-destructive hover:text-destructive'} onClick={handleArchive}>
+            {lot.est_archive ? <ArchiveRestore className="h-3.5 w-3.5 mr-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
             {lot.est_archive ? 'Restaurer' : 'Archiver'}
           </Button>
         </div>
       </div>
 
       {lot.est_archive && (
-        <div className="flex items-center gap-2 px-3 py-2.5 bg-primary/5 border border-primary/30 rounded-lg text-primary text-xs">
+        <div className="flex items-center gap-2 px-3 py-2.5 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-xs">
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          Ce lot est archive. Les modifications sont desactivees.
+          Ce lot est archivé. Les modifications sont désactivées.
         </div>
       )}
 
-      {/* Quick stats band */}
-      <motion.div layout>
-        <div data-card className="bg-muted/50 rounded-lg border border-border/50 flex items-center gap-0 overflow-hidden divide-x divide-slate-200/60">
-          {/* Etage */}
-          <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
-            <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-blue-500">
-              <Home className="h-3.5 w-3.5 text-white" />
-            </div>
-            <div>
-              <p className={labelClass}>Etage</p>
-              {editing ? (
-                <Input value={formData.etage} onChange={(e) => setFormData(prev => ({ ...prev, etage: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
-              ) : (
-                <p className="text-sm font-bold text-foreground leading-tight">{lot.etage || 'RDC'}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Type */}
-          <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
-            <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-primary">
-              <Building2 className="h-3.5 w-3.5 text-white" />
-            </div>
-            <div>
-              <p className={labelClass}>Type</p>
-              {editing ? (
-                <Select value={formData.type_bien} onValueChange={(val) => setFormData(prev => ({ ...prev, type_bien: val }))}>
-                  <SelectTrigger className="h-6 w-28 text-xs mt-0.5">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {typeBienOptions.map(o => (
-                      <SelectItem key={o.value} value={o.value} className="text-xs">{o.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-sm font-bold text-foreground leading-tight">{typeBienLabels[lot.type_bien]}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Surface */}
-          <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
-            <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-emerald-500">
-              <Ruler className="h-3.5 w-3.5 text-white" />
-            </div>
-            <div>
-              <p className={labelClass}>Surface</p>
-              {editing ? (
-                <Input type="number" value={formData.surface} onChange={(e) => setFormData(prev => ({ ...prev, surface: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
-              ) : (
-                <p className="text-sm font-bold text-foreground leading-tight">{lot.surface ? `${lot.surface} m2` : '\u2014'}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Pieces */}
-          <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
-            <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-violet-500">
-              <BedDouble className="h-3.5 w-3.5 text-white" />
-            </div>
-            <div>
-              <p className={labelClass}>Pieces</p>
-              {editing ? (
-                <Input value={formData.nb_pieces} onChange={(e) => setFormData(prev => ({ ...prev, nb_pieces: e.target.value }))} className="h-6 w-16 text-xs text-center mt-0.5" />
-              ) : (
-                <p className="text-sm font-bold text-foreground leading-tight">{lot.nb_pieces || '\u2014'}</p>
-              )}
-            </div>
-          </div>
-
-          {/* DPE */}
-          <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
-            <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-orange-500">
-              <Zap className="h-3.5 w-3.5 text-white" />
-            </div>
-            <div>
-              <p className={labelClass}>DPE</p>
-              {editing ? (
-                <Select value={formData.dpe_classe} onValueChange={(val) => setFormData(prev => ({ ...prev, dpe_classe: val }))}>
-                  <SelectTrigger className="h-6 w-16 text-xs mt-0.5">
-                    <SelectValue placeholder="\u2014" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {dpeOptions.map(o => (
-                      <SelectItem key={o || '__empty'} value={o} className="text-xs">{o || '\u2014'}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-sm font-bold text-foreground leading-tight">{lot.dpe_classe || '\u2014'}</p>
-              )}
-            </div>
-          </div>
-
-          {/* GES */}
-          <div className="flex-1 flex items-center gap-2.5 px-4 py-3">
-            <div className="h-7 w-7 rounded-md flex items-center justify-center shrink-0 bg-rose-500">
-              <Thermometer className="h-3.5 w-3.5 text-white" />
-            </div>
-            <div>
-              <p className={labelClass}>GES</p>
-              {editing ? (
-                <Select value={formData.ges_classe} onValueChange={(val) => setFormData(prev => ({ ...prev, ges_classe: val }))}>
-                  <SelectTrigger className="h-6 w-16 text-xs mt-0.5">
-                    <SelectValue placeholder="\u2014" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gesOptions.map(o => (
-                      <SelectItem key={o || '__empty'} value={o} className="text-xs">{o || '\u2014'}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-sm font-bold text-foreground leading-tight">{lot.ges_classe || '\u2014'}</p>
-              )}
-            </div>
-          </div>
+      {/* ── Section: Informations générales (open by default) ── */}
+      <CollapsibleSection title="Informations générales" open={openSections.general} onToggle={() => toggleSection('general')}>
+        <div className="divide-y divide-border/50">
+          <InfoRow label="Désignation" editing={editing} value={lot.designation}>
+            <Input value={formData.designation} onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))} className="h-8 w-48 text-sm" />
+          </InfoRow>
+          <InfoRow label="Type de bien" editing={editing} value={lot.type_bien}>
+            <Select value={formData.type_bien} onValueChange={(v) => setFormData(prev => ({ ...prev, type_bien: v }))}>
+              <SelectTrigger className="h-8 w-48 text-sm"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {typeBienOptions.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </InfoRow>
+          <InfoRow label="Réf. interne" editing={editing} value={lot.reference_interne || '--'}>
+            <Input value={formData.reference_interne} onChange={(e) => setFormData(prev => ({ ...prev, reference_interne: e.target.value }))} className="h-8 w-48 text-sm" />
+          </InfoRow>
+          <InfoRow label="N° appartement" editing={false} value={lot.designation || '--'}>
+            <span />
+          </InfoRow>
+          <InfoRow label="Nb pièces" editing={editing} value={lot.nb_pieces || '--'}>
+            <Input value={formData.nb_pieces} onChange={(e) => setFormData(prev => ({ ...prev, nb_pieces: e.target.value }))} className="h-8 w-48 text-sm" />
+          </InfoRow>
+          <InfoRow label="Étage" editing={editing} value={lot.etage || '--'}>
+            <Input value={formData.etage} onChange={(e) => setFormData(prev => ({ ...prev, etage: e.target.value }))} className="h-8 w-48 text-sm" />
+          </InfoRow>
+          <InfoRow label="Emplacement / palier" editing={editing} value={lot.emplacement_palier || '--'}>
+            <Input value={formData.emplacement_palier} onChange={(e) => setFormData(prev => ({ ...prev, emplacement_palier: e.target.value }))} className="h-8 w-48 text-sm" />
+          </InfoRow>
+          <InfoRow label="Surface" editing={editing} value={lot.surface ? `${lot.surface} m²` : '--'}>
+            <Input type="number" value={formData.surface} onChange={(e) => setFormData(prev => ({ ...prev, surface: e.target.value }))} className="h-8 w-48 text-sm" />
+          </InfoRow>
+          <InfoRow label="Meublé" editing={editing} value={lot.meuble ? 'Oui' : 'Non'}>
+            <Switch checked={formData.meuble} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, meuble: checked }))} />
+          </InfoRow>
         </div>
-      </motion.div>
+      </CollapsibleSection>
 
-      {/* Content */}
-      <motion.div layout className="space-y-4">
-        <div className="grid grid-cols-3 gap-4">
-          {/* Left sidebar -- Energie + Annexes */}
-          <div className="space-y-4">
-            <EnergieSection lot={lot} editing={editing} formData={formData} setFormData={setFormData} />
-
-            <div data-card className={`${cardClass} overflow-hidden`}>
-              <div className="px-5 py-3.5">
-                <h2 className={labelClass}>Annexes</h2>
-              </div>
-              <div className="px-5 pb-5 space-y-2">
-                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
-                  <Warehouse className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground flex-1">Cave</span>
-                  {editing ? (
-                    <Input value={formData.num_cave} onChange={(e) => setFormData(prev => ({ ...prev, num_cave: e.target.value }))} className="h-6 w-20 text-xs text-right" />
-                  ) : (
-                    <span className="text-sm font-medium text-foreground">{lot.num_cave || '\u2014'}</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
-                  <Car className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground flex-1">Parking</span>
-                  {editing ? (
-                    <Input value={formData.num_parking} onChange={(e) => setFormData(prev => ({ ...prev, num_parking: e.target.value }))} className="h-6 w-20 text-xs text-right" />
-                  ) : (
-                    <span className="text-sm font-medium text-foreground">{lot.num_parking || '\u2014'}</span>
-                  )}
-                </div>
-              </div>
+      {/* ── Section: Énergie ── */}
+      <CollapsibleSection title="Énergie" open={openSections.energie} onToggle={() => toggleSection('energie')}>
+        <div className="divide-y divide-border/50">
+          <InfoRow label="DPE" editing={editing} value={lot.dpe_classe || '--'}>
+            <Select value={formData.dpe_classe} onValueChange={(v) => setFormData(prev => ({ ...prev, dpe_classe: v }))}>
+              <SelectTrigger className="h-8 w-48 text-sm"><SelectValue placeholder="--" /></SelectTrigger>
+              <SelectContent>{dpeOptions.map(o => <SelectItem key={o || '__empty'} value={o}>{o || '--'}</SelectItem>)}</SelectContent>
+            </Select>
+          </InfoRow>
+          <InfoRow label="GES" editing={editing} value={lot.ges_classe || '--'}>
+            <Select value={formData.ges_classe} onValueChange={(v) => setFormData(prev => ({ ...prev, ges_classe: v }))}>
+              <SelectTrigger className="h-8 w-48 text-sm"><SelectValue placeholder="--" /></SelectTrigger>
+              <SelectContent>{dpeOptions.map(o => <SelectItem key={o || '__empty'} value={o}>{o || '--'}</SelectItem>)}</SelectContent>
+            </Select>
+          </InfoRow>
+          <InfoRow label="Eau chaude" editing={editing} value={lot.eau_chaude_type ? `${energyLabels[lot.eau_chaude_type] || lot.eau_chaude_type}${lot.eau_chaude_mode ? ` (${energyLabels[lot.eau_chaude_mode] || lot.eau_chaude_mode})` : ''}` : '--'}>
+            <div className="flex items-center gap-1.5">
+              <select value={formData.eau_chaude_type} onChange={(e) => setFormData(prev => ({ ...prev, eau_chaude_type: e.target.value }))} className="h-8 text-sm rounded-md border border-border bg-card px-2 focus:outline-none focus:ring-1 focus:ring-primary">
+                {ENERGY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+              <select value={formData.eau_chaude_mode} onChange={(e) => setFormData(prev => ({ ...prev, eau_chaude_mode: e.target.value }))} className="h-8 text-sm rounded-md border border-border bg-card px-2 focus:outline-none focus:ring-1 focus:ring-primary">
+                {ENERGY_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
             </div>
-
-            <p className="text-[10px] text-muted-foreground/50 px-1">
-              Cree {formatDate(lot.created_at)} — Modifie {formatDate(lot.updated_at)}
-            </p>
-          </div>
-
-          {/* Right main -- Details complementaires */}
-          <div data-card className={`col-span-2 ${cardClass} p-5`}>
-            <h2 className={`${labelClass} mb-3`}>Details complementaires</h2>
-            <div className="grid grid-cols-2 gap-x-8">
-              <InlineField label="Designation" editing={editing} value={lot.designation}>
-                <Input value={formData.designation} onChange={(e) => setFormData(prev => ({ ...prev, designation: e.target.value }))} className="h-7 text-sm" />
-              </InlineField>
-              <InlineField label="Reference" editing={editing} value={lot.reference_interne}>
-                <Input value={formData.reference_interne} onChange={(e) => setFormData(prev => ({ ...prev, reference_interne: e.target.value }))} className="h-7 text-sm" />
-              </InlineField>
-              <InlineField label="Meuble" editing={editing} value={lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">Oui</Badge> : 'Non'}>
-                <Switch checked={formData.meuble} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, meuble: checked }))} />
-              </InlineField>
-              <InlineField label="Emplacement palier" editing={editing} value={lot.emplacement_palier}>
-                <Input value={formData.emplacement_palier} onChange={(e) => setFormData(prev => ({ ...prev, emplacement_palier: e.target.value }))} className="h-7 text-sm" />
-              </InlineField>
-              <InlineField label="N. cave" editing={editing} value={lot.num_cave}>
-                <Input value={formData.num_cave} onChange={(e) => setFormData(prev => ({ ...prev, num_cave: e.target.value }))} className="h-7 text-sm" />
-              </InlineField>
-              <InlineField label="N. parking" editing={editing} value={lot.num_parking}>
-                <Input value={formData.num_parking} onChange={(e) => setFormData(prev => ({ ...prev, num_parking: e.target.value }))} className="h-7 text-sm" />
-              </InlineField>
+          </InfoRow>
+          <InfoRow label="Chauffage" editing={editing} value={lot.chauffage_type ? `${energyLabels[lot.chauffage_type] || lot.chauffage_type}${lot.chauffage_mode ? ` (${energyLabels[lot.chauffage_mode] || lot.chauffage_mode})` : ''}` : '--'}>
+            <div className="flex items-center gap-1.5">
+              <select value={formData.chauffage_type} onChange={(e) => setFormData(prev => ({ ...prev, chauffage_type: e.target.value }))} className="h-8 text-sm rounded-md border border-border bg-card px-2 focus:outline-none focus:ring-1 focus:ring-primary">
+                {ENERGY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+              <select value={formData.chauffage_mode} onChange={(e) => setFormData(prev => ({ ...prev, chauffage_mode: e.target.value }))} className="h-8 text-sm rounded-md border border-border bg-card px-2 focus:outline-none focus:ring-1 focus:ring-primary">
+                {ENERGY_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
             </div>
-            <Separator className="my-3" />
-            <InlineField label="Commentaire" editing={editing} value={lot.commentaire ? (
-              <p className="text-sm text-foreground bg-muted/50 rounded-lg p-3 border border-border/50 leading-relaxed">{lot.commentaire}</p>
-            ) : null} horizontal={false}>
-              <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} rows={3} className="text-sm" />
-            </InlineField>
-          </div>
+          </InfoRow>
         </div>
+      </CollapsibleSection>
 
-        {/* Tiers lies */}
-        <TiersLiesSection lotId={lot.id} proprietaires={proprietaires} mandataire={mandataire} isArchived={lot.est_archive} />
-
-        {/* Missions placeholder */}
-        <div data-card className={cardClass}>
-          <div className="px-5 py-3.5">
-            <h2 className={labelClass}>Missions</h2>
-          </div>
-          <div className="py-10 text-center">
-            <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-3">
-              <Building2 className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm font-medium text-muted-foreground">Aucune mission pour ce lot</p>
-            <p className="text-xs text-muted-foreground mt-1">Sprint 3</p>
-          </div>
+      {/* ── Section: Annexes ── */}
+      <CollapsibleSection title="Annexes" open={openSections.annexes} onToggle={() => toggleSection('annexes')}>
+        <div className="divide-y divide-border/50">
+          <InfoRow label="N° cave" editing={editing} value={lot.num_cave || '--'}>
+            <Input value={formData.num_cave} onChange={(e) => setFormData(prev => ({ ...prev, num_cave: e.target.value }))} className="h-8 w-48 text-sm" />
+          </InfoRow>
+          <InfoRow label="N° parking" editing={editing} value={lot.num_parking || '--'}>
+            <Input value={formData.num_parking} onChange={(e) => setFormData(prev => ({ ...prev, num_parking: e.target.value }))} className="h-8 w-48 text-sm" />
+          </InfoRow>
         </div>
-      </motion.div>
+      </CollapsibleSection>
 
-      {/* Floating save bar */}
+      {/* ── Section: Tiers liés ── */}
+      <CollapsibleSection title={`Tiers liés (${(proprietaires.length + (mandataire ? 1 : 0))})`} open={openSections.tiers} onToggle={() => toggleSection('tiers')}>
+        <TiersLiesContent lotId={lot.id} proprietaires={proprietaires} mandataire={mandataire} isArchived={lot.est_archive} />
+      </CollapsibleSection>
+
+      {/* ── Section: Commentaire ── */}
+      <CollapsibleSection title="Commentaire" open={openSections.commentaire} onToggle={() => toggleSection('commentaire')}>
+        <div className="px-5 py-4">
+          {editing ? (
+            <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} rows={3} className="text-sm" placeholder="Ajouter un commentaire..." />
+          ) : (
+            <p className="text-sm text-foreground">{lot.commentaire || <span className="text-muted-foreground">--</span>}</p>
+          )}
+        </div>
+      </CollapsibleSection>
+
+      {/* Meta */}
+      <p className="text-[10px] text-muted-foreground/50 px-1">
+        Créé {formatDate(lot.created_at)} — Modifié {formatDate(lot.updated_at)}
+      </p>
+
       <FloatingSaveBar visible={editing} onSave={handleSave} onCancel={handleCancel} saving={saving} />
     </div>
   )
 }
 
-// Energy type/mode options
-const ENERGY_TYPE_OPTIONS = [
-  { value: '', label: '\u2014' },
-  { value: 'electrique', label: 'Electrique' },
-  { value: 'gaz', label: 'Gaz' },
-  { value: 'fioul', label: 'Fioul' },
-  { value: 'bois', label: 'Bois' },
-  { value: 'pompe_a_chaleur', label: 'Pompe a chaleur' },
-  { value: 'autre', label: 'Autre' },
-]
-
-const ENERGY_MODE_OPTIONS = [
-  { value: '', label: '\u2014' },
-  { value: 'individuel', label: 'Individuel' },
-  { value: 'collectif', label: 'Collectif' },
-]
-
-const energyLabels: Record<string, string> = {
-  individuelle: 'Individuelle', collective: 'Collective', aucun: 'Aucun', autre: 'Autre',
-  individuel: 'Individuel', collectif: 'Collectif',
-  gaz: 'Gaz', electrique: 'Electrique', fioul: 'Fioul', bois: 'Bois',
-  pompe_a_chaleur: 'Pompe a chaleur',
-}
-
-function EnergieSection({ lot, editing, formData, setFormData }: {
-  lot: any
-  editing: boolean
-  formData: any
-  setFormData: React.Dispatch<React.SetStateAction<any>>
-}) {
+/* ── Collapsible Section ── */
+function CollapsibleSection({ title, open, onToggle, children }: { title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <div data-card className={`${cardClass} overflow-hidden`}>
-      <div className="px-5 py-3.5">
-        <h2 className={labelClass}>Energie</h2>
-      </div>
-      <div className="px-5 pb-5 space-y-2">
-        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
-          <Zap className="h-4 w-4 text-orange-500" />
-          <span className="text-xs text-muted-foreground flex-1">DPE</span>
-          <span className="text-sm font-bold text-foreground">{lot.dpe_classe || '\u2014'}</span>
-        </div>
-        <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 border border-border/50">
-          <Thermometer className="h-4 w-4 text-rose-500" />
-          <span className="text-xs text-muted-foreground flex-1">GES</span>
-          <span className="text-sm font-bold text-foreground">{lot.ges_classe || '\u2014'}</span>
-        </div>
-
-        {/* Eau chaude */}
-        <div className={`flex items-center gap-3 p-2.5 rounded-lg border ${editing ? 'bg-primary/5 border-primary/30' : 'bg-muted/50 border-border/50'}`}>
-          <Droplets className="h-4 w-4 text-blue-500 shrink-0" />
-          <span className="text-xs text-muted-foreground shrink-0">Eau chaude</span>
-          {editing ? (
-            <div className="flex-1 flex items-center gap-1.5 justify-end">
-              <select value={formData.eau_chaude_type} onChange={(e) => setFormData((prev: any) => ({ ...prev, eau_chaude_type: e.target.value }))} className="h-7 text-xs rounded-md border border-border bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
-                {ENERGY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-              <select value={formData.eau_chaude_mode} onChange={(e) => setFormData((prev: any) => ({ ...prev, eau_chaude_mode: e.target.value }))} className="h-7 text-xs rounded-md border border-border bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
-                {ENERGY_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-          ) : (
-            <span className="text-sm font-medium text-foreground flex-1 text-right">
-              {lot.eau_chaude_type ? `${energyLabels[lot.eau_chaude_type] || lot.eau_chaude_type}${lot.eau_chaude_mode ? ` (${energyLabels[lot.eau_chaude_mode] || lot.eau_chaude_mode})` : ''}` : '\u2014'}
-            </span>
-          )}
-        </div>
-
-        {/* Chauffage */}
-        <div className={`flex items-center gap-3 p-2.5 rounded-lg border ${editing ? 'bg-primary/5 border-primary/30' : 'bg-muted/50 border-border/50'}`}>
-          <Flame className="h-4 w-4 text-red-500 shrink-0" />
-          <span className="text-xs text-muted-foreground shrink-0">Chauffage</span>
-          {editing ? (
-            <div className="flex-1 flex items-center gap-1.5 justify-end">
-              <select value={formData.chauffage_type} onChange={(e) => setFormData((prev: any) => ({ ...prev, chauffage_type: e.target.value }))} className="h-7 text-xs rounded-md border border-border bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
-                {ENERGY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-              <select value={formData.chauffage_mode} onChange={(e) => setFormData((prev: any) => ({ ...prev, chauffage_mode: e.target.value }))} className="h-7 text-xs rounded-md border border-border bg-white px-2 focus:outline-none focus:ring-1 focus:ring-primary">
-                {ENERGY_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-          ) : (
-            <span className="text-sm font-medium text-foreground flex-1 text-right">
-              {lot.chauffage_type ? `${energyLabels[lot.chauffage_type] || lot.chauffage_type}${lot.chauffage_mode ? ` (${energyLabels[lot.chauffage_mode] || lot.chauffage_mode})` : ''}` : '\u2014'}
-            </span>
-          )}
-        </div>
-      </div>
+    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-accent/30 transition-colors"
+      >
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        {open ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+      </button>
+      {open && <div className="border-t border-border/50">{children}</div>}
     </div>
   )
 }
 
-// Unified Tiers lies section -- proprietaires + mandataire as cards
-function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
+/* ── Info Row ── */
+function InfoRow({ label, value, editing, children }: { label: string; value: React.ReactNode; editing: boolean; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between px-5 py-3">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      {editing ? <div>{children}</div> : <span className="text-sm font-medium text-foreground">{value}</span>}
+    </div>
+  )
+}
+
+/* ── Tiers Liés Content ── */
+function TiersLiesContent({ lotId, proprietaires, mandataire, isArchived }: {
   lotId: string
   proprietaires: Array<{ id: string; nom: string; prenom?: string | null; raison_sociale?: string | null; email?: string | null; tel?: string | null; est_principal?: boolean }>
   mandataire: { id: string; nom: string; prenom?: string | null; raison_sociale?: string | null; email?: string | null } | null
@@ -549,28 +391,20 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
   const totalTiers = proprietaires.length + (mandataire ? 1 : 0)
 
   return (
-    <div data-card className={`${cardClass} p-5`}>
-      <div className="flex items-center justify-between mb-4">
+    <div className="px-5 py-4 space-y-3">
+      {!isArchived && (
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-muted-foreground" />
-          <h2 className={labelClass}>
-            Tiers lies ({totalTiers})
-          </h2>
+          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowCreateTiers(true)}>
+            <Plus className="h-3 w-3 mr-1" /> Nouveau tiers
+          </Button>
+          <Button variant="ghost" size="sm" className="h-7 text-xs text-primary hover:text-primary" onClick={() => setShowAdd(!showAdd)}>
+            {showAdd ? 'Fermer' : <><Plus className="h-3 w-3 mr-1" /> Ajouter propriétaire</>}
+          </Button>
         </div>
-        {!isArchived && (
-          <div className="flex items-center gap-1.5">
-            <Button variant="outline" size="sm" className="h-6 text-xs px-2" onClick={() => setShowCreateTiers(true)}>
-              <Plus className="h-3 w-3 mr-1" /> Nouveau tiers
-            </Button>
-            <Button variant="ghost" size="sm" className="h-6 text-xs text-primary hover:text-primary px-2" onClick={() => setShowAdd(!showAdd)}>
-              {showAdd ? 'Fermer' : <><Plus className="h-3 w-3 mr-1" /> Ajouter proprietaire</>}
-            </Button>
-          </div>
-        )}
-      </div>
+      )}
 
       {showAdd && (
-        <div className="mb-4 p-3 bg-primary/5 border border-primary/30 rounded-lg space-y-2">
+        <div className="p-3 bg-primary/5 border border-primary/30 rounded-lg space-y-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="Rechercher un tiers..." className="pl-8 h-8 text-xs" autoFocus />
@@ -589,62 +423,51 @@ function TiersLiesSection({ lotId, proprietaires, mandataire, isArchived }: {
       )}
 
       {totalTiers > 0 ? (
-        <div className="grid grid-cols-2 gap-3">
-          {/* Proprietaire cards */}
+        <div className="space-y-2">
           {proprietaires.map((p) => (
-            <div key={p.id} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary/30 transition-colors group">
-              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-primary">{(p.prenom?.[0] || p.nom[0]).toUpperCase()}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-medium text-foreground truncate">{p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}</p>
-                  {p.est_principal && <Badge className="bg-primary/5 text-primary border-primary/30 text-[9px] shrink-0">Principal</Badge>}
+            <div key={p.id} className="flex items-center justify-between py-2 group">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <span className="text-xs font-bold text-primary">{(p.prenom?.[0] || p.nom[0]).toUpperCase()}</span>
                 </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px] font-medium">Proprietaire</Badge>
-                  <span className="text-xs text-muted-foreground truncate">{p.email || p.tel || ''}</span>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px]">Propriétaire</Badge>
+                    {p.est_principal && <Badge className="bg-primary/5 text-primary border-primary/30 text-[9px]">Principal</Badge>}
+                  </div>
                 </div>
               </div>
               {!isArchived && (
-                <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: p.id })} className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 transition-all shrink-0" title="Retirer">
+                <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: p.id })} className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 transition-all" title="Retirer">
                   <X className="h-3.5 w-3.5" />
                 </button>
               )}
             </div>
           ))}
 
-          {/* Mandataire card */}
           {mandataire && (
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-blue-200 transition-colors">
-              <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3 py-2">
+              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                 <span className="text-xs font-bold text-blue-700">{(mandataire.nom[0]).toUpperCase()}</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
+              <div>
+                <p className="text-sm font-medium text-foreground">
                   {mandataire.prenom ? `${mandataire.prenom} ${mandataire.nom}` : mandataire.raison_sociale || mandataire.nom}
                 </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[9px] font-medium">Mandataire</Badge>
-                  <span className="text-xs text-muted-foreground truncate">{mandataire.email || ''}</span>
-                </div>
+                <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[9px] mt-0.5">Mandataire</Badge>
               </div>
             </div>
           )}
         </div>
       ) : (
-        <div className="text-center py-6">
-          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mx-auto mb-2"><Users className="h-4 w-4 text-muted-foreground" /></div>
-          <p className="text-xs text-muted-foreground">Aucun tiers lie</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Aucun tiers lié</p>
       )}
 
       <CreateTiersModal
         open={showCreateTiers}
         onOpenChange={setShowCreateTiers}
-        onCreated={() => {
-          toast.success('Tiers cree — vous pouvez maintenant le lier au lot')
-        }}
+        onCreated={() => toast.success('Tiers créé — vous pouvez maintenant le lier au lot')}
       />
     </div>
   )
