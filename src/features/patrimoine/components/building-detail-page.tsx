@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Archive, ArchiveRestore, Plus, Building2, Pencil, AlertTriangle, ClipboardList, Trash2, MapPin } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from 'src/components/ui/table'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { Input } from 'src/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
@@ -238,64 +239,70 @@ export function BuildingDetailPage() {
             <h2 className="text-sm font-semibold text-foreground">Adresses</h2>
           </div>
 
-          {/* Address table header */}
-          <div className="grid grid-cols-[100px_1fr_160px] gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50">
-            <div>Type</div>
-            <div>Adresse</div>
-            <div className="text-right">CP / Ville</div>
-          </div>
-
           {addrForms.length > 0 ? (
-            <div className="divide-y divide-border/30">
-              {addrForms.map((a, idx) => (
-                <div key={a.id} className="grid grid-cols-[100px_1fr_160px] gap-3 px-5 py-3 items-center">
-                  <div>
-                    <Badge variant="outline" className="text-[10px] capitalize">{a.type}</Badge>
-                  </div>
-                  {editing ? (
-                    <>
-                      <div className="space-y-1.5">
-                        <AddressAutocomplete
-                          value={a.rue}
-                          onChange={(addr) => {
-                            if (addr) {
-                              const next = [...addrForms]
-                              next[idx] = { ...next[idx], rue: addr.rue, code_postal: addr.code_postal, ville: addr.ville, latitude: addr.latitude, longitude: addr.longitude }
-                              setAddrForms(next)
-                            }
-                          }}
-                        />
-                        <Input value={a.complement} onChange={(e) => updateAddrField(idx, 'complement', e.target.value)} placeholder="Complément..." className="h-7 text-xs" />
-                      </div>
-                      <div className="text-right">
-                        <Input value={`${a.code_postal} ${a.ville}`} readOnly tabIndex={-1} className="h-7 text-xs bg-muted/50 text-muted-foreground cursor-default text-right" />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="text-sm text-foreground truncate">
-                        {a.rue}{a.complement ? `, ${a.complement}` : ''}
-                      </div>
-                      <div className="flex items-center justify-end gap-2">
-                        <span className="text-sm text-foreground">{a.code_postal} {a.ville}</span>
-                        {a.latitude && a.longitude ? (
-                          <a
-                            href={`https://www.google.com/maps?q=${a.latitude},${a.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="h-6 w-6 rounded-md flex items-center justify-center text-primary/60 hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
-                            title="Ouvrir dans Google Maps"
-                          >
-                            <MapPin size={14} strokeWidth={1.5} />
-                          </a>
-                        ) : null}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
+            <Table className="table-fixed">
+              <TableHeader>
+                <TableRow className="border-b border-border/50 hover:bg-transparent">
+                  <TableHead className="h-9 px-5 text-xs font-medium text-muted-foreground" style={{ width: 100 }}>Type</TableHead>
+                  <TableHead className="h-9 px-2 text-xs font-medium text-muted-foreground">Adresse</TableHead>
+                  <TableHead className="h-9 px-2 text-xs font-medium text-muted-foreground text-right" style={{ width: 160 }}>CP / Ville</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {addrForms.map((a, idx) => (
+                  <TableRow key={a.id} className="border-b border-border/30 hover:bg-transparent">
+                    <TableCell className="px-5 py-3 align-middle">
+                      <Badge variant="outline" className="text-[10px] capitalize">{a.type}</Badge>
+                    </TableCell>
+                    {editing ? (
+                      <>
+                        <TableCell className="px-2 py-3 align-middle">
+                          <div className="space-y-1.5">
+                            <AddressAutocomplete
+                              value={a.rue}
+                              onChange={(addr) => {
+                                if (addr) {
+                                  const next = [...addrForms]
+                                  next[idx] = { ...next[idx], rue: addr.rue, code_postal: addr.code_postal, ville: addr.ville, latitude: addr.latitude, longitude: addr.longitude }
+                                  setAddrForms(next)
+                                }
+                              }}
+                            />
+                            <Input value={a.complement} onChange={(e) => updateAddrField(idx, 'complement', e.target.value)} placeholder="Complément..." className="h-7 text-xs" />
+                          </div>
+                        </TableCell>
+                        <TableCell className="px-2 py-3 text-right align-middle">
+                          <Input value={`${a.code_postal} ${a.ville}`} readOnly tabIndex={-1} className="h-7 text-xs bg-muted/50 text-muted-foreground cursor-default text-right" />
+                        </TableCell>
+                      </>
+                    ) : (
+                      <>
+                        <TableCell className="px-2 py-3 text-sm text-foreground truncate align-middle">
+                          {a.rue}{a.complement ? `, ${a.complement}` : ''}
+                        </TableCell>
+                        <TableCell className="px-2 py-3 text-right align-middle">
+                          <div className="flex items-center justify-end gap-2">
+                            <span className="text-sm text-foreground">{a.code_postal} {a.ville}</span>
+                            {a.latitude && a.longitude ? (
+                              <a
+                                href={`https://www.google.com/maps?q=${a.latitude},${a.longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="h-6 w-6 rounded-md flex items-center justify-center text-primary/60 hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
+                                title="Ouvrir dans Google Maps"
+                              >
+                                <MapPin size={14} strokeWidth={1.5} />
+                              </a>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           ) : (
             <div className="py-10 text-center text-muted-foreground text-sm">Aucune adresse</div>
           )}
@@ -313,36 +320,41 @@ export function BuildingDetailPage() {
           )}
         </div>
 
-        <div className="flex items-center gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50 select-none">
-          <div className="relative shrink-0" style={{ width: lotCols.colWidths.designation, minWidth: 40 }}>
-            Désignation<ResizeHandle colId="designation" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
-          </div>
-          <div className="relative shrink-0" style={{ width: lotCols.colWidths.type, minWidth: 40 }}>
-            Type<ResizeHandle colId="type" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
-          </div>
-          <div className="relative shrink-0" style={{ width: lotCols.colWidths.etage, minWidth: 40 }}>
-            Étage<ResizeHandle colId="etage" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
-          </div>
-          <div className="relative shrink-0 text-right" style={{ width: lotCols.colWidths.surface, minWidth: 40 }}>
-            Surface<ResizeHandle colId="surface" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
-          </div>
-          <div className="shrink-0" style={{ width: lotCols.colWidths.meuble, minWidth: 40 }}>Meublé</div>
-        </div>
-
         {lots && lots.length > 0 ? (
-          <div className="divide-y divide-border/30">
-            {lots.map((lot) => (
-              <div key={lot.id} className="flex items-center gap-3 px-5 py-3 hover:bg-accent/50 cursor-pointer transition-colors" onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batiment.designation, href: `/app/patrimoine/batiments/${batiment.id}` }, { label: lot.designation }] } })}>
-                <div className="shrink-0 text-sm font-medium text-foreground truncate" style={{ width: lotCols.colWidths.designation }}>{lot.designation}</div>
-                <div className="shrink-0" style={{ width: lotCols.colWidths.type }}>
-                  <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] capitalize">{lot.type_bien.replace('_', ' ')}</Badge>
-                </div>
-                <div className="shrink-0 text-sm text-muted-foreground" style={{ width: lotCols.colWidths.etage }}>{lot.etage || '--'}</div>
-                <div className="shrink-0 text-sm text-muted-foreground text-right" style={{ width: lotCols.colWidths.surface }}>{lot.surface ? `${lot.surface} m²` : '--'}</div>
-                <div className="shrink-0 text-sm text-muted-foreground" style={{ width: lotCols.colWidths.meuble }}>{lot.meuble ? 'Oui' : 'Non'}</div>
-              </div>
-            ))}
-          </div>
+          <Table className="table-fixed">
+            <TableHeader>
+              <TableRow className="border-b border-border/50 hover:bg-transparent">
+                <TableHead className="relative h-9 px-5 text-xs font-medium text-muted-foreground select-none" style={{ width: lotCols.colWidths.designation, minWidth: 40 }}>
+                  Désignation<ResizeHandle colId="designation" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+                </TableHead>
+                <TableHead className="relative h-9 px-2 text-xs font-medium text-muted-foreground select-none" style={{ width: lotCols.colWidths.type, minWidth: 40 }}>
+                  Type<ResizeHandle colId="type" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+                </TableHead>
+                <TableHead className="relative h-9 px-2 text-xs font-medium text-muted-foreground select-none" style={{ width: lotCols.colWidths.etage, minWidth: 40 }}>
+                  Étage<ResizeHandle colId="etage" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+                </TableHead>
+                <TableHead className="relative h-9 px-2 text-xs font-medium text-muted-foreground text-right select-none" style={{ width: lotCols.colWidths.surface, minWidth: 40 }}>
+                  Surface<ResizeHandle colId="surface" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+                </TableHead>
+                <TableHead className="h-9 px-2 text-xs font-medium text-muted-foreground select-none" style={{ width: lotCols.colWidths.meuble, minWidth: 40 }}>
+                  Meublé
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {lots.map((lot) => (
+                <TableRow key={lot.id} className="cursor-pointer hover:bg-accent/50 border-b border-border/30" onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batiment.designation, href: `/app/patrimoine/batiments/${batiment.id}` }, { label: lot.designation }] } })}>
+                  <TableCell className="px-5 py-3 text-sm font-medium text-foreground truncate">{lot.designation}</TableCell>
+                  <TableCell className="px-2 py-3">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] capitalize">{lot.type_bien.replace('_', ' ')}</Badge>
+                  </TableCell>
+                  <TableCell className="px-2 py-3 text-sm text-muted-foreground">{lot.etage || '--'}</TableCell>
+                  <TableCell className="px-2 py-3 text-sm text-muted-foreground text-right">{lot.surface ? `${lot.surface} m²` : '--'}</TableCell>
+                  <TableCell className="px-2 py-3 text-sm text-muted-foreground">{lot.meuble ? 'Oui' : 'Non'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         ) : (
           <div className="py-10 text-center text-muted-foreground text-sm">Aucun lot</div>
         )}

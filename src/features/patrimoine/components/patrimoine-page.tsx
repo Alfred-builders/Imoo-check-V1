@@ -4,6 +4,7 @@ import { Input } from 'src/components/ui/input'
 import { Badge } from 'src/components/ui/badge'
 import { Button } from 'src/components/ui/button'
 import { Skeleton } from 'src/components/ui/skeleton'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from 'src/components/ui/table'
 import { useBatiments, useBatimentLots } from '../api'
 import { formatDate } from '../../../lib/formatters'
 import { useNavigate } from 'react-router-dom'
@@ -276,77 +277,76 @@ export function PatrimoinePage() {
       {/* Table view */}
       {view === 'table' && (
         <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-          {/* Table header */}
-          <div className="flex items-center gap-4 px-4 py-2.5 bg-muted/50 border-b border-border text-[11px] font-bold text-muted-foreground uppercase tracking-wider select-none">
-            <div className="w-6 shrink-0" /> {/* expand */}
-            {isCol('designation') && (
-              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.designation, minWidth: 40 }}>
-                Désignation
-                <ResizeHandle colId="designation" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-            {isCol('type') && (
-              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.type, minWidth: 40 }}>
-                Type
-                <ResizeHandle colId="type" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-            {isCol('adresse') && (
-              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.adresse, minWidth: 40 }}>
-                Adresse
-                <ResizeHandle colId="adresse" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-            {isCol('nb_lots') && (
-              <div className="relative overflow-visible shrink-0 text-center" style={{ width: colWidths.nb_lots, minWidth: 40 }}>
-                Lots
-                <ResizeHandle colId="nb_lots" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-            {isCol('nb_etages') && (
-              <div className="relative overflow-visible shrink-0 text-center" style={{ width: colWidths.nb_etages, minWidth: 40 }}>
-                Étages
-                <ResizeHandle colId="nb_etages" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-            {isCol('annee_construction') && (
-              <div className="relative overflow-visible shrink-0 text-center" style={{ width: colWidths.annee_construction, minWidth: 40 }}>
-                Année
-                <ResizeHandle colId="annee_construction" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-            {isCol('derniere_mission') && (
-              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.derniere_mission, minWidth: 40 }}>
-                Dern. mission
-                <ResizeHandle colId="derniere_mission" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-            {isCol('missions_a_venir') && (
-              <div className="relative overflow-visible shrink-0 text-center" style={{ width: colWidths.missions_a_venir, minWidth: 40 }}>
-                À venir
-                <ResizeHandle colId="missions_a_venir" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-            {isCol('created_at') && (
-              <div className="relative overflow-visible shrink-0" style={{ width: colWidths.created_at, minWidth: 40 }}>
-                Créé le
-                <ResizeHandle colId="created_at" onResizeStart={handleResizeStart} onResize={handleResize} />
-              </div>
-            )}
-          </div>
-
-          {isLoading && (
-            <div className="divide-y divide-border/50">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-center gap-4 px-4 py-3">
-                  <div className="w-6" />
-                  <Skeleton className="h-4 flex-1" />
-                  <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-4 w-32" />
-                </div>
+          <Table className="table-fixed">
+            <TableHeader>
+              <TableRow className="bg-muted/50 text-[11px] font-bold text-muted-foreground uppercase tracking-wider select-none">
+                <TableHead className="w-8" />
+                {isCol('designation') && (
+                  <TableHead className="relative" style={{ width: colWidths.designation }}>
+                    Désignation
+                    <ResizeHandle colId="designation" onResizeStart={handleResizeStart} onResize={handleResize} />
+                  </TableHead>
+                )}
+                {isCol('type') && (
+                  <TableHead className="relative" style={{ width: colWidths.type }}>
+                    Type
+                    <ResizeHandle colId="type" onResizeStart={handleResizeStart} onResize={handleResize} />
+                  </TableHead>
+                )}
+                {isCol('adresse') && (
+                  <TableHead className="relative" style={{ width: colWidths.adresse }}>
+                    Adresse
+                    <ResizeHandle colId="adresse" onResizeStart={handleResizeStart} onResize={handleResize} />
+                  </TableHead>
+                )}
+                {isCol('nb_lots') && (
+                  <TableHead className="relative text-center" style={{ width: colWidths.nb_lots }}>
+                    Lots
+                    <ResizeHandle colId="nb_lots" onResizeStart={handleResizeStart} onResize={handleResize} />
+                  </TableHead>
+                )}
+                {isCol('nb_etages') && (
+                  <TableHead className="relative text-center" style={{ width: colWidths.nb_etages }}>
+                    Étages
+                    <ResizeHandle colId="nb_etages" onResizeStart={handleResizeStart} onResize={handleResize} />
+                  </TableHead>
+                )}
+                {isCol('annee_construction') && (
+                  <TableHead className="relative text-center" style={{ width: colWidths.annee_construction }}>
+                    Année
+                    <ResizeHandle colId="annee_construction" onResizeStart={handleResizeStart} onResize={handleResize} />
+                  </TableHead>
+                )}
+                {isCol('derniere_mission') && (
+                  <TableHead className="relative" style={{ width: colWidths.derniere_mission }}>
+                    Dern. mission
+                    <ResizeHandle colId="derniere_mission" onResizeStart={handleResizeStart} onResize={handleResize} />
+                  </TableHead>
+                )}
+                {isCol('missions_a_venir') && (
+                  <TableHead className="relative text-center" style={{ width: colWidths.missions_a_venir }}>
+                    À venir
+                    <ResizeHandle colId="missions_a_venir" onResizeStart={handleResizeStart} onResize={handleResize} />
+                  </TableHead>
+                )}
+                {isCol('created_at') && (
+                  <TableHead className="relative" style={{ width: colWidths.created_at }}>
+                    Créé le
+                  </TableHead>
+                )}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading && [1, 2, 3, 4].map((i) => (
+                <TableRow key={i}>
+                  <TableCell colSpan={10}><Skeleton className="h-4 w-full" /></TableCell>
+                </TableRow>
               ))}
-            </div>
-          )}
+              {!isLoading && displayedBatiments.map((bat) => (
+                <BatimentRow key={bat.id} batiment={bat} visibleCols={visibleCols} colWidths={colWidths} />
+              ))}
+            </TableBody>
+          </Table>
 
           {!isLoading && filteredBatiments.length === 0 && (
             <div className="py-16 text-center text-muted-foreground text-sm">
@@ -354,18 +354,12 @@ export function PatrimoinePage() {
             </div>
           )}
 
-          {!isLoading && displayedBatiments.map((bat) => (
-            <BatimentRow key={bat.id} batiment={bat} visibleCols={visibleCols} colWidths={colWidths} />
-          ))}
-
-          {/* Infinite scroll sentinel */}
           {!isLoading && hasMore && (
             <div ref={sentinelRef} className="py-4 text-center">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mx-auto" />
             </div>
           )}
 
-          {/* End of list indicator */}
           {!isLoading && !hasMore && filteredBatiments.length > BATCH_SIZE && (
             <div className="py-3 text-center text-[12px] text-muted-foreground/50">
               {filteredBatiments.length} bâtiment{filteredBatiments.length > 1 ? 's' : ''} affichés
@@ -387,106 +381,118 @@ function BatimentRow({ batiment, visibleCols, colWidths }: { batiment: Batiment;
   const isCol = (id: string) => visibleCols.includes(id)
 
   return (
-    <div className="border-b border-border/50 last:border-b-0">
-      <div
-        className="flex items-center gap-4 px-4 py-2.5 hover:bg-accent/50 transition-colors cursor-pointer text-sm"
+    <>
+      <TableRow
+        className="cursor-pointer"
         onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batiment.designation }] } })}
+        aria-expanded={expanded}
       >
-        <button
-          onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
-          className="w-6 shrink-0 flex items-center justify-center p-0.5 rounded hover:bg-muted"
-        >
-          {expanded ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
-        </button>
+        <TableCell className="w-8 px-2">
+          <button
+            onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
+            className="w-6 h-6 flex items-center justify-center rounded hover:bg-muted"
+          >
+            {expanded ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+          </button>
+        </TableCell>
         {isCol('designation') && (
-          <div className="shrink-0 flex items-center gap-2 min-w-0 overflow-hidden group" style={{ width: colWidths.designation }}>
-            <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="font-bold text-foreground group-hover:text-primary truncate transition-colors">{batiment.designation}</span>
-            {batiment.est_archive && <Badge variant="outline" className="text-[9px] text-muted-foreground">Archive</Badge>}
-          </div>
+          <TableCell>
+            <div className="flex items-center gap-2 min-w-0 group">
+              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="font-semibold text-foreground group-hover:text-primary truncate transition-colors">{batiment.designation}</span>
+              {batiment.est_archive && <Badge variant="outline" className="text-[9px] text-muted-foreground">Archive</Badge>}
+            </div>
+          </TableCell>
         )}
         {isCol('type') && (
-          <div className="shrink-0" style={{ width: colWidths.type }}>
-            <Badge variant="outline" className="text-[10px] font-normal capitalize">{typeLabels[batiment.type]}</Badge>
-          </div>
+          <TableCell><Badge variant="outline" className="text-[10px] font-normal capitalize">{typeLabels[batiment.type]}</Badge></TableCell>
         )}
         {isCol('adresse') && (
-          <div className="shrink-0 text-xs text-muted-foreground truncate" style={{ width: colWidths.adresse }}>
-            {adresse ? `${adresse.rue}, ${adresse.ville}` : '—'}
-          </div>
+          <TableCell className="text-xs text-muted-foreground truncate">{adresse ? `${adresse.rue}, ${adresse.ville}` : '—'}</TableCell>
         )}
-        {isCol('nb_lots') && <div className="shrink-0 text-center" style={{ width: colWidths.nb_lots }}><Badge variant="outline" className="text-[10px] font-medium">{batiment.nb_lots}</Badge></div>}
-        {isCol('nb_etages') && <div className="shrink-0 text-center text-muted-foreground text-xs" style={{ width: colWidths.nb_etages }}>{batiment.nb_etages ?? '—'}</div>}
-        {isCol('annee_construction') && <div className="shrink-0 text-center text-muted-foreground text-xs" style={{ width: colWidths.annee_construction }}>{batiment.annee_construction ?? '—'}</div>}
-        {isCol('derniere_mission') && (
-          <div className="shrink-0 text-xs text-muted-foreground" style={{ width: colWidths.derniere_mission }}>{batiment.derniere_mission ? formatDate(batiment.derniere_mission) : '—'}</div>
-        )}
+        {isCol('nb_lots') && <TableCell className="text-center"><Badge variant="outline" className="text-[10px] font-medium">{batiment.nb_lots}</Badge></TableCell>}
+        {isCol('nb_etages') && <TableCell className="text-center text-muted-foreground text-xs">{batiment.nb_etages ?? '—'}</TableCell>}
+        {isCol('annee_construction') && <TableCell className="text-center text-muted-foreground text-xs">{batiment.annee_construction ?? '—'}</TableCell>}
+        {isCol('derniere_mission') && <TableCell className="text-xs text-muted-foreground">{batiment.derniere_mission ? formatDate(batiment.derniere_mission) : '—'}</TableCell>}
         {isCol('missions_a_venir') && (
-          <div className="shrink-0 text-center" style={{ width: colWidths.missions_a_venir }}>
+          <TableCell className="text-center">
             {batiment.missions_a_venir > 0 ? (
               <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px]">{batiment.missions_a_venir}</Badge>
             ) : <span className="text-xs text-muted-foreground/50">—</span>}
-          </div>
+          </TableCell>
         )}
-        {isCol('created_at') && (
-          <div className="shrink-0 text-xs text-muted-foreground" style={{ width: colWidths.created_at }}>{formatDate(batiment.created_at)}</div>
-        )}
-      </div>
-
-      {expanded && <LotSubRows batimentId={batiment.id} batimentName={batiment.designation} />}
-    </div>
+        {isCol('created_at') && <TableCell className="text-xs text-muted-foreground">{formatDate(batiment.created_at)}</TableCell>}
+      </TableRow>
+      {expanded && <LotSubRows batimentId={batiment.id} batimentName={batiment.designation} colSpan={1 + visibleCols.length} />}
+    </>
   )
 }
 
-function LotSubRows({ batimentId, batimentName }: { batimentId: string; batimentName: string }) {
+function LotSubRows({ batimentId, batimentName, colSpan }: { batimentId: string; batimentName: string; colSpan: number }) {
   const { data: lots, isLoading } = useBatimentLots(batimentId)
   const navigate = useNavigate()
 
   if (isLoading) {
     return (
-      <div className="pl-10 pr-4 py-2 bg-muted/50">
-        {[1, 2].map((i) => (
-          <div key={i} className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 py-2">
-            <Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" />
-          </div>
-        ))}
-      </div>
+      <TableRow className="bg-muted/30">
+        <TableCell colSpan={colSpan} className="py-2 pl-10">
+          <Skeleton className="h-4 w-full" />
+        </TableCell>
+      </TableRow>
     )
   }
 
-  if (!lots || lots.length === 0) return <div className="pl-10 pr-4 py-3 bg-muted/50 text-xs text-muted-foreground">Aucun lot</div>
+  if (!lots || lots.length === 0) {
+    return (
+      <TableRow className="bg-muted/30">
+        <TableCell colSpan={colSpan} className="py-3 pl-10 text-xs text-muted-foreground">Aucun lot</TableCell>
+      </TableRow>
+    )
+  }
 
   return (
-    <div className="bg-muted/50 border-t border-border">
-      {/* Sub-row column headers */}
-      <div className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border/60">
-        <div>Lot</div>
-        <div>Type</div>
-        <div>Etage</div>
-        <div>Surface</div>
-        <div>Meuble</div>
-        <div>Proprietaire</div>
-      </div>
-      {lots.map((lot) => {
-        const propLabel = lot.proprietaires?.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.nom).join(', ') || '—'
-        return (
-          <div
-            key={lot.id}
-            className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-accent/50 cursor-pointer transition-colors text-xs border-b border-border/30 last:border-b-0 items-center"
-            onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batimentName, href: `/app/patrimoine/batiments/${batimentId}` }, { label: lot.designation }] } })}
-          >
-            <div className="flex items-center gap-2 min-w-0 group">
-              <Home className="h-3 w-3 text-muted-foreground/50 shrink-0" />
-              <span className="font-bold text-foreground group-hover:text-primary truncate transition-colors">{lot.designation}</span>
-            </div>
-            <div><Badge variant="outline" className="text-[9px] capitalize font-normal">{lot.type_bien.replace('_', ' ')}</Badge></div>
-            <div className="text-muted-foreground">{lot.etage || '—'}</div>
-            <div className="text-muted-foreground">{lot.surface ? `${lot.surface} m²` : '—'}</div>
-            <div>{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meublé</Badge> : <span className="text-muted-foreground/50">—</span>}</div>
-            <div className="text-muted-foreground truncate">{propLabel}</div>
-          </div>
-        )
-      })}
-    </div>
+    <>
+      {/* Sub-header */}
+      <TableRow className="bg-muted/30">
+        <TableCell colSpan={colSpan} className="p-0">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border/40">
+                <th className="pl-10 pr-2 py-1.5 text-left font-semibold">Lot</th>
+                <th className="px-2 py-1.5 text-left font-semibold w-[100px]">Type</th>
+                <th className="px-2 py-1.5 text-left font-semibold w-[60px]">Étage</th>
+                <th className="px-2 py-1.5 text-left font-semibold w-[80px]">Surface</th>
+                <th className="px-2 py-1.5 text-left font-semibold w-[70px]">Meublé</th>
+                <th className="px-2 py-1.5 text-left font-semibold w-[140px]">Propriétaire</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lots.map((lot) => {
+                const propLabel = lot.proprietaires?.map(p => p.prenom ? `${p.prenom} ${p.nom}` : p.nom).join(', ') || '—'
+                return (
+                  <tr
+                    key={lot.id}
+                    className="border-b border-border/20 last:border-b-0 hover:bg-accent/50 cursor-pointer transition-colors"
+                    onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batimentName, href: `/app/patrimoine/batiments/${batimentId}` }, { label: lot.designation }] } })}
+                  >
+                    <td className="pl-10 pr-2 py-2">
+                      <div className="flex items-center gap-2 min-w-0 group">
+                        <Home className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+                        <span className="font-semibold text-foreground group-hover:text-primary truncate transition-colors">{lot.designation}</span>
+                      </div>
+                    </td>
+                    <td className="px-2 py-2"><Badge variant="outline" className="text-[9px] capitalize font-normal">{lot.type_bien.replace('_', ' ')}</Badge></td>
+                    <td className="px-2 py-2 text-muted-foreground">{lot.etage || '—'}</td>
+                    <td className="px-2 py-2 text-muted-foreground">{lot.surface ? `${lot.surface} m²` : '—'}</td>
+                    <td className="px-2 py-2">{lot.meuble ? <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[9px]">Meublé</Badge> : <span className="text-muted-foreground/50">—</span>}</td>
+                    <td className="px-2 py-2 text-muted-foreground truncate">{propLabel}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </TableCell>
+      </TableRow>
+    </>
   )
 }
