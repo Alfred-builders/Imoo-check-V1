@@ -65,8 +65,6 @@ export function LotDetailPage() {
     general: true,
     energie: false,
     annexes: false,
-    tiers: false,
-    commentaire: false,
   })
 
   function toggleSection(key: string) {
@@ -107,7 +105,7 @@ export function LotDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-5 max-w-4xl mx-auto">
+      <div className="p-6 space-y-5 ">
         <Skeleton className="h-12 w-72" />
         <Skeleton className="h-64 rounded-xl" />
         <Skeleton className="h-14 rounded-xl" />
@@ -189,7 +187,7 @@ export function LotDetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-5 max-w-4xl mx-auto">
+    <div className="p-6 space-y-5 ">
       {/* Header — icon + name + badge + actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -263,6 +261,9 @@ export function LotDetailPage() {
           <InfoRow label="Meublé" editing={editing} value={lot.meuble ? 'Oui' : 'Non'}>
             <Switch checked={formData.meuble} onCheckedChange={(checked) => setFormData(prev => ({ ...prev, meuble: checked }))} />
           </InfoRow>
+          <InfoRow label="Commentaire" editing={editing} value={lot.commentaire || '--'}>
+            <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} rows={2} className="text-sm w-72" placeholder="Ajouter un commentaire..." />
+          </InfoRow>
         </div>
       </CollapsibleSection>
 
@@ -316,21 +317,8 @@ export function LotDetailPage() {
         </div>
       </CollapsibleSection>
 
-      {/* ── Section: Tiers liés ── */}
-      <CollapsibleSection title={`Tiers liés (${(proprietaires.length + (mandataire ? 1 : 0))})`} open={openSections.tiers} onToggle={() => toggleSection('tiers')}>
-        <TiersLiesContent lotId={lot.id} proprietaires={proprietaires} mandataire={mandataire} isArchived={lot.est_archive} />
-      </CollapsibleSection>
-
-      {/* ── Section: Commentaire ── */}
-      <CollapsibleSection title="Commentaire" open={openSections.commentaire} onToggle={() => toggleSection('commentaire')}>
-        <div className="px-5 py-4">
-          {editing ? (
-            <Textarea value={formData.commentaire} onChange={(e) => setFormData(prev => ({ ...prev, commentaire: e.target.value }))} rows={3} className="text-sm" placeholder="Ajouter un commentaire..." />
-          ) : (
-            <p className="text-sm text-foreground">{lot.commentaire || <span className="text-muted-foreground">--</span>}</p>
-          )}
-        </div>
-      </CollapsibleSection>
+      {/* ── Tiers liés — flat table (not collapsible) ── */}
+      <TiersTable lotId={lot.id} proprietaires={proprietaires} mandataire={mandataire} isArchived={lot.est_archive} />
 
       {/* Meta */}
       <p className="text-[10px] text-muted-foreground/50 px-1">
@@ -368,8 +356,8 @@ function InfoRow({ label, value, editing, children }: { label: string; value: Re
   )
 }
 
-/* ── Tiers Liés Content ── */
-function TiersLiesContent({ lotId, proprietaires, mandataire, isArchived }: {
+/* ── Tiers Table (flat, below sections) ── */
+function TiersTable({ lotId, proprietaires, mandataire, isArchived }: {
   lotId: string
   proprietaires: Array<{ id: string; nom: string; prenom?: string | null; raison_sociale?: string | null; email?: string | null; tel?: string | null; est_principal?: boolean }>
   mandataire: { id: string; nom: string; prenom?: string | null; raison_sociale?: string | null; email?: string | null } | null
@@ -388,23 +376,29 @@ function TiersLiesContent({ lotId, proprietaires, mandataire, isArchived }: {
     setSearchQ('')
   }
 
-  const totalTiers = proprietaires.length + (mandataire ? 1 : 0)
+  const allTiers = [
+    ...proprietaires.map(p => ({ ...p, role: 'Propriétaire' as const })),
+    ...(mandataire ? [{ ...mandataire, role: 'Mandataire' as const, est_principal: false, tel: null }] : []),
+  ]
 
   return (
-    <div className="px-5 py-4 space-y-3">
-      {!isArchived && (
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowCreateTiers(true)}>
-            <Plus className="h-3 w-3 mr-1" /> Nouveau tiers
-          </Button>
-          <Button variant="ghost" size="sm" className="h-7 text-xs text-primary hover:text-primary" onClick={() => setShowAdd(!showAdd)}>
-            {showAdd ? 'Fermer' : <><Plus className="h-3 w-3 mr-1" /> Ajouter propriétaire</>}
-          </Button>
-        </div>
-      )}
+    <div className="bg-card rounded-xl border border-border shadow-sm">
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-foreground">Tiers liés ({allTiers.length})</h2>
+        {!isArchived && (
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowCreateTiers(true)}>
+              <Plus className="h-3 w-3 mr-1" /> Nouveau tiers
+            </Button>
+            <Button variant="ghost" size="sm" className="h-7 text-xs text-primary hover:text-primary" onClick={() => setShowAdd(!showAdd)}>
+              {showAdd ? 'Fermer' : <><Plus className="h-3 w-3 mr-1" /> Ajouter propriétaire</>}
+            </Button>
+          </div>
+        )}
+      </div>
 
       {showAdd && (
-        <div className="p-3 bg-primary/5 border border-primary/30 rounded-lg space-y-2">
+        <div className="mx-5 my-3 p-3 bg-primary/5 border border-primary/30 rounded-lg space-y-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input value={searchQ} onChange={(e) => setSearchQ(e.target.value)} placeholder="Rechercher un tiers..." className="pl-8 h-8 text-xs" autoFocus />
@@ -422,46 +416,42 @@ function TiersLiesContent({ lotId, proprietaires, mandataire, isArchived }: {
         </div>
       )}
 
-      {totalTiers > 0 ? (
-        <div className="space-y-2">
-          {proprietaires.map((p) => (
-            <div key={p.id} className="flex items-center justify-between py-2 group">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-bold text-primary">{(p.prenom?.[0] || p.nom[0]).toUpperCase()}</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">{p.prenom ? `${p.prenom} ${p.nom}` : p.raison_sociale || p.nom}</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[9px]">Propriétaire</Badge>
-                    {p.est_principal && <Badge className="bg-primary/5 text-primary border-primary/30 text-[9px]">Principal</Badge>}
-                  </div>
-                </div>
-              </div>
-              {!isArchived && (
-                <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: p.id })} className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 transition-all" title="Retirer">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              )}
-            </div>
-          ))}
+      {/* Table header */}
+      <div className="grid grid-cols-[1fr_120px_160px_140px_40px] gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50">
+        <div>Nom</div>
+        <div>Rôle</div>
+        <div>Email</div>
+        <div>Téléphone</div>
+        <div />
+      </div>
 
-          {mandataire && (
-            <div className="flex items-center gap-3 py-2">
-              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-blue-700">{(mandataire.nom[0]).toUpperCase()}</span>
+      {allTiers.length > 0 ? (
+        <div className="divide-y divide-border/30">
+          {allTiers.map((t) => {
+            const displayName = t.prenom ? `${t.prenom} ${t.nom}` : (t as any).raison_sociale || t.nom
+            return (
+              <div key={t.id + t.role} className="grid grid-cols-[1fr_120px_160px_140px_40px] gap-3 px-5 py-3 items-center group hover:bg-accent/30 transition-colors">
+                <div className="text-sm font-medium text-foreground truncate">{displayName}</div>
+                <div>
+                  <Badge className={t.role === 'Mandataire' ? 'bg-blue-50 text-blue-700 border-blue-200 text-[10px]' : 'bg-amber-50 text-amber-700 border-amber-200 text-[10px]'}>
+                    {t.role}
+                  </Badge>
+                </div>
+                <div className="text-sm text-muted-foreground truncate">{t.email || '--'}</div>
+                <div className="text-sm text-muted-foreground">{t.tel || '--'}</div>
+                <div>
+                  {!isArchived && t.role === 'Propriétaire' && (
+                    <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: t.id })} className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 transition-all" title="Retirer">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  {mandataire.prenom ? `${mandataire.prenom} ${mandataire.nom}` : mandataire.raison_sociale || mandataire.nom}
-                </p>
-                <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[9px] mt-0.5">Mandataire</Badge>
-              </div>
-            </div>
-          )}
+            )
+          })}
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground">Aucun tiers lié</p>
+        <div className="py-8 text-center text-muted-foreground text-sm">Aucun tiers lié</div>
       )}
 
       <CreateTiersModal

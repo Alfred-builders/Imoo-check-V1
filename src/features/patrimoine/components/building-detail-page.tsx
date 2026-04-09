@@ -83,7 +83,7 @@ export function BuildingDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-6 max-w-6xl mx-auto">
+      <div className="p-6 space-y-6 ">
         <Skeleton className="h-12 w-72" />
         <div className="grid grid-cols-2 gap-5">
           <Skeleton className="h-72 rounded-xl" />
@@ -109,7 +109,7 @@ export function BuildingDetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="p-6 space-y-6 ">
       {/* Header — icon + name + badge + actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
