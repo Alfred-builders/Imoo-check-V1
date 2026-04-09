@@ -7,7 +7,6 @@ import { Skeleton } from 'src/components/ui/skeleton'
 import { Input } from 'src/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'src/components/ui/select'
 import { Textarea } from 'src/components/ui/textarea'
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from 'src/components/ui/table'
 import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
 import { ConfirmDialog } from '../../../components/shared/confirm-dialog'
 import { ResizeHandle, useResizableColumns } from '../../../components/shared/resizable-columns'
@@ -355,54 +354,49 @@ function LotsTable({ lotsProprietaire, lotsMandataire, tiersId, tiersName, isArc
           )}
         </div>
 
-        {/* Table */}
-        <Table className="table-fixed">
-          <TableHeader>
-            <TableRow className="border-b border-border/50 hover:bg-transparent">
-              <TableHead className="relative px-5 text-xs font-medium text-muted-foreground select-none" style={{ width: lotCols.colWidths.designation, minWidth: 40 }}>
-                Désignation
-                <ResizeHandle colId="designation" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
-              </TableHead>
-              <TableHead className="relative px-2 text-xs font-medium text-muted-foreground select-none" style={{ width: lotCols.colWidths.batiment, minWidth: 40 }}>
-                Bâtiment
-                <ResizeHandle colId="batiment" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
-              </TableHead>
-              <TableHead className="relative px-2 text-xs font-medium text-muted-foreground select-none" style={{ width: lotCols.colWidths.type, minWidth: 40 }}>
-                Type
-                <ResizeHandle colId="type" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
-              </TableHead>
-              <TableHead className="px-2 text-xs font-medium text-muted-foreground select-none" style={{ width: lotCols.colWidths.role, minWidth: 40 }}>
-                Rôle
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {allLots.length > 0 ? (
-              allLots.map(lot => (
-                <TableRow
-                  key={lot.id + lot.role}
-                  className="border-b border-border/30 hover:bg-accent/50 cursor-pointer"
-                  onClick={() => goToLot(lot.id, lot.designation)}
-                >
-                  <TableCell className="px-5 py-3 text-sm font-medium text-foreground truncate">{lot.designation}</TableCell>
-                  <TableCell className="px-2 py-3 text-sm text-muted-foreground truncate">{lot.batiment_designation}</TableCell>
-                  <TableCell className="px-2 py-3">
-                    <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] capitalize">{lot.type_bien.replace('_', ' ')}</Badge>
-                  </TableCell>
-                  <TableCell className="px-2 py-3">
-                    <Badge className={lot.role === 'Mandataire' ? 'bg-blue-50 text-blue-700 border-blue-200 text-[10px]' : 'bg-amber-50 text-amber-700 border-amber-200 text-[10px]'}>
-                      {lot.role}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={4} className="py-8 text-center text-muted-foreground text-sm">Aucun lot lié</TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        {/* Table header */}
+        <div className="flex items-center gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50 select-none">
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.designation, minWidth: 40 }}>
+            Désignation
+            <ResizeHandle colId="designation" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.batiment, minWidth: 40 }}>
+            Bâtiment
+            <ResizeHandle colId="batiment" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.type, minWidth: 40 }}>
+            Type
+            <ResizeHandle colId="type" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="shrink-0" style={{ width: lotCols.colWidths.role, minWidth: 40 }}>
+            Rôle
+          </div>
+        </div>
+
+        {allLots.length > 0 ? (
+          <div className="divide-y divide-border/30">
+            {allLots.map(lot => (
+              <div
+                key={lot.id + lot.role}
+                className="flex items-center gap-3 px-5 py-3 hover:bg-accent/50 cursor-pointer transition-colors"
+                onClick={() => goToLot(lot.id, lot.designation)}
+              >
+                <div className="shrink-0 text-sm font-medium text-foreground truncate" style={{ width: lotCols.colWidths.designation }}>{lot.designation}</div>
+                <div className="shrink-0 text-sm text-muted-foreground truncate" style={{ width: lotCols.colWidths.batiment }}>{lot.batiment_designation}</div>
+                <div className="shrink-0" style={{ width: lotCols.colWidths.type }}>
+                  <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] capitalize">{lot.type_bien.replace('_', ' ')}</Badge>
+                </div>
+                <div className="shrink-0" style={{ width: lotCols.colWidths.role }}>
+                  <Badge className={lot.role === 'Mandataire' ? 'bg-blue-50 text-blue-700 border-blue-200 text-[10px]' : 'bg-amber-50 text-amber-700 border-amber-200 text-[10px]'}>
+                    {lot.role}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-8 text-center text-muted-foreground text-sm">Aucun lot lié</div>
+        )}
       </div>
 
       <CreateLotModal
