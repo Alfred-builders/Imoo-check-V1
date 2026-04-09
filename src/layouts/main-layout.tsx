@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
-import { LayoutGrid, CalendarCheck, Building, UsersRound, SlidersHorizontal, LogOut, ChevronRight, Pin, PinOff, Bell, PanelLeftClose, PanelLeft } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, Building2, Users, Settings, LogOut, ChevronRight, Bell, PanelLeftClose, PanelLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../hooks/use-auth'
 
@@ -12,21 +12,21 @@ const navigation = [
   {
     group: 'Opérationnel',
     items: [
-      { label: 'Tableau de bord', icon: LayoutGrid, href: '/app/dashboard', disabled: true },
-      { label: 'Missions', icon: CalendarCheck, href: '/app/missions', disabled: true },
+      { label: 'Tableau de bord', icon: LayoutDashboard, href: '/app/dashboard', disabled: true },
+      { label: 'Missions', icon: ClipboardList, href: '/app/missions', disabled: true },
     ],
   },
   {
     group: 'Référentiel',
     items: [
-      { label: 'Parc immobilier', icon: Building, href: '/app/patrimoine', disabled: false },
-      { label: 'Tiers', icon: UsersRound, href: '/app/tiers', disabled: false },
+      { label: 'Parc immobilier', icon: Building2, href: '/app/patrimoine', disabled: false },
+      { label: 'Tiers', icon: Users, href: '/app/tiers', disabled: false },
     ],
   },
   {
     group: 'Administration',
     items: [
-      { label: 'Paramètres', icon: SlidersHorizontal, href: '/app/parametres', disabled: false },
+      { label: 'Paramètres', icon: Settings, href: '/app/parametres', disabled: false },
     ],
   },
 ]
@@ -121,7 +121,7 @@ export function MainLayout() {
         <div className={`h-14 flex items-center ${ICON_PL} pr-3 border-b border-border shrink-0`}>
           <Link to="/app/patrimoine" className="flex items-center gap-3 group">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
-              <Building size={16} className="text-primary-foreground" strokeWidth={2} />
+              <Building2 size={16} className="text-primary-foreground" strokeWidth={2} />
             </div>
             {expanded && (
               <span className="text-[15px] font-bold tracking-tight text-foreground whitespace-nowrap">
