@@ -12,6 +12,7 @@ import { BuildingDetailPage } from './features/patrimoine/components/building-de
 import { LotDetailPage } from './features/patrimoine/components/lot-detail-page'
 import { SettingsPage } from './features/admin/components/settings-page'
 import { TiersPage } from './features/tiers/components/tiers-page'
+import { TiersDetailPage } from './features/tiers/components/tiers-detail-page'
 import VibesSelection from './vibes-selection'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -51,7 +52,7 @@ function AppRoutes() {
         <Route path="/app/patrimoine/batiments/:id" element={<BuildingDetailPage />} />
         <Route path="/app/patrimoine/lots/:id" element={<LotDetailPage />} />
         <Route path="/app/tiers" element={<TiersPage />} />
-        <Route path="/app/tiers/:id" element={<div className="p-6"><p className="text-gray-400">Fiche tiers — Sprint 2 en cours</p></div>} />
+        <Route path="/app/tiers/:id" element={<TiersDetailPage />} />
         <Route path="/app/parametres" element={<SettingsPage />} />
         <Route path="/app" element={<Navigate to="/app/patrimoine" replace />} />
       </Route>
