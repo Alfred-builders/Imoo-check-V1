@@ -13,7 +13,7 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreated?: (id: string) => void
-  onMaisonCreated?: (batimentId: string) => void // Triggers lot form after maison building
+  onMaisonCreated?: (batimentId: string) => void
 }
 
 export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCreated }: Props) {
@@ -39,15 +39,10 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
   const createMutation = useCreateBatiment()
 
   function reset() {
-    setDesignation('')
-    setType('immeuble')
-    setRue('')
-    setCodePostal('')
-    setVille('')
-    setComplement('')
-    setNbEtages('')
-    setAnneeConstruction('')
-    setCommentaire('')
+    setDesignation(''); setType('immeuble'); setRue(''); setCodePostal(''); setVille('')
+    setComplement(''); setNbEtages(''); setAnneeConstruction(''); setCommentaire('')
+    setNumBatiment(''); setLatitude(undefined); setLongitude(undefined)
+    setShowSecondary(false); setSecRue(''); setSecCodePostal(''); setSecVille('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -68,7 +63,6 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
       toast.success(`Bâtiment "${designation}" créé`)
       reset()
       onOpenChange(false)
-      // If type=maison, chain to lot creation (US-585)
       if (type === 'maison' && onMaisonCreated) {
         onMaisonCreated(result.id)
       } else {
@@ -86,103 +80,103 @@ export function CreateBuildingModal({ open, onOpenChange, onCreated, onMaisonCre
           <DialogTitle>Nouveau bâtiment</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 space-y-2">
-              <Label>Désignation *</Label>
-              <Input value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="Résidence Les Lilas" required />
+          {/* Identification */}
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Désignation *</Label>
+              <Input value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="Résidence Les Lilas" required className="h-9" />
             </div>
-            <div className="space-y-2">
-              <Label>Type *</Label>
-              <Select value={type} onValueChange={setType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="immeuble">Immeuble</SelectItem>
-                  <SelectItem value="maison">Maison</SelectItem>
-                  <SelectItem value="local_commercial">Local commercial</SelectItem>
-                  <SelectItem value="mixte">Mixte</SelectItem>
-                  <SelectItem value="autre">Autre</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>N batiment</Label>
-              <Input value={numBatiment} onChange={(e) => setNumBatiment(e.target.value)} placeholder="A, B, C..." />
-            </div>
-            <div className="space-y-2">
-              <Label>Nombre d'etages</Label>
-              <Input type="number" value={nbEtages} onChange={(e) => setNbEtages(e.target.value)} placeholder="5" />
-            </div>
-          </div>
-
-          <div className="border-t border-border pt-4">
-            <p className="text-sm font-medium mb-3">Adresse principale</p>
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label>Adresse *</Label>
-                <AddressAutocomplete
-                  onChange={(addr) => {
-                    if (addr) {
-                      setRue(addr.rue)
-                      setCodePostal(addr.code_postal)
-                      setVille(addr.ville)
-                      setLatitude(addr.latitude)
-                      setLongitude(addr.longitude)
-                    }
-                  }}
-                  placeholder="Rechercher une adresse..."
-                />
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Type *</Label>
+                <Select value={type} onValueChange={setType}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="immeuble">Immeuble</SelectItem>
+                    <SelectItem value="maison">Maison</SelectItem>
+                    <SelectItem value="local_commercial">Local commercial</SelectItem>
+                    <SelectItem value="mixte">Mixte</SelectItem>
+                    <SelectItem value="autre">Autre</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="space-y-2">
-                <Label>Complement</Label>
-                <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Bat. A, Entree 2" />
+              <div className="space-y-1.5">
+                <Label className="text-xs">N° bâtiment</Label>
+                <Input value={numBatiment} onChange={(e) => setNumBatiment(e.target.value)} placeholder="A, B, C..." className="h-9" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label>Code postal *</Label>
-                  <Input value={codePostal} onChange={(e) => setCodePostal(e.target.value)} placeholder="75011" required />
-                </div>
-                <div className="space-y-2">
-                  <Label>Ville *</Label>
-                  <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Paris" required />
-                </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Nb étages</Label>
+                <Input type="number" value={nbEtages} onChange={(e) => setNbEtages(e.target.value)} placeholder="5" className="h-9" />
               </div>
             </div>
           </div>
 
-          {/* Secondary address */}
+          {/* Adresse principale */}
+          <div className="border-t border-border pt-4 space-y-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Adresse principale</p>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Adresse *</Label>
+              <AddressAutocomplete
+                onChange={(addr) => {
+                  if (addr) {
+                    setRue(addr.rue); setCodePostal(addr.code_postal); setVille(addr.ville)
+                    setLatitude(addr.latitude); setLongitude(addr.longitude)
+                  }
+                }}
+                placeholder="Rechercher une adresse..."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Complément</Label>
+              <Input value={complement} onChange={(e) => setComplement(e.target.value)} placeholder="Bât. A, Entrée 2" className="h-9" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Code postal</Label>
+                <Input value={codePostal} readOnly tabIndex={-1} className="h-9 bg-muted/50 text-muted-foreground cursor-default" placeholder="Rempli automatiquement" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Ville</Label>
+                <Input value={ville} readOnly tabIndex={-1} className="h-9 bg-muted/50 text-muted-foreground cursor-default" placeholder="Rempli automatiquement" />
+              </div>
+            </div>
+          </div>
+
+          {/* Adresse secondaire */}
           {!showSecondary ? (
-            <button type="button" onClick={() => setShowSecondary(true)} className="text-xs text-primary hover:text-primary font-medium">
+            <button type="button" onClick={() => setShowSecondary(true)} className="text-xs text-primary hover:text-primary/80 font-medium">
               + Ajouter une adresse secondaire
             </button>
           ) : (
-            <div className="border-t border-border pt-3">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium">Adresse secondaire</p>
-                <button type="button" onClick={() => { setShowSecondary(false); setSecRue('') }} className="text-xs text-gray-400 hover:text-red-500">Retirer</button>
+            <div className="border-t border-border pt-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Adresse secondaire</p>
+                <button type="button" onClick={() => { setShowSecondary(false); setSecRue('') }} className="text-xs text-muted-foreground hover:text-destructive">Retirer</button>
               </div>
-              <div className="space-y-2">
-                <AddressAutocomplete
-                  onChange={(addr) => {
-                    if (addr) { setSecRue(addr.rue); setSecCodePostal(addr.code_postal); setSecVille(addr.ville); setSecLat(addr.latitude); setSecLng(addr.longitude) }
-                  }}
-                  placeholder="Rechercher adresse secondaire..."
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <Input value={secCodePostal} onChange={(e) => setSecCodePostal(e.target.value)} placeholder="Code postal" />
-                  <Input value={secVille} onChange={(e) => setSecVille(e.target.value)} placeholder="Ville" />
-                </div>
+              <AddressAutocomplete
+                onChange={(addr) => {
+                  if (addr) { setSecRue(addr.rue); setSecCodePostal(addr.code_postal); setSecVille(addr.ville); setSecLat(addr.latitude); setSecLng(addr.longitude) }
+                }}
+                placeholder="Rechercher adresse secondaire..."
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <Input value={secCodePostal} readOnly tabIndex={-1} className="h-9 bg-muted/50 text-muted-foreground cursor-default" placeholder="Auto" />
+                <Input value={secVille} readOnly tabIndex={-1} className="h-9 bg-muted/50 text-muted-foreground cursor-default" placeholder="Auto" />
               </div>
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label>Annee construction</Label>
-            <Input type="number" value={anneeConstruction} onChange={(e) => setAnneeConstruction(e.target.value)} placeholder="1990" />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Commentaire</Label>
-            <Textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} placeholder="Notes..." rows={2} />
+          {/* Infos complémentaires */}
+          <div className="border-t border-border pt-4 space-y-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Informations complémentaires</p>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Année de construction</Label>
+              <Input type="number" value={anneeConstruction} onChange={(e) => setAnneeConstruction(e.target.value)} placeholder="1990" className="h-9" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Commentaire</Label>
+              <Textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} placeholder="Notes..." rows={2} />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

@@ -10,7 +10,7 @@ import { RecordPicker } from 'src/components/shared/record-picker'
 import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
 import { useCreateLot, useCreateBatiment, useBatiments } from '../api'
 import { toast } from 'sonner'
-import { ArrowLeft, Plus, ChevronDown, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronRight } from 'lucide-react'
 
 interface Props {
   open: boolean
@@ -63,7 +63,6 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
   const createBatMutation = useCreateBatiment()
   const { data: batimentsData, refetch: refetchBatiments } = useBatiments()
 
-  // Sync preselected when it changes
   useEffect(() => {
     if (preselectedBatimentId) setBatimentId(preselectedBatimentId)
   }, [preselectedBatimentId])
@@ -81,55 +80,32 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
 
   function resetLot() {
     if (!preselectedBatimentId) setBatimentId('')
-    setDesignation('')
-    setReferenceInterne('')
-    setTypeBien(preselectedTypeBien || 'appartement')
-    setEtage('')
-    setEmplacementPalier('')
-    setSurface('')
-    setMeuble(false)
-    setNbPieces('')
-    setDpeClasse('')
-    setGesClasse('')
-    setEauChaudeType('')
-    setEauChaudeMode('')
-    setChauffageType('')
-    setChauffageMode('')
-    setCommentaire('')
-    setStep('lot')
+    setDesignation(''); setReferenceInterne(''); setTypeBien(preselectedTypeBien || 'appartement')
+    setEtage(''); setEmplacementPalier(''); setSurface(''); setMeuble(false); setNbPieces('')
+    setDpeClasse(''); setGesClasse(''); setEauChaudeType(''); setEauChaudeMode('')
+    setChauffageType(''); setChauffageMode(''); setCommentaire(''); setStep('lot')
   }
 
   function resetBat() {
-    setBatDesignation('')
-    setBatType('immeuble')
-    setBatNumBatiment('')
-    setBatNbEtages('')
-    setBatAnneeConstruction('')
-    setBatCommentaire('')
-    setBatRue('')
-    setBatCP('')
-    setBatVille('')
-    setBatComplement('')
-    setBatLat(undefined)
-    setBatLng(undefined)
+    setBatDesignation(''); setBatType('immeuble'); setBatNumBatiment(''); setBatNbEtages('')
+    setBatAnneeConstruction(''); setBatCommentaire(''); setBatRue(''); setBatCP(''); setBatVille('')
+    setBatComplement(''); setBatLat(undefined); setBatLng(undefined)
   }
 
   async function handleCreateBatiment(e: React.FormEvent) {
     e.preventDefault()
     try {
       const result = await createBatMutation.mutateAsync({
-        designation: batDesignation,
-        type: batType,
+        designation: batDesignation, type: batType,
         num_batiment: batNumBatiment || undefined,
         nb_etages: batNbEtages ? parseInt(batNbEtages) : undefined,
         annee_construction: batAnneeConstruction ? parseInt(batAnneeConstruction) : undefined,
         commentaire: batCommentaire || undefined,
         adresses: [{ type: 'principale', rue: batRue, complement: batComplement || undefined, code_postal: batCP, ville: batVille, latitude: batLat, longitude: batLng }],
       })
-      toast.success(`Batiment "${batDesignation}" cree`)
+      toast.success(`Bâtiment "${batDesignation}" créé`)
       const newId = result.id
       resetBat()
-      // Refresh picker options first, then set the ID and switch step
       await refetchBatiments()
       setBatimentId(newId)
       setStep('lot')
@@ -140,27 +116,18 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
 
   async function handleCreateLot(e: React.FormEvent) {
     e.preventDefault()
-    if (!batimentId) { toast.error('Selectionnez un batiment'); return }
+    if (!batimentId) { toast.error('Sélectionnez un bâtiment'); return }
     try {
       const result = await createLotMutation.mutateAsync({
-        batiment_id: batimentId,
-        designation,
-        reference_interne: referenceInterne || undefined,
-        type_bien: typeBien,
-        etage: etage || undefined,
-        emplacement_palier: emplacementPalier || undefined,
-        surface: surface ? parseFloat(surface) : undefined,
-        meuble,
-        nb_pieces: nbPieces || undefined,
-        dpe_classe: dpeClasse || undefined,
-        ges_classe: gesClasse || undefined,
-        eau_chaude_type: eauChaudeType || undefined,
-        eau_chaude_mode: eauChaudeMode || undefined,
-        chauffage_type: chauffageType || undefined,
-        chauffage_mode: chauffageMode || undefined,
+        batiment_id: batimentId, designation, reference_interne: referenceInterne || undefined,
+        type_bien: typeBien, etage: etage || undefined, emplacement_palier: emplacementPalier || undefined,
+        surface: surface ? parseFloat(surface) : undefined, meuble, nb_pieces: nbPieces || undefined,
+        dpe_classe: dpeClasse || undefined, ges_classe: gesClasse || undefined,
+        eau_chaude_type: eauChaudeType || undefined, eau_chaude_mode: eauChaudeMode || undefined,
+        chauffage_type: chauffageType || undefined, chauffage_mode: chauffageMode || undefined,
         commentaire: commentaire || undefined,
       })
-      toast.success(`Lot "${designation}" cree`)
+      toast.success(`Lot "${designation}" créé`)
       resetLot()
       onOpenChange(false)
       onCreated?.(result.id)
@@ -181,184 +148,190 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
               <DialogTitle>Nouveau lot</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreateLot} className="space-y-4">
-              {/* Batiment picker */}
+              {/* Bâtiment picker */}
               {!preselectedBatimentId && (
                 <div className="space-y-2">
-                  <Label>Batiment *</Label>
+                  <Label className="text-xs">Bâtiment *</Label>
                   <RecordPicker
                     options={batimentOptions}
                     value={batimentId}
                     onChange={(id) => setBatimentId(id || '')}
-                    placeholder="Selectionner un batiment"
+                    placeholder="Sélectionner un bâtiment"
                     searchPlaceholder="Chercher par nom ou adresse..."
                     onCreateClick={() => setStep('create-batiment')}
-                    createLabel="Creer un batiment"
+                    createLabel="Créer un bâtiment"
                   />
                   {batimentId && selectedBatiment && (
                     <p className="text-[10px] text-emerald-600 flex items-center gap-1">
-                      Selectionne : <span className="font-medium">{selectedBatiment.designation}</span>
+                      Sélectionné : <span className="font-medium">{selectedBatiment.designation}</span>
                       — {selectedBatiment.adresse_principale?.rue}, {selectedBatiment.adresse_principale?.ville}
                     </p>
-                  )}
-                  {batimentId && !selectedBatiment && (
-                    <p className="text-[10px] text-emerald-600">Batiment selectionne (chargement...)</p>
                   )}
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Designation *</Label>
-                  <Input value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="Appartement 201" required className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Reference interne</Label>
-                  <Input value={referenceInterne} onChange={(e) => setReferenceInterne(e.target.value)} placeholder="Bail, ref cadastrale..." className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Type de bien *</Label>
-                  <Select value={typeBien} onValueChange={setTypeBien}>
-                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {['appartement','maison','studio','local_commercial','parking','cave','autre'].map(t =>
-                        <SelectItem key={t} value={t} className="text-xs capitalize">{t.replace('_',' ')}</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Etage</Label>
-                  <Input value={etage} onChange={(e) => setEtage(e.target.value)} placeholder="2, RDC, SS-1..." className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Emplacement palier</Label>
-                  <Input value={emplacementPalier} onChange={(e) => setEmplacementPalier(e.target.value)} placeholder="Porte gauche..." className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Surface (m2)</Label>
-                  <Input type="number" step="0.01" value={surface} onChange={(e) => setSurface(e.target.value)} placeholder="65" className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Pieces</Label>
-                  <Select value={nbPieces} onValueChange={setNbPieces}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>
-                      {['studio','T1','T2','T3','T4','T5','T6'].map(t => <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">DPE</Label>
-                  <Select value={dpeClasse} onValueChange={setDpeClasse}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{['A','B','C','D','E','F','G'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">GES</Label>
-                  <Select value={gesClasse} onValueChange={setGesClasse}>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
-                    <SelectContent>{['A','B','C','D','E','F','G'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-                  </Select>
+              {/* Identification */}
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Identification</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Désignation *</Label>
+                    <Input value={designation} onChange={(e) => setDesignation(e.target.value)} placeholder="Appartement 201" required className="h-9" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Type de bien *</Label>
+                    <Select value={typeBien} onValueChange={setTypeBien}>
+                      <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {['appartement','maison','studio','local_commercial','parking','cave','autre'].map(t =>
+                          <SelectItem key={t} value={t} className="text-xs capitalize">{t.replace('_',' ')}</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Réf. interne</Label>
+                    <Input value={referenceInterne} onChange={(e) => setReferenceInterne(e.target.value)} placeholder="Bail, réf cadastrale..." className="h-9" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Pièces</Label>
+                    <Select value={nbPieces} onValueChange={setNbPieces}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectContent>
+                        {['studio','T1','T2','T3','T4','T5','T6'].map(t => <SelectItem key={t} value={t} className="text-xs">{t}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
-              {/* Energy section — collapsible */}
-              <div className="border border-gray-100 rounded-lg overflow-hidden">
+              {/* Localisation dans le bâtiment */}
+              <div className="border-t border-border pt-4 space-y-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Localisation</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Étage</Label>
+                    <Input value={etage} onChange={(e) => setEtage(e.target.value)} placeholder="2, RDC, SS-1..." className="h-9" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Emplacement palier</Label>
+                    <Input value={emplacementPalier} onChange={(e) => setEmplacementPalier(e.target.value)} placeholder="Porte gauche..." className="h-9" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Surface (m²)</Label>
+                    <Input type="number" step="0.01" value={surface} onChange={(e) => setSurface(e.target.value)} placeholder="65" className="h-9" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Switch checked={meuble} onCheckedChange={setMeuble} />
+                  <Label className="text-xs">Meublé</Label>
+                </div>
+              </div>
+
+              {/* Énergie — collapsible, contains DPE + GES + chauffage */}
+              <div className="border-t border-border pt-4">
                 <button
                   type="button"
                   onClick={() => setEnergieOpen(!energieOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 bg-gray-50 hover:bg-gray-100/70 transition-colors"
+                  className="w-full flex items-center justify-between py-1"
                 >
-                  <span className="text-xs font-medium text-gray-500">Energie & Chauffage</span>
-                  {energieOpen ? <ChevronDown className="h-3.5 w-3.5 text-gray-400" /> : <ChevronRight className="h-3.5 w-3.5 text-gray-400" />}
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Énergie</p>
+                  {energieOpen ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
                 </button>
-                {energieOpen && <div className="grid grid-cols-2 gap-3 p-3">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Eau chaude type</Label>
-                    <Select value={eauChaudeType} onValueChange={setEauChaudeType}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="individuelle" className="text-xs">Individuelle</SelectItem>
-                        <SelectItem value="collective" className="text-xs">Collective</SelectItem>
-                        <SelectItem value="aucun" className="text-xs">Aucun</SelectItem>
-                        <SelectItem value="autre" className="text-xs">Autre</SelectItem>
-                      </SelectContent>
-                    </Select>
+                {energieOpen && (
+                  <div className="grid grid-cols-2 gap-3 pt-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">DPE</Label>
+                      <Select value={dpeClasse} onValueChange={setDpeClasse}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>{['A','B','C','D','E','F','G'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">GES</Label>
+                      <Select value={gesClasse} onValueChange={setGesClasse}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>{['A','B','C','D','E','F','G'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Eau chaude type</Label>
+                      <Select value={eauChaudeType} onValueChange={setEauChaudeType}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>
+                          {[{v:'electrique',l:'Électrique'},{v:'gaz',l:'Gaz'},{v:'fioul',l:'Fioul'},{v:'pompe_a_chaleur',l:'Pompe à chaleur'},{v:'autre',l:'Autre'}].map(o =>
+                            <SelectItem key={o.v} value={o.v} className="text-xs">{o.l}</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Eau chaude mode</Label>
+                      <Select value={eauChaudeMode} onValueChange={setEauChaudeMode}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="individuel" className="text-xs">Individuel</SelectItem>
+                          <SelectItem value="collectif" className="text-xs">Collectif</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Chauffage type</Label>
+                      <Select value={chauffageType} onValueChange={setChauffageType}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>
+                          {[{v:'electrique',l:'Électrique'},{v:'gaz',l:'Gaz'},{v:'fioul',l:'Fioul'},{v:'pompe_a_chaleur',l:'Pompe à chaleur'},{v:'autre',l:'Autre'}].map(o =>
+                            <SelectItem key={o.v} value={o.v} className="text-xs">{o.l}</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs">Chauffage mode</Label>
+                      <Select value={chauffageMode} onValueChange={setChauffageMode}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="individuel" className="text-xs">Individuel</SelectItem>
+                          <SelectItem value="collectif" className="text-xs">Collectif</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Eau chaude mode</Label>
-                    <Select value={eauChaudeMode} onValueChange={setEauChaudeMode}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gaz" className="text-xs">Gaz</SelectItem>
-                        <SelectItem value="electrique" className="text-xs">Electrique</SelectItem>
-                        <SelectItem value="autre" className="text-xs">Autre</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Chauffage type</Label>
-                    <Select value={chauffageType} onValueChange={setChauffageType}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="individuel" className="text-xs">Individuel</SelectItem>
-                        <SelectItem value="collectif" className="text-xs">Collectif</SelectItem>
-                        <SelectItem value="aucun" className="text-xs">Aucun</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs">Chauffage mode</Label>
-                    <Select value={chauffageMode} onValueChange={setChauffageMode}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="—" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gaz" className="text-xs">Gaz</SelectItem>
-                        <SelectItem value="electrique" className="text-xs">Electrique</SelectItem>
-                        <SelectItem value="fioul" className="text-xs">Fioul</SelectItem>
-                        <SelectItem value="autre" className="text-xs">Autre</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>}
+                )}
               </div>
 
-              <div className="flex items-center gap-3">
-                <Switch checked={meuble} onCheckedChange={setMeuble} />
-                <Label className="text-xs">Meuble</Label>
-              </div>
-
-              <div className="space-y-1.5">
+              {/* Commentaire */}
+              <div className="border-t border-border pt-4 space-y-1.5">
                 <Label className="text-xs">Commentaire</Label>
                 <Textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} placeholder="Notes..." rows={2} />
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Annuler</Button>
-                <Button type="submit" size="sm" disabled={createLotMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  {createLotMutation.isPending ? 'Creation...' : 'Creer le lot'}
+                <Button type="submit" size="sm" disabled={createLotMutation.isPending}>
+                  {createLotMutation.isPending ? 'Création...' : 'Créer le lot'}
                 </Button>
               </div>
             </form>
           </>
         )}
 
-        {/* STEP: Create Building (inline, stays in same modal) */}
+        {/* STEP: Create Building (inline sub-form) */}
         {step === 'create-batiment' && (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <button onClick={() => setStep('lot')} className="p-1 rounded hover:bg-gray-100 transition-colors">
+                <button onClick={() => setStep('lot')} className="p-1 rounded hover:bg-accent transition-colors">
                   <ArrowLeft className="h-4 w-4" />
                 </button>
-                Nouveau batiment
+                Nouveau bâtiment
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreateBatiment} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2 space-y-1.5">
-                  <Label className="text-xs">Designation *</Label>
-                  <Input value={batDesignation} onChange={(e) => setBatDesignation(e.target.value)} placeholder="Residence Les Lilas" required className="h-9" />
+                  <Label className="text-xs">Désignation *</Label>
+                  <Input value={batDesignation} onChange={(e) => setBatDesignation(e.target.value)} placeholder="Résidence Les Lilas" required className="h-9" />
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Type *</Label>
@@ -372,17 +345,17 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">N batiment</Label>
+                  <Label className="text-xs">N° bâtiment</Label>
                   <Input value={batNumBatiment} onChange={(e) => setBatNumBatiment(e.target.value)} placeholder="A, B, C..." className="h-9" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Nombre d'etages</Label>
+                  <Label className="text-xs">Nb étages</Label>
                   <Input type="number" value={batNbEtages} onChange={(e) => setBatNbEtages(e.target.value)} placeholder="5" className="h-9" />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <p className="text-xs font-medium text-gray-500">Adresse principale</p>
+              <div className="border-t border-border pt-4 space-y-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Adresse principale</p>
                 <AddressAutocomplete
                   onChange={(addr) => {
                     if (addr) { setBatRue(addr.rue); setBatCP(addr.code_postal); setBatVille(addr.ville); setBatLat(addr.latitude); setBatLng(addr.longitude) }
@@ -390,23 +363,23 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                   placeholder="Rechercher une adresse..."
                 />
                 <div className="space-y-1.5">
-                  <Label className="text-xs">Complement</Label>
-                  <Input value={batComplement} onChange={(e) => setBatComplement(e.target.value)} placeholder="Bat. A, Entree 2" className="h-9" />
+                  <Label className="text-xs">Complément</Label>
+                  <Input value={batComplement} onChange={(e) => setBatComplement(e.target.value)} placeholder="Bât. A, Entrée 2" className="h-9" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Code postal *</Label>
-                    <Input value={batCP} onChange={(e) => setBatCP(e.target.value)} placeholder="75011" required className="h-9" />
+                    <Label className="text-xs text-muted-foreground">Code postal</Label>
+                    <Input value={batCP} readOnly tabIndex={-1} className="h-9 bg-muted/50 text-muted-foreground cursor-default" placeholder="Auto" />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs">Ville *</Label>
-                    <Input value={batVille} onChange={(e) => setBatVille(e.target.value)} placeholder="Paris" required className="h-9" />
+                    <Label className="text-xs text-muted-foreground">Ville</Label>
+                    <Input value={batVille} readOnly tabIndex={-1} className="h-9 bg-muted/50 text-muted-foreground cursor-default" placeholder="Auto" />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-xs">Annee construction</Label>
+                <Label className="text-xs">Année construction</Label>
                 <Input type="number" value={batAnneeConstruction} onChange={(e) => setBatAnneeConstruction(e.target.value)} placeholder="1990" className="h-9" />
               </div>
 
@@ -419,8 +392,8 @@ export function CreateLotModal({ open, onOpenChange, preselectedBatimentId, pres
                 <Button type="button" variant="ghost" size="sm" onClick={() => setStep('lot')}>
                   <ArrowLeft className="h-3.5 w-3.5 mr-1" /> Retour au lot
                 </Button>
-                <Button type="submit" size="sm" disabled={createBatMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  {createBatMutation.isPending ? 'Creation...' : 'Creer et selectionner'}
+                <Button type="submit" size="sm" disabled={createBatMutation.isPending}>
+                  {createBatMutation.isPending ? 'Création...' : 'Créer et sélectionner'}
                 </Button>
               </div>
             </form>
