@@ -45,7 +45,17 @@ app.use('/api/invitations', invitationRoutes)
 app.use('/api/workspaces', workspaceRoutes)
 app.use('/api/tiers', tiersRoutes)
 
-// Global error handler
+// Serve frontend (always in non-dev — Railway, staging, production)
+if (!isDev) {
+  const distPath = path.resolve(__dirname, '..', 'dist')
+  console.log(`[server] Serving frontend from: ${distPath}`)
+  app.use(express.static(distPath))
+  app.get('{*path}', (_req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'))
+  })
+}
+
+// Global error handler (must be AFTER all routes and static serving)
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (err instanceof AppError) {
     res.status(err.status).json({ error: err.message, code: err.code, ...(err.details ? { details: err.details } : {}) })
@@ -54,15 +64,6 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   console.error('[server] Unhandled error:', err)
   res.status(500).json({ error: 'Erreur interne', code: 'INTERNAL_ERROR' })
 })
-
-// Serve frontend (always in non-dev — Railway, staging, production)
-if (!isDev) {
-  const distPath = path.resolve(__dirname, '..', 'dist')
-  app.use(express.static(distPath))
-  app.get('{*path}', (_req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'))
-  })
-}
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`[server] ImmoChecker running on port ${PORT} (${process.env.NODE_ENV || 'production'})`)
