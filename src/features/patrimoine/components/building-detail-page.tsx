@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Archive, ArchiveRestore, Plus, Building2, Pencil, AlertTriangle, ClipboardList, Trash2 } from 'lucide-react'
+import { Archive, ArchiveRestore, Plus, Building2, Pencil, AlertTriangle, ClipboardList, Trash2, MapPin } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Skeleton } from 'src/components/ui/skeleton'
@@ -276,8 +276,20 @@ export function BuildingDetailPage() {
                       <div className="text-sm text-foreground truncate">
                         {a.rue}{a.complement ? `, ${a.complement}` : ''}
                       </div>
-                      <div className="text-sm text-foreground text-right">
-                        {a.code_postal} {a.ville}
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-sm text-foreground">{a.code_postal} {a.ville}</span>
+                        {a.latitude && a.longitude ? (
+                          <a
+                            href={`https://www.google.com/maps?q=${a.latitude},${a.longitude}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="h-6 w-6 rounded-md flex items-center justify-center text-primary/60 hover:text-primary hover:bg-primary/10 transition-colors shrink-0"
+                            title="Ouvrir dans Google Maps"
+                          >
+                            <MapPin size={14} strokeWidth={1.5} />
+                          </a>
+                        ) : null}
                       </div>
                     </>
                   )}

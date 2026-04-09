@@ -4,7 +4,7 @@ import { Button } from 'src/components/ui/button'
 import { Input } from 'src/components/ui/input'
 import { Label } from 'src/components/ui/label'
 import { Textarea } from 'src/components/ui/textarea'
-import { Switch } from 'src/components/ui/switch'
+import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
 import { useCreateTiers } from '../api'
 import { toast } from 'sonner'
 
@@ -20,6 +20,8 @@ export function CreateTiersModal({ open, onOpenChange, onCreated }: Props) {
   const [prenom, setPrenom] = useState('')
   const [raisonSociale, setRaisonSociale] = useState('')
   const [siren, setSiren] = useState('')
+  const [representantNom, setRepresentantNom] = useState('')
+  const [dateNaissance, setDateNaissance] = useState('')
   const [email, setEmail] = useState('')
   const [tel, setTel] = useState('')
   const [adresse, setAdresse] = useState('')
@@ -31,6 +33,7 @@ export function CreateTiersModal({ open, onOpenChange, onCreated }: Props) {
   function reset() {
     setTypePersonne('physique')
     setNom(''); setPrenom(''); setRaisonSociale(''); setSiren('')
+    setRepresentantNom(''); setDateNaissance('')
     setEmail(''); setTel(''); setAdresse(''); setCodePostal(''); setVille(''); setNotes('')
   }
 
@@ -39,10 +42,12 @@ export function CreateTiersModal({ open, onOpenChange, onCreated }: Props) {
     try {
       const result = await createMutation.mutateAsync({
         type_personne: typePersonne,
-        nom: typePersonne === 'morale' ? raisonSociale : nom,
-        prenom: typePersonne === 'physique' ? prenom : undefined,
-        raison_sociale: typePersonne === 'morale' ? raisonSociale : undefined,
-        siren: typePersonne === 'morale' ? siren || undefined : undefined,
+        nom: typePersonne === 'morale' ? (raisonSociale || nom) : nom,
+        prenom: typePersonne === 'physique' ? prenom || undefined : undefined,
+        raison_sociale: typePersonne === 'morale' ? raisonSociale || undefined : undefined,
+        siren: typePersonne === 'morale' && siren ? siren : undefined,
+        representant_nom: typePersonne === 'morale' && representantNom ? representantNom : undefined,
+        date_naissance: typePersonne === 'physique' && dateNaissance ? dateNaissance : undefined,
         email: email || undefined,
         tel: tel || undefined,
         adresse: adresse || undefined,
@@ -51,7 +56,8 @@ export function CreateTiersModal({ open, onOpenChange, onCreated }: Props) {
         notes: notes || undefined,
       })
       if (result.warning) toast.warning(result.warning)
-      toast.success(`Tiers "${typePersonne === 'morale' ? raisonSociale : `${prenom} ${nom}`}" cree`)
+      const displayName = typePersonne === 'morale' ? raisonSociale : `${prenom} ${nom}`
+      toast.success(`Tiers "${displayName}" créé`)
       reset()
       onOpenChange(false)
       onCreated?.(result.id)
@@ -68,82 +74,111 @@ export function CreateTiersModal({ open, onOpenChange, onCreated }: Props) {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Type toggle */}
-          <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-            <span className="text-xs text-gray-500">Type :</span>
-            <div className="flex items-center gap-2 bg-white rounded-md border border-gray-200 p-0.5">
+          <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg border border-border">
+            <span className="text-xs text-muted-foreground">Type :</span>
+            <div className="flex items-center gap-0.5 bg-card rounded-md border border-border p-0.5">
               <button type="button" onClick={() => setTypePersonne('physique')}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${typePersonne === 'physique' ? 'bg-primary text-primary-foreground' : 'text-gray-500 hover:text-gray-700'}`}>
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${typePersonne === 'physique' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                 Personne physique
               </button>
               <button type="button" onClick={() => setTypePersonne('morale')}
-                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${typePersonne === 'morale' ? 'bg-primary text-primary-foreground' : 'text-gray-500 hover:text-gray-700'}`}>
+                className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${typePersonne === 'morale' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
                 Personne morale
               </button>
             </div>
           </div>
 
-          {/* Adaptive fields */}
-          <div className="grid grid-cols-2 gap-3">
-            {typePersonne === 'physique' ? (
-              <>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Nom *</Label>
-                  <Input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Dupont" required className="h-9" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Prenom *</Label>
-                  <Input value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Jean" required className="h-9" />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="col-span-2 space-y-1.5">
-                  <Label className="text-xs">Raison sociale *</Label>
-                  <Input value={raisonSociale} onChange={(e) => setRaisonSociale(e.target.value)} placeholder="SCI Les Hetres" required className="h-9" />
-                </div>
-                <div className="col-span-2 space-y-1.5">
-                  <Label className="text-xs">SIREN</Label>
-                  <Input value={siren} onChange={(e) => setSiren(e.target.value)} placeholder="123456789" className="h-9" />
-                </div>
-              </>
-            )}
-            <div className="space-y-1.5">
-              <Label className="text-xs">Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemple.com" className="h-9" />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Telephone</Label>
-              <Input value={tel} onChange={(e) => setTel(e.target.value)} placeholder="06 12 34 56 78" className="h-9" />
+          {/* Identity fields */}
+          <div className="space-y-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Identité</p>
+            <div className="grid grid-cols-2 gap-3">
+              {typePersonne === 'physique' ? (
+                <>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Nom *</Label>
+                    <Input value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Dupont" required className="h-9" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Prénom *</Label>
+                    <Input value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Jean" required className="h-9" />
+                  </div>
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-xs">Date de naissance</Label>
+                    <Input type="date" value={dateNaissance} onChange={(e) => setDateNaissance(e.target.value)} className="h-9" />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-xs">Raison sociale *</Label>
+                    <Input value={raisonSociale} onChange={(e) => setRaisonSociale(e.target.value)} placeholder="SCI Les Hêtres" required className="h-9" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">SIREN</Label>
+                    <Input value={siren} onChange={(e) => setSiren(e.target.value)} placeholder="123456789" className="h-9" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Nom du représentant</Label>
+                    <Input value={representantNom} onChange={(e) => setRepresentantNom(e.target.value)} placeholder="M. Martin" className="h-9" />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Address */}
-          <div className="space-y-3">
+          {/* Contact */}
+          <div className="border-t border-border pt-4 space-y-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Contact</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs">Email</Label>
+                <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemple.com" className="h-9" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Téléphone</Label>
+                <Input value={tel} onChange={(e) => setTel(e.target.value)} placeholder="06 12 34 56 78" className="h-9" />
+              </div>
+            </div>
+          </div>
+
+          {/* Address with autocomplete */}
+          <div className="border-t border-border pt-4 space-y-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Adresse</p>
             <div className="space-y-1.5">
               <Label className="text-xs">Adresse</Label>
-              <Input value={adresse} onChange={(e) => setAdresse(e.target.value)} placeholder="12 Rue de la Paix" className="h-9" />
+              <AddressAutocomplete
+                onChange={(addr) => {
+                  if (addr) {
+                    setAdresse(addr.rue)
+                    setCodePostal(addr.code_postal)
+                    setVille(addr.ville)
+                  }
+                }}
+                placeholder="Rechercher une adresse..."
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-xs">Code postal</Label>
-                <Input value={codePostal} onChange={(e) => setCodePostal(e.target.value)} placeholder="75001" className="h-9" />
+                <Label className="text-xs text-muted-foreground">Code postal</Label>
+                <Input value={codePostal} readOnly tabIndex={-1} className="h-9 bg-muted/50 text-muted-foreground cursor-default" placeholder="Rempli automatiquement" />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Ville</Label>
-                <Input value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Paris" className="h-9" />
+                <Label className="text-xs text-muted-foreground">Ville</Label>
+                <Input value={ville} readOnly tabIndex={-1} className="h-9 bg-muted/50 text-muted-foreground cursor-default" placeholder="Rempli automatiquement" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-1.5">
+          {/* Notes */}
+          <div className="border-t border-border pt-4 space-y-1.5">
             <Label className="text-xs">Notes</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes..." rows={2} />
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes, commentaires..." rows={2} />
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>Annuler</Button>
-            <Button type="submit" size="sm" disabled={createMutation.isPending} className="bg-primary text-primary-foreground hover:bg-primary/90">
-              {createMutation.isPending ? 'Creation...' : 'Creer'}
+            <Button type="submit" size="sm" disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Création...' : 'Créer'}
             </Button>
           </div>
         </form>
