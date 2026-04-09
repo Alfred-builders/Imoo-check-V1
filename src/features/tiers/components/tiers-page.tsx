@@ -6,16 +6,20 @@ import { Badge } from 'src/components/ui/badge'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { useTiers, useTiersStats } from '../api'
 import { CreateTiersModal } from './create-tiers-modal'
+import { ResizeHandle, useResizableColumns } from '../../../components/shared/resizable-columns'
 import { useNavigate } from 'react-router-dom'
 import type { Tiers } from '../types'
 
 type Tab = 'tous' | 'proprietaire' | 'locataire' | 'mandataire'
+
+const DEFAULT_COL_WIDTHS = { avatar: 32, nom: 220, type: 96, email: 180, tel: 130, lots: 80, ville: 130 }
 
 export function TiersPage() {
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState<Tab>('tous')
   const [showCreate, setShowCreate] = useState(false)
   const navigate = useNavigate()
+  const { colWidths, onResizeStart, onResize } = useResizableColumns(DEFAULT_COL_WIDTHS)
 
   const role = tab === 'tous' ? undefined : tab
   const { data, isLoading } = useTiers({ search: search || undefined, role })
@@ -74,14 +78,31 @@ export function TiersPage() {
 
       {/* Table */}
       <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-        <div className="flex items-center gap-4 px-4 py-2.5 bg-muted/50 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-          <div className="w-8" />
-          <div className="flex-1 min-w-[150px]">Nom / Raison sociale</div>
-          <div className="w-24">Type</div>
-          <div className="w-40">Email</div>
-          <div className="w-28">Telephone</div>
-          <div className="w-20 text-center">Lots</div>
-          <div className="w-28">Ville</div>
+        <div className="flex items-center gap-4 px-4 py-2.5 bg-muted/50 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
+          <div className="shrink-0" style={{ width: colWidths.avatar }} />
+          <div className="relative shrink-0" style={{ width: colWidths.nom, minWidth: 40 }}>
+            Nom / Raison sociale
+            <ResizeHandle colId="nom" onResizeStart={onResizeStart} onResize={onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: colWidths.type, minWidth: 40 }}>
+            Type
+            <ResizeHandle colId="type" onResizeStart={onResizeStart} onResize={onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: colWidths.email, minWidth: 40 }}>
+            Email
+            <ResizeHandle colId="email" onResizeStart={onResizeStart} onResize={onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: colWidths.tel, minWidth: 40 }}>
+            Telephone
+            <ResizeHandle colId="tel" onResizeStart={onResizeStart} onResize={onResize} />
+          </div>
+          <div className="relative shrink-0 text-center" style={{ width: colWidths.lots, minWidth: 40 }}>
+            Lots
+            <ResizeHandle colId="lots" onResizeStart={onResizeStart} onResize={onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: colWidths.ville, minWidth: 40 }}>
+            Ville
+          </div>
         </div>
 
         {isLoading && (
@@ -97,14 +118,14 @@ export function TiersPage() {
         )}
 
         {!isLoading && tiersList.map((tiers) => (
-          <TiersRow key={tiers.id} tiers={tiers} onClick={() => navigate(`/app/tiers/${tiers.id}`)} />
+          <TiersRow key={tiers.id} tiers={tiers} colWidths={colWidths} onClick={() => navigate(`/app/tiers/${tiers.id}`)} />
         ))}
       </div>
     </div>
   )
 }
 
-function TiersRow({ tiers: t, onClick }: { tiers: Tiers; onClick: () => void }) {
+function TiersRow({ tiers: t, colWidths, onClick }: { tiers: Tiers; colWidths: Record<string, number>; onClick: () => void }) {
   const displayName = t.type_personne === 'morale'
     ? t.raison_sociale || t.nom
     : `${t.prenom || ''} ${t.nom}`.trim()
@@ -116,7 +137,7 @@ function TiersRow({ tiers: t, onClick }: { tiers: Tiers; onClick: () => void }) 
       className="flex items-center gap-4 px-4 py-2.5 hover:bg-accent/50 cursor-pointer transition-colors text-sm border-b border-border/30 last:border-b-0"
       onClick={onClick}
     >
-      <div className="w-8 flex justify-center">
+      <div className="shrink-0 flex justify-center" style={{ width: colWidths.avatar }}>
         <div className={`h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${t.type_personne === 'morale' ? 'bg-emerald-100' : 'bg-primary/10'}`}>
           {t.type_personne === 'morale'
             ? <Building2 className="h-3.5 w-3.5 text-emerald-700" />
@@ -124,19 +145,19 @@ function TiersRow({ tiers: t, onClick }: { tiers: Tiers; onClick: () => void }) 
           }
         </div>
       </div>
-      <div className="flex-1 min-w-[150px] min-w-0">
+      <div className="shrink-0 min-w-0" style={{ width: colWidths.nom }}>
         <p className="font-medium text-foreground truncate">{displayName}</p>
         {t.est_archive && <Badge variant="outline" className="text-[9px] text-muted-foreground">Archive</Badge>}
       </div>
-      <div className="w-24">
+      <div className="shrink-0" style={{ width: colWidths.type }}>
         <Badge className={`text-[10px] font-normal border ${t.type_personne === 'morale' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-primary/10 text-primary border-primary/20'}`}>
           {t.type_personne === 'morale' ? 'Morale' : 'Physique'}
         </Badge>
       </div>
-      <div className="w-40 text-xs text-muted-foreground truncate">{t.email || '—'}</div>
-      <div className="w-28 text-xs text-muted-foreground">{t.tel || '—'}</div>
-      <div className="w-20 text-center text-xs text-foreground font-medium">{nbLots || '—'}</div>
-      <div className="w-28 text-xs text-muted-foreground truncate">{t.ville || '—'}</div>
+      <div className="shrink-0 text-xs text-muted-foreground truncate" style={{ width: colWidths.email }}>{t.email || '—'}</div>
+      <div className="shrink-0 text-xs text-muted-foreground" style={{ width: colWidths.tel }}>{t.tel || '—'}</div>
+      <div className="shrink-0 text-center text-xs text-foreground font-medium" style={{ width: colWidths.lots }}>{nbLots || '—'}</div>
+      <div className="shrink-0 text-xs text-muted-foreground truncate" style={{ width: colWidths.ville }}>{t.ville || '—'}</div>
     </div>
   )
 }

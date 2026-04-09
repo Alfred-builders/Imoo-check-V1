@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 's
 import { Textarea } from 'src/components/ui/textarea'
 import { Switch } from 'src/components/ui/switch'
 import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
+import { ResizeHandle, useResizableColumns } from '../../../components/shared/resizable-columns'
 import { useLotDetail, useUpdateLot, useSearchTiers, useLinkProprietaire, useUnlinkProprietaire } from '../api'
 import { CreateTiersModal } from '../../tiers/components/create-tiers-modal'
 import { formatDate } from '../../../lib/formatters'
@@ -377,6 +378,8 @@ function TiersTable({ lotId, proprietaires, mandataire, isArchived }: {
   const linkMutation = useLinkProprietaire()
   const unlinkMutation = useUnlinkProprietaire()
 
+  const tiersCols = useResizableColumns({ nom: 250, role: 120, email: 180, tel: 140, actions: 40 })
+
   async function handleLink(tiersId: string) {
     await linkMutation.mutateAsync({ lotId, tiersId, estPrincipal: proprietaires.length === 0 })
     setShowAdd(false)
@@ -424,12 +427,24 @@ function TiersTable({ lotId, proprietaires, mandataire, isArchived }: {
       )}
 
       {/* Table header */}
-      <div className="grid grid-cols-[1fr_120px_160px_140px_40px] gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50">
-        <div>Nom</div>
-        <div>Rôle</div>
-        <div>Email</div>
-        <div>Téléphone</div>
-        <div />
+      <div className="flex items-center gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50 select-none">
+        <div className="relative shrink-0" style={{ width: tiersCols.colWidths.nom, minWidth: 40 }}>
+          Nom
+          <ResizeHandle colId="nom" onResizeStart={tiersCols.onResizeStart} onResize={tiersCols.onResize} />
+        </div>
+        <div className="relative shrink-0" style={{ width: tiersCols.colWidths.role, minWidth: 40 }}>
+          Rôle
+          <ResizeHandle colId="role" onResizeStart={tiersCols.onResizeStart} onResize={tiersCols.onResize} />
+        </div>
+        <div className="relative shrink-0" style={{ width: tiersCols.colWidths.email, minWidth: 40 }}>
+          Email
+          <ResizeHandle colId="email" onResizeStart={tiersCols.onResizeStart} onResize={tiersCols.onResize} />
+        </div>
+        <div className="relative shrink-0" style={{ width: tiersCols.colWidths.tel, minWidth: 40 }}>
+          Téléphone
+          <ResizeHandle colId="tel" onResizeStart={tiersCols.onResizeStart} onResize={tiersCols.onResize} />
+        </div>
+        <div className="shrink-0" style={{ width: tiersCols.colWidths.actions }} />
       </div>
 
       {allTiers.length > 0 ? (
@@ -437,16 +452,16 @@ function TiersTable({ lotId, proprietaires, mandataire, isArchived }: {
           {allTiers.map((t) => {
             const displayName = t.prenom ? `${t.prenom} ${t.nom}` : (t as any).raison_sociale || t.nom
             return (
-              <div key={t.id + t.role} className="grid grid-cols-[1fr_120px_160px_140px_40px] gap-3 px-5 py-3 items-center group hover:bg-accent/30 transition-colors">
-                <div className="text-sm font-medium text-foreground truncate">{displayName}</div>
-                <div>
+              <div key={t.id + t.role} className="flex items-center gap-3 px-5 py-3 group hover:bg-accent/30 transition-colors">
+                <div className="shrink-0 text-sm font-medium text-foreground truncate" style={{ width: tiersCols.colWidths.nom }}>{displayName}</div>
+                <div className="shrink-0" style={{ width: tiersCols.colWidths.role }}>
                   <Badge className={t.role === 'Mandataire' ? 'bg-blue-50 text-blue-700 border-blue-200 text-[10px]' : 'bg-amber-50 text-amber-700 border-amber-200 text-[10px]'}>
                     {t.role}
                   </Badge>
                 </div>
-                <div className="text-sm text-muted-foreground truncate">{t.email || '--'}</div>
-                <div className="text-sm text-muted-foreground">{t.tel || '--'}</div>
-                <div>
+                <div className="shrink-0 text-sm text-muted-foreground truncate" style={{ width: tiersCols.colWidths.email }}>{t.email || '--'}</div>
+                <div className="shrink-0 text-sm text-muted-foreground" style={{ width: tiersCols.colWidths.tel }}>{t.tel || '--'}</div>
+                <div className="shrink-0" style={{ width: tiersCols.colWidths.actions }}>
                   {!isArchived && t.role === 'Propriétaire' && (
                     <button onClick={() => unlinkMutation.mutate({ lotId, tiersId: t.id })} className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-red-500 transition-all" title="Retirer">
                       <X className="h-3.5 w-3.5" />

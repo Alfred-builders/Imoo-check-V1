@@ -10,6 +10,7 @@ import { Textarea } from 'src/components/ui/textarea'
 import { useBatimentDetail, useBatimentLots, useUpdateBatiment, useUpdateAddress, useAddAddress, useDeleteAddress } from '../api'
 import { AddressAutocomplete } from 'src/components/shared/address-autocomplete'
 import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
+import { ResizeHandle, useResizableColumns } from '../../../components/shared/resizable-columns'
 import { CreateLotModal } from './create-lot-modal'
 import { toast } from 'sonner'
 import { Trash2, Save, X as XIcon } from 'lucide-react'
@@ -26,6 +27,7 @@ export function BuildingDetailPage() {
   const { data: batiment, isLoading } = useBatimentDetail(id)
   const { data: lots } = useBatimentLots(id)
   const updateMutation = useUpdateBatiment()
+  const lotCols = useResizableColumns({ designation: 250, type: 120, etage: 100, surface: 100, meuble: 80 })
 
   const [formData, setFormData] = useState({
     designation: '',
@@ -247,12 +249,26 @@ export function BuildingDetailPage() {
         </div>
 
         {/* Lots table header */}
-        <div className="grid grid-cols-[1fr_120px_100px_100px_80px] gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50">
-          <div>Désignation</div>
-          <div>Type</div>
-          <div>Étage</div>
-          <div className="text-right">Surface</div>
-          <div>Meublé</div>
+        <div className="flex items-center gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50 select-none">
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.designation, minWidth: 40 }}>
+            Désignation
+            <ResizeHandle colId="designation" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.type, minWidth: 40 }}>
+            Type
+            <ResizeHandle colId="type" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.etage, minWidth: 40 }}>
+            Étage
+            <ResizeHandle colId="etage" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="relative shrink-0 text-right" style={{ width: lotCols.colWidths.surface, minWidth: 40 }}>
+            Surface
+            <ResizeHandle colId="surface" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.meuble, minWidth: 40 }}>
+            Meublé
+          </div>
         </div>
 
         {lots && lots.length > 0 ? (
@@ -260,16 +276,16 @@ export function BuildingDetailPage() {
             {lots.map((lot) => (
               <div
                 key={lot.id}
-                className="grid grid-cols-[1fr_120px_100px_100px_80px] gap-3 px-5 py-3 hover:bg-accent/50 cursor-pointer transition-colors items-center"
+                className="flex items-center gap-3 px-5 py-3 hover:bg-accent/50 cursor-pointer transition-colors"
                 onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
               >
-                <div className="text-sm font-medium text-foreground truncate">{lot.designation}</div>
-                <div>
+                <div className="shrink-0 text-sm font-medium text-foreground truncate" style={{ width: lotCols.colWidths.designation }}>{lot.designation}</div>
+                <div className="shrink-0" style={{ width: lotCols.colWidths.type }}>
                   <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] capitalize">{lot.type_bien.replace('_', ' ')}</Badge>
                 </div>
-                <div className="text-sm text-muted-foreground">{lot.etage || '--'}</div>
-                <div className="text-sm text-muted-foreground text-right">{lot.surface ? `${lot.surface} m²` : '--'}</div>
-                <div className="text-sm text-muted-foreground">{lot.meuble ? 'Oui' : 'Non'}</div>
+                <div className="shrink-0 text-sm text-muted-foreground" style={{ width: lotCols.colWidths.etage }}>{lot.etage || '--'}</div>
+                <div className="shrink-0 text-sm text-muted-foreground text-right" style={{ width: lotCols.colWidths.surface }}>{lot.surface ? `${lot.surface} m²` : '--'}</div>
+                <div className="shrink-0 text-sm text-muted-foreground" style={{ width: lotCols.colWidths.meuble }}>{lot.meuble ? 'Oui' : 'Non'}</div>
               </div>
             ))}
           </div>

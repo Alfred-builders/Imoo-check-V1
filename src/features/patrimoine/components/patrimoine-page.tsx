@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Search, Map, List, Building2, ChevronRight, ChevronDown, Home, Store, Landmark, Plus, Upload, Loader2 } from 'lucide-react'
 import { Input } from 'src/components/ui/input'
 import { Badge } from 'src/components/ui/badge'
@@ -12,6 +12,7 @@ import { CreateLotModal } from './create-lot-modal'
 import { ImportCSVModal } from './import-csv-modal'
 import { PatrimoineMap } from './patrimoine-map'
 import { ColumnConfig, useColumnPreferences, type ColumnDef } from '../../../components/shared/column-config'
+import { ResizeHandle, useResizableColumns } from '../../../components/shared/resizable-columns'
 import { DynamicFilter, type FilterField, type ActiveFilter } from '../../../components/shared/dynamic-filter'
 import type { Batiment, Lot } from '../types'
 
@@ -67,33 +68,6 @@ const DEFAULT_COL_WIDTHS: Record<string, number> = {
   created_at: 96,
 }
 
-function ResizeHandle({ colId, onResizeStart, onResize }: {
-  colId: string
-  onResizeStart: () => void
-  onResize: (id: string, delta: number) => void
-}) {
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const startX = e.clientX
-    onResizeStart()
-    const onMouseMove = (ev: MouseEvent) => {
-      onResize(colId, ev.clientX - startX)
-    }
-    const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseup', onMouseUp)
-    }
-    document.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseup', onMouseUp)
-  }
-  return (
-    <div
-      onMouseDown={handleMouseDown}
-      className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/30 active:bg-primary/40 transition-colors z-10"
-    />
-  )
-}
 
 function useDebounce(value: string, delay: number) {
   const [debounced, setDebounced] = useState(value)
@@ -153,21 +127,9 @@ export function PatrimoinePage() {
   const [showCreateLot, setShowCreateLot] = useState(false)
   const [showImportCSV, setShowImportCSV] = useState(false)
   const [maisonBatimentId, setMaisonBatimentId] = useState<string | null>(null)
-  const [colWidths, setColWidths] = useState<Record<string, number>>({ ...DEFAULT_COL_WIDTHS })
-  const startWidths = useRef<Record<string, number>>({})
+  const { colWidths, onResizeStart: handleResizeStart, onResize: handleResize } = useResizableColumns(DEFAULT_COL_WIDTHS)
   const [displayCount, setDisplayCount] = useState(BATCH_SIZE)
   const sentinelRef = useRef<HTMLDivElement>(null)
-
-  const handleResizeStart = useCallback(() => {
-    startWidths.current = { ...colWidths }
-  }, [colWidths])
-
-  const handleResize = useCallback((colId: string, delta: number) => {
-    setColWidths(prev => ({
-      ...prev,
-      [colId]: Math.max(40, (startWidths.current[colId] || prev[colId]) + delta),
-    }))
-  }, [])
 
   const debouncedSearch = useDebounce(search, 300)
   const navigate = useNavigate()
