@@ -49,7 +49,7 @@ export function ResizeHandle({ colId, onResizeStart, onResize }: {
   return (
     <div
       onMouseDown={handleMouseDown}
-      className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-primary/30 active:bg-primary/40 transition-colors z-10"
+      className="absolute right-0 top-[20%] bottom-[20%] w-[3px] cursor-col-resize z-10 flex items-center justify-center before:content-[''] before:block before:w-px before:h-full before:bg-border before:transition-colors hover:before:bg-primary/40 active:before:bg-primary/60"
     />
   )
 }
