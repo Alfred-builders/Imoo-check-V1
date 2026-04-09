@@ -29,13 +29,6 @@ const typeLabels: Record<string, string> = {
 export function SettingsPage() {
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-        <span>Administration</span>
-        <span>/</span>
-        <span className="text-foreground font-medium">Parametres</span>
-      </div>
-
       <div>
         <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">Parametres</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Gerez votre workspace, vos utilisateurs et vos invitations</p>

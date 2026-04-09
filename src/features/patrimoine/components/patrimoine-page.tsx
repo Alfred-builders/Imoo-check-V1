@@ -211,13 +211,6 @@ export function PatrimoinePage() {
         onImported={() => window.location.reload()}
       />
 
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
-        <span>Référentiel</span>
-        <ChevronRight className="h-3 w-3 text-border" />
-        <span className="text-foreground font-medium">Parc immobilier</span>
-      </nav>
-
       {/* Header */}
       <div>
         <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">Parc immobilier</h1>

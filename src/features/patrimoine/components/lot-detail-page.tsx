@@ -30,10 +30,9 @@ const typeBienOptions = [
   { value: 'autre', label: 'Autre' },
 ]
 
-const dpeOptions = ['', 'A', 'B', 'C', 'D', 'E', 'F', 'G']
+const dpeGesOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 
 const ENERGY_TYPE_OPTIONS = [
-  { value: '', label: '\u2014' },
   { value: 'electrique', label: 'Électrique' },
   { value: 'gaz', label: 'Gaz' },
   { value: 'fioul', label: 'Fioul' },
@@ -43,7 +42,6 @@ const ENERGY_TYPE_OPTIONS = [
 ]
 
 const ENERGY_MODE_OPTIONS = [
-  { value: '', label: '\u2014' },
   { value: 'individuel', label: 'Individuel' },
   { value: 'collectif', label: 'Collectif' },
 ]
@@ -251,9 +249,6 @@ export function LotDetailPage() {
           <InfoRow label="Réf. interne" editing={editing} value={lot.reference_interne || '--'}>
             <Input value={formData.reference_interne} onChange={(e) => setFormData(prev => ({ ...prev, reference_interne: e.target.value }))} className="h-8 w-48 text-sm" />
           </InfoRow>
-          <InfoRow label="N° appartement" editing={false} value={lot.designation || '--'}>
-            <span />
-          </InfoRow>
           <InfoRow label="Nb pièces" editing={editing} value={lot.nb_pieces || '--'}>
             <Input value={formData.nb_pieces} onChange={(e) => setFormData(prev => ({ ...prev, nb_pieces: e.target.value }))} className="h-8 w-48 text-sm" />
           </InfoRow>
@@ -279,36 +274,40 @@ export function LotDetailPage() {
       <CollapsibleSection title="Énergie" open={openSections.energie} onToggle={() => toggleSection('energie')}>
         <div className="divide-y divide-border/50">
           <InfoRow label="DPE" editing={editing} value={lot.dpe_classe || '--'}>
-            <Select value={formData.dpe_classe} onValueChange={(v) => setFormData(prev => ({ ...prev, dpe_classe: v }))}>
+            <Select value={formData.dpe_classe || undefined} onValueChange={(v) => setFormData(prev => ({ ...prev, dpe_classe: v }))}>
               <SelectTrigger className="h-8 w-48 text-sm"><SelectValue placeholder="--" /></SelectTrigger>
-              <SelectContent>{dpeOptions.map(o => <SelectItem key={o || '__empty'} value={o}>{o || '--'}</SelectItem>)}</SelectContent>
+              <SelectContent>{dpeGesOptions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
             </Select>
           </InfoRow>
           <InfoRow label="GES" editing={editing} value={lot.ges_classe || '--'}>
-            <Select value={formData.ges_classe} onValueChange={(v) => setFormData(prev => ({ ...prev, ges_classe: v }))}>
+            <Select value={formData.ges_classe || undefined} onValueChange={(v) => setFormData(prev => ({ ...prev, ges_classe: v }))}>
               <SelectTrigger className="h-8 w-48 text-sm"><SelectValue placeholder="--" /></SelectTrigger>
-              <SelectContent>{dpeOptions.map(o => <SelectItem key={o || '__empty'} value={o}>{o || '--'}</SelectItem>)}</SelectContent>
+              <SelectContent>{dpeGesOptions.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
             </Select>
           </InfoRow>
-          <InfoRow label="Eau chaude" editing={editing} value={lot.eau_chaude_type ? `${energyLabels[lot.eau_chaude_type] || lot.eau_chaude_type}${lot.eau_chaude_mode ? ` (${energyLabels[lot.eau_chaude_mode] || lot.eau_chaude_mode})` : ''}` : '--'}>
-            <div className="flex items-center gap-1.5">
-              <select value={formData.eau_chaude_type} onChange={(e) => setFormData(prev => ({ ...prev, eau_chaude_type: e.target.value }))} className="h-8 text-sm rounded-md border border-border bg-card px-2 focus:outline-none focus:ring-1 focus:ring-primary">
-                {ENERGY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-              <select value={formData.eau_chaude_mode} onChange={(e) => setFormData(prev => ({ ...prev, eau_chaude_mode: e.target.value }))} className="h-8 text-sm rounded-md border border-border bg-card px-2 focus:outline-none focus:ring-1 focus:ring-primary">
-                {ENERGY_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
+          <InfoRow label="Eau chaude type" editing={editing} value={lot.eau_chaude_type ? (energyLabels[lot.eau_chaude_type] || lot.eau_chaude_type) : '--'}>
+            <Select value={formData.eau_chaude_type || undefined} onValueChange={(v) => setFormData(prev => ({ ...prev, eau_chaude_type: v }))}>
+              <SelectTrigger className="h-8 w-48 text-sm"><SelectValue placeholder="--" /></SelectTrigger>
+              <SelectContent>{ENERGY_TYPE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+            </Select>
           </InfoRow>
-          <InfoRow label="Chauffage" editing={editing} value={lot.chauffage_type ? `${energyLabels[lot.chauffage_type] || lot.chauffage_type}${lot.chauffage_mode ? ` (${energyLabels[lot.chauffage_mode] || lot.chauffage_mode})` : ''}` : '--'}>
-            <div className="flex items-center gap-1.5">
-              <select value={formData.chauffage_type} onChange={(e) => setFormData(prev => ({ ...prev, chauffage_type: e.target.value }))} className="h-8 text-sm rounded-md border border-border bg-card px-2 focus:outline-none focus:ring-1 focus:ring-primary">
-                {ENERGY_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-              <select value={formData.chauffage_mode} onChange={(e) => setFormData(prev => ({ ...prev, chauffage_mode: e.target.value }))} className="h-8 text-sm rounded-md border border-border bg-card px-2 focus:outline-none focus:ring-1 focus:ring-primary">
-                {ENERGY_MODE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
+          <InfoRow label="Eau chaude mode" editing={editing} value={lot.eau_chaude_mode ? (energyLabels[lot.eau_chaude_mode] || lot.eau_chaude_mode) : '--'}>
+            <Select value={formData.eau_chaude_mode || undefined} onValueChange={(v) => setFormData(prev => ({ ...prev, eau_chaude_mode: v }))}>
+              <SelectTrigger className="h-8 w-48 text-sm"><SelectValue placeholder="--" /></SelectTrigger>
+              <SelectContent>{ENERGY_MODE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+            </Select>
+          </InfoRow>
+          <InfoRow label="Chauffage type" editing={editing} value={lot.chauffage_type ? (energyLabels[lot.chauffage_type] || lot.chauffage_type) : '--'}>
+            <Select value={formData.chauffage_type || undefined} onValueChange={(v) => setFormData(prev => ({ ...prev, chauffage_type: v }))}>
+              <SelectTrigger className="h-8 w-48 text-sm"><SelectValue placeholder="--" /></SelectTrigger>
+              <SelectContent>{ENERGY_TYPE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+            </Select>
+          </InfoRow>
+          <InfoRow label="Chauffage mode" editing={editing} value={lot.chauffage_mode ? (energyLabels[lot.chauffage_mode] || lot.chauffage_mode) : '--'}>
+            <Select value={formData.chauffage_mode || undefined} onValueChange={(v) => setFormData(prev => ({ ...prev, chauffage_mode: v }))}>
+              <SelectTrigger className="h-8 w-48 text-sm"><SelectValue placeholder="--" /></SelectTrigger>
+              <SelectContent>{ENERGY_MODE_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+            </Select>
           </InfoRow>
         </div>
       </CollapsibleSection>

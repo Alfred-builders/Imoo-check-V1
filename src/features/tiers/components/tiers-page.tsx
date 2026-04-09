@@ -37,13 +37,6 @@ export function TiersPage() {
     <div className="p-6 space-y-4">
       <CreateTiersModal open={showCreate} onOpenChange={setShowCreate} onCreated={(id) => navigate(`/app/tiers/${id}`)} />
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-        <span>Referentiel</span>
-        <span>/</span>
-        <span className="text-foreground font-medium">Tiers</span>
-      </div>
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
