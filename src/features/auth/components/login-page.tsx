@@ -93,7 +93,7 @@ export function LoginPage() {
 
         <Button
           type="submit"
-          className="w-full h-11 rounded-lg font-bold shadow-lg shadow-primary/20 transition-all"
+          className="w-full h-11 rounded-lg font-bold shadow-elevation-raised shadow-primary/20 transition-all"
           disabled={loading}
         >
           {loading ? 'Connexion...' : 'Se connecter'}

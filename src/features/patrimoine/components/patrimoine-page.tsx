@@ -246,7 +246,7 @@ export function PatrimoinePage() {
           <Button
             size="sm"
             onClick={() => setShowCreateLot(true)}
-            className="h-8 text-xs shadow-lg shadow-primary/15"
+            className="h-8 text-xs shadow-elevation-raised shadow-primary/15"
           >
             <Plus className="h-3.5 w-3.5 mr-1.5" /> Nouveau lot
           </Button>
@@ -256,16 +256,16 @@ export function PatrimoinePage() {
             visibleColumns={visibleCols}
             onColumnsChange={setVisibleCols}
           />
-          <div className="flex items-center bg-muted rounded-lg p-0.5">
+          <div className="flex items-center bg-surface-sunken rounded-lg p-0.5">
             <button
               onClick={() => setView('table')}
-              className={`p-1.5 rounded-md transition-colors ${view === 'table' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`p-1.5 rounded-md transition-colors ${view === 'table' ? 'bg-surface-raised shadow-elevation-raised text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <List className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => setView('carte')}
-              className={`p-1.5 rounded-md transition-colors ${view === 'carte' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              className={`p-1.5 rounded-md transition-colors ${view === 'carte' ? 'bg-surface-raised shadow-elevation-raised text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <Map className="h-3.5 w-3.5" />
             </button>
@@ -275,9 +275,9 @@ export function PatrimoinePage() {
 
       {/* Table view */}
       {view === 'table' && (
-        <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+        <div className="elevation-raised rounded-xl overflow-hidden">
           {/* Table header */}
-          <div className="flex items-center gap-4 px-4 py-2.5 bg-muted/50 border-b border-border text-[11px] font-bold text-muted-foreground uppercase tracking-wider select-none">
+          <div className="flex items-center gap-4 px-4 py-2.5 bg-surface-sunken border-b border-border text-[11px] font-bold text-muted-foreground uppercase tracking-wider select-none">
             <div className="w-6 shrink-0" /> {/* expand */}
             {isCol('designation') && (
               <div className="relative overflow-visible shrink-0" style={{ width: colWidths.designation, minWidth: 40 }}>
@@ -444,7 +444,7 @@ function LotSubRows({ batimentId, batimentName }: { batimentId: string; batiment
 
   if (isLoading) {
     return (
-      <div className="pl-10 pr-4 py-2 bg-muted/50">
+      <div className="pl-10 pr-4 py-2 bg-surface-sunken">
         {[1, 2].map((i) => (
           <div key={i} className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 py-2">
             <Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" /><Skeleton className="h-4" />
@@ -454,10 +454,10 @@ function LotSubRows({ batimentId, batimentName }: { batimentId: string; batiment
     )
   }
 
-  if (!lots || lots.length === 0) return <div className="pl-10 pr-4 py-3 bg-muted/50 text-xs text-muted-foreground">Aucun lot</div>
+  if (!lots || lots.length === 0) return <div className="pl-10 pr-4 py-3 bg-surface-sunken text-xs text-muted-foreground">Aucun lot</div>
 
   return (
-    <div className="bg-muted/50 border-t border-border">
+    <div className="bg-surface-sunken border-t border-border">
       {/* Sub-row column headers */}
       <div className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-1.5 text-[9px] font-bold text-muted-foreground uppercase tracking-wider border-b border-border/60">
         <div>Lot</div>

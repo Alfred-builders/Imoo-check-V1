@@ -206,7 +206,7 @@ export function BuildingDetailPage() {
       {/* Two-column: Informations + Adresses */}
       <div className="grid grid-cols-2 gap-5">
         {/* Informations card */}
-        <div data-card className="bg-card rounded-xl border border-border shadow-sm">
+        <div data-card className="elevation-raised rounded-xl">
           <div className="px-5 py-4 border-b border-border">
             <h2 className="text-sm font-semibold text-foreground">Informations</h2>
           </div>
@@ -233,7 +233,7 @@ export function BuildingDetailPage() {
         </div>
 
         {/* Adresses card — inline edit controlled by global Modifier */}
-        <div data-card className="bg-card rounded-xl border border-border shadow-sm">
+        <div data-card className="elevation-raised rounded-xl">
           <div className="px-5 py-4 border-b border-border">
             <h2 className="text-sm font-semibold text-foreground">Adresses</h2>
           </div>
@@ -268,7 +268,7 @@ export function BuildingDetailPage() {
                         <Input value={a.complement} onChange={(e) => updateAddrField(idx, 'complement', e.target.value)} placeholder="Complément..." className="h-7 text-xs" />
                       </div>
                       <div className="text-right">
-                        <Input value={`${a.code_postal} ${a.ville}`} readOnly tabIndex={-1} className="h-7 text-xs bg-muted/50 text-muted-foreground cursor-default text-right" />
+                        <Input value={`${a.code_postal} ${a.ville}`} readOnly tabIndex={-1} className="h-7 text-xs bg-surface-sunken text-muted-foreground cursor-default text-right" />
                       </div>
                     </>
                   ) : (
@@ -303,7 +303,7 @@ export function BuildingDetailPage() {
       </div>
 
       {/* Lots table */}
-      <div data-card className="bg-card rounded-xl border border-border shadow-sm">
+      <div data-card className="elevation-raised rounded-xl">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Lots ({lots?.length ?? 0})</h2>
           {!batiment.est_archive && (

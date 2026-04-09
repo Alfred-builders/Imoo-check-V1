@@ -35,7 +35,7 @@ export function SettingsPage() {
       </div>
 
       <Tabs defaultValue="workspace" className="w-full">
-        <TabsList className="bg-muted p-0.5 h-9">
+        <TabsList className="bg-surface-sunken p-0.5 h-9">
           <TabsTrigger value="workspace" className="text-xs h-8 px-4"><Building2 className="h-3.5 w-3.5 mr-1.5" /> Workspace</TabsTrigger>
           <TabsTrigger value="utilisateurs" className="text-xs h-8 px-4"><Users className="h-3.5 w-3.5 mr-1.5" /> Utilisateurs</TabsTrigger>
           <TabsTrigger value="invitations" className="text-xs h-8 px-4"><Mail className="h-3.5 w-3.5 mr-1.5" /> Invitations</TabsTrigger>
@@ -102,7 +102,7 @@ function WorkspaceTab() {
         ) : (
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setEditing(false)}>Annuler</Button>
-            <Button size="sm" className="h-8 text-xs rounded-lg font-bold shadow-lg shadow-primary/15" onClick={handleSave} disabled={updateMutation.isPending}>
+            <Button size="sm" className="h-8 text-xs rounded-lg font-bold shadow-elevation-raised shadow-primary/15" onClick={handleSave} disabled={updateMutation.isPending}>
               <Save className="h-3 w-3 mr-1.5" /> Enregistrer
             </Button>
           </div>
@@ -403,7 +403,7 @@ function InvitationsTab() {
                 <SelectContent>{ROLES.map((r) => <SelectItem key={r} value={r} className="text-xs">{roleConfig[r].label}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <Button type="submit" disabled={sendInvitation.isPending} className="rounded-lg font-bold shadow-lg shadow-primary/15 h-9 px-4">
+            <Button type="submit" disabled={sendInvitation.isPending} className="rounded-lg font-bold shadow-elevation-raised shadow-primary/15 h-9 px-4">
               {sendInvitation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1.5" />}
               Envoyer
             </Button>
@@ -426,7 +426,7 @@ function InvitationsTab() {
               { key: 'expired' as const, label: 'Expirees' },
             ]).map(({ key, label }) => (
               <button key={key} onClick={() => setFilter(key)}
-                className={`px-2.5 py-1 rounded transition-colors font-medium ${filter === key ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}>
+                className={`px-2.5 py-1 rounded transition-colors font-medium ${filter === key ? 'bg-surface-raised shadow-elevation-raised text-foreground' : 'text-muted-foreground'}`}>
                 {label} {counts[key] > 0 && <span className="text-muted-foreground/60 ml-0.5">{counts[key]}</span>}
               </button>
             ))}

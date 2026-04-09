@@ -353,7 +353,7 @@ export function LotDetailPage() {
 /* ── Collapsible Section ── */
 function CollapsibleSection({ title, open, onToggle, children }: { title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+    <div className="elevation-raised rounded-xl overflow-hidden">
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-accent/30 transition-colors"
@@ -404,7 +404,7 @@ function TiersTable({ lotId, proprietaires, mandataire, isArchived }: {
   ]
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm">
+    <div className="elevation-raised rounded-xl">
       <div className="px-5 py-4 border-b border-border flex items-center justify-between">
         <h2 className="text-sm font-semibold text-foreground">Tiers liés ({allTiers.length})</h2>
         {!isArchived && (

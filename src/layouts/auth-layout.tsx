@@ -20,7 +20,7 @@ export function AuthLayout() {
       {/* Right panel — light form area */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-sm">
-          <div className="bg-card rounded-xl border border-border shadow-sm p-8">
+          <div className="elevation-raised rounded-xl p-8">
             {/* Mobile-only logo */}
             <div className="lg:hidden text-center mb-8">
               <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center mx-auto mb-3 shadow-lg shadow-primary/20">

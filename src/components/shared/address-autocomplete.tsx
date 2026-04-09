@@ -119,7 +119,7 @@ export function AddressAutocomplete({ value, onChange, placeholder = 'Rechercher
       </div>
 
       {isOpen && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute z-40 w-full mt-1 bg-surface-overlay border border-border rounded-lg shadow-elevation-overlay overflow-hidden">
           {suggestions.map((feat, i) => (
             <button
               key={i}

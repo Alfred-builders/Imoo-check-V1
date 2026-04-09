@@ -41,8 +41,15 @@
 - Hover: bg-slate-50 text-slate-900
 - User section: avatar circle + name (14px bold) + role (12px muted)
 
+## Elevation System (5 levels)
+- **Sunken** (`bg-surface-sunken`): Table headers, expanded rows, tab list backgrounds, filter bars. No shadow.
+- **Default** (`bg-background` ~#fafafa): Page background only. No shadow.
+- **Raised** (`elevation-raised` or `bg-card` + `shadow-elevation-raised`): Cards, sidebar, header, detail sections. Subtle shadow.
+- **Overlay** (`bg-popover` + `shadow-elevation-overlay`, z-40): Dropdowns, popovers, selects, autocomplete.
+- **Floating** (`elevation-floating` or `bg-surface-floating` + `shadow-elevation-floating`, z-50): Modals, sheets, floating save bar.
+
 ## Cards
-- bg-white rounded-xl border border-[#e2e8f0] shadow-[0_1px_3px_rgba(0,0,0,0.04)]
+- Use `elevation-raised rounded-xl` (combines bg-white + subtle shadow + 1px border)
 - No heavy shadows — subtle, clean elevation
 
 ## Table

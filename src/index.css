@@ -12,7 +12,7 @@
   --sidebar-accent-foreground: oklch(0.2050 0 0);
   --sidebar-border: oklch(0.9220 0 0);
   --sidebar-ring: oklch(0.7080 0 0);
-  --background: oklch(1 0 0);
+  --background: oklch(0.9800 0 0);
   --foreground: oklch(0.1450 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.1450 0 0);
@@ -72,6 +72,16 @@
   --map-upcoming: #2563eb;
   --map-recent: #16a34a;
   --map-inactive: #9ca3af;
+
+  /* ── Elevation system ── */
+  --elevation-sunken: oklch(0.9650 0 0);
+  --elevation-raised: oklch(1 0 0);
+  --elevation-overlay: oklch(1 0 0);
+  --elevation-floating: oklch(1 0 0);
+  --shadow-elevation-raised: 0 1px 3px 0 hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+  --shadow-elevation-raised-hover: 0 2px 6px 0 hsl(0 0% 0% / 0.08), 0 4px 12px -2px hsl(0 0% 0% / 0.05);
+  --shadow-elevation-overlay: 0 4px 16px -2px hsl(0 0% 0% / 0.12), 0 2px 6px -1px hsl(0 0% 0% / 0.08);
+  --shadow-elevation-floating: 0 8px 30px -4px hsl(0 0% 0% / 0.15), 0 4px 10px -2px hsl(0 0% 0% / 0.08);
 }
 
 .dark {
@@ -127,6 +137,16 @@
   --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
   --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+
+  /* Elevation (dark) */
+  --elevation-sunken: oklch(0.1200 0 0);
+  --elevation-raised: oklch(0.2050 0 0);
+  --elevation-overlay: oklch(0.2690 0 0);
+  --elevation-floating: oklch(0.2690 0 0);
+  --shadow-elevation-raised: 0 1px 3px 0 hsl(0 0% 0% / 0.20), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
+  --shadow-elevation-raised-hover: 0 2px 6px 0 hsl(0 0% 0% / 0.25), 0 4px 12px -2px hsl(0 0% 0% / 0.15);
+  --shadow-elevation-overlay: 0 4px 16px -2px hsl(0 0% 0% / 0.30), 0 2px 6px -1px hsl(0 0% 0% / 0.20);
+  --shadow-elevation-floating: 0 8px 30px -4px hsl(0 0% 0% / 0.40), 0 4px 10px -2px hsl(0 0% 0% / 0.20);
 }
 
 @theme inline {
@@ -188,6 +208,16 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
+  /* Elevation surfaces */
+  --color-surface-sunken: var(--elevation-sunken);
+  --color-surface-raised: var(--elevation-raised);
+  --color-surface-overlay: var(--elevation-overlay);
+  --color-surface-floating: var(--elevation-floating);
+  /* Elevation shadows */
+  --shadow-elevation-raised: var(--shadow-elevation-raised);
+  --shadow-elevation-raised-hover: var(--shadow-elevation-raised-hover);
+  --shadow-elevation-overlay: var(--shadow-elevation-overlay);
+  --shadow-elevation-floating: var(--shadow-elevation-floating);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -324,23 +354,30 @@ button, a, input, select, textarea, [role="tab"], [role="tabpanel"] {
   background: oklch(0.5560 0 0);
 }
 
-/* Modern shadows */
-.shadow-card {
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(0, 0, 0, 0.03),
-    0 8px 24px rgba(0, 0, 0, 0.02);
+/* ── Elevation composite utilities ── */
+.elevation-raised {
+  background-color: var(--elevation-raised);
+  box-shadow: var(--shadow-elevation-raised);
+  border: 1px solid var(--border);
 }
-.shadow-card-hover {
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.05),
-    0 8px 20px rgba(0, 0, 0, 0.06),
-    0 16px 40px rgba(0, 0, 0, 0.03);
+.elevation-raised-interactive {
+  background-color: var(--elevation-raised);
+  box-shadow: var(--shadow-elevation-raised);
+  border: 1px solid var(--border);
+  transition: box-shadow 0.15s ease;
 }
-.shadow-elevated {
-  box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.04),
-    0 12px 32px rgba(0, 0, 0, 0.08);
+.elevation-raised-interactive:hover {
+  box-shadow: var(--shadow-elevation-raised-hover);
+}
+.elevation-overlay {
+  background-color: var(--elevation-overlay);
+  box-shadow: var(--shadow-elevation-overlay);
+  border: 1px solid var(--border);
+}
+.elevation-floating {
+  background-color: var(--elevation-floating);
+  box-shadow: var(--shadow-elevation-floating);
+  border: 1px solid var(--border);
 }
 
 /* Mapbox popup */

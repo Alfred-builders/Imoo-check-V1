@@ -43,19 +43,19 @@ export function TiersPage() {
           <h1 className="text-[28px] font-bold tracking-[-0.5px] text-foreground">Tiers</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Proprietaires, locataires, mandataires</p>
         </div>
-        <Button size="sm" onClick={() => setShowCreate(true)} className="shadow-lg shadow-primary/15 h-8 text-xs">
+        <Button size="sm" onClick={() => setShowCreate(true)} className="shadow-elevation-raised shadow-primary/15 h-8 text-xs">
           <Plus className="h-3.5 w-3.5 mr-1" /> Nouveau tiers
         </Button>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5 w-fit">
+      <div className="flex items-center gap-1 bg-surface-sunken rounded-lg p-0.5 w-fit">
         {tabs.map(({ key, label, count }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
             className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              tab === key ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'
+              tab === key ? 'bg-surface-raised shadow-elevation-raised text-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {label} {count !== undefined && <span className="text-muted-foreground/60 ml-0.5">{count}</span>}
@@ -70,8 +70,8 @@ export function TiersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-        <div className="flex items-center gap-4 px-4 py-2.5 bg-muted/50 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
+      <div className="elevation-raised rounded-xl overflow-hidden">
+        <div className="flex items-center gap-4 px-4 py-2.5 bg-surface-sunken border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wider select-none">
           <div className="shrink-0" style={{ width: colWidths.avatar }} />
           <div className="relative shrink-0" style={{ width: colWidths.nom, minWidth: 40 }}>
             Nom / Raison sociale

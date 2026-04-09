@@ -269,9 +269,9 @@ export function PatrimoineMap({ batiments }: Props) {
   }
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+    <div className="elevation-raised rounded-xl overflow-hidden">
       <div ref={mapContainer} className="h-[500px] w-full" />
-      <div className="flex items-center gap-6 px-4 py-2.5 bg-white text-xs text-gray-500 border-t border-gray-100">
+      <div className="flex items-center gap-6 px-4 py-2.5 bg-surface-sunken text-xs text-muted-foreground border-t border-border">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-blue-600" />
           <span>Mission a venir</span>

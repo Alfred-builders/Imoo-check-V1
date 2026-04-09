@@ -142,7 +142,7 @@ export function MainLayout() {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{ width: sidebarWidth }}
-        className="fixed left-0 top-0 bottom-0 bg-card border-r border-border flex flex-col z-50 transition-[width] duration-200 ease-in-out overflow-hidden"
+        className="fixed left-0 top-0 bottom-0 bg-surface-raised border-r border-border flex flex-col z-30 transition-[width] duration-200 ease-in-out overflow-hidden"
       >
         <div className={`h-14 flex items-center ${ICON_PL} pr-3 border-b border-border shrink-0`}>
           <Link to="/app/patrimoine" className="flex items-center gap-3 group">
@@ -198,7 +198,7 @@ export function MainLayout() {
       {/* Main content */}
       <div style={{ marginLeft: sidebarWidth }} className="min-h-screen transition-[margin-left] duration-200 ease-in-out flex flex-col">
         {/* Header */}
-        <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 sticky top-0 z-40">
+        <header className="h-14 border-b border-border bg-surface-raised flex items-center justify-between px-4 shrink-0 sticky top-0 z-20">
           <div className="flex items-center gap-2">
             {isDetailPage && (
               <button onClick={() => navigate(-1)} className="h-8 w-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors" title="Retour">
@@ -265,7 +265,7 @@ function WorkspaceSwitcher({ expanded }: { expanded: boolean }) {
         <ChevronsUpDown size={12} className="text-muted-foreground shrink-0" />
       </button>
       {open && (
-        <div className="absolute bottom-full left-0 right-0 mb-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden z-50">
+        <div className="absolute bottom-full left-0 right-0 mb-1 bg-popover border border-border rounded-lg shadow-elevation-overlay overflow-hidden z-40">
           {workspaces.map((ws) => (
             <button key={ws.id} onClick={() => handleSwitch(ws.id)} className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent transition-colors text-[12px]">
               <span className="flex-1 truncate font-medium text-foreground">{ws.nom}</span>

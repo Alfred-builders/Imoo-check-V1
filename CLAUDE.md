@@ -544,6 +544,49 @@ Composant reutilise partout (creation mission, creation lot, associations tiers)
 
 ---
 
+## 7h. Systeme d'elevation
+
+ImmoChecker utilise un systeme d'elevation a 5 niveaux inspire d'Atlassian. Chaque element visuel appartient a exactement un niveau. Surface et shadow sont toujours apparies.
+
+### Niveaux
+
+| Niveau | Surface | Shadow | Z-index | Utilisation |
+|---|---|---|---|---|
+| **Sunken** | `bg-surface-sunken` | aucune | 0 | En-tetes de tableau, lignes expandees, fond de barre de filtre/tabs, inputs disabled |
+| **Default** | `bg-background` | aucune | 0 | Fond de page uniquement |
+| **Raised** | `bg-card` ou `elevation-raised` | `shadow-elevation-raised` | 0 | Cards, sidebar, header, sections detail, formulaire auth |
+| **Overlay** | `bg-popover` ou `bg-surface-overlay` | `shadow-elevation-overlay` | z-40 | Dropdowns, popovers, selects, autocomplete, tooltips |
+| **Floating** | `bg-surface-floating` ou `elevation-floating` | `shadow-elevation-floating` | z-50 | Dialogs, sheets, alert-dialogs, floating save bar |
+
+### Classes composites
+
+- `.elevation-raised` = surface + shadow + border (pour les cartes et sections)
+- `.elevation-raised-interactive` = idem + hover shadow transition
+- `.elevation-overlay` = surface overlay + shadow overlay + border
+- `.elevation-floating` = surface floating + shadow floating + border
+
+### Regles
+
+1. **Ne jamais utiliser les shadow bruts** (`shadow-sm`, `shadow-md`, `shadow-lg`) pour l'elevation. Utiliser `shadow-elevation-raised`, `shadow-elevation-overlay`, ou `shadow-elevation-floating`.
+2. **`shadow-xs` sur les inputs/boutons est OK** — ce n'est pas de l'elevation, c'est du form control styling.
+3. **Ne jamais utiliser `bg-white`** — utiliser `bg-card`, `bg-surface-raised`, ou `bg-surface-sunken`.
+4. **Ne jamais mettre `z-50` sur des elements non-modaux.** Sidebar = z-30, header = z-20, dropdowns/popovers = z-40, modals/floating = z-50.
+5. **Shadows decoratives colorees** (`shadow-primary/20`) sur les CTA auth sont une exception.
+6. **`bg-muted/50` est deprecie** pour les zones en retrait — utiliser `bg-surface-sunken`.
+
+### Echelle Z-index
+
+| Token | Valeur | Usage |
+|---|---|---|
+| z-0 | 0 | Contenu par defaut |
+| z-10 | 10 | Elements sticky, resize handles |
+| z-20 | 20 | Header sticky |
+| z-30 | 30 | Sidebar |
+| z-40 | 40 | Overlays (dropdowns, popovers, selects, tooltips, autocomplete) |
+| z-50 | 50 | Modaux (dialog, sheet, alert-dialog, floating save bar) |
+
+---
+
 ## 8. Specifications Detaillees
 
 Documents de specification a consulter pour les details fonctionnels :
