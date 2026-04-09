@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
-import { Building2, LayoutDashboard, ClipboardList, Users, Settings, LogOut, ChevronRight } from 'lucide-react'
+import { Building2, LayoutDashboard, ClipboardList, Users, Settings, LogOut, ChevronRight, Pin, PinOff } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../hooks/use-auth'
 
@@ -73,8 +73,9 @@ export function MainLayout() {
   const navigate = useNavigate()
   const { user, workspace, logout } = useAuth()
   const [hovered, setHovered] = useState(false)
+  const [pinned, setPinned] = useState(false)
 
-  const expanded = hovered
+  const expanded = pinned || hovered
 
   async function handleLogout() {
     await logout()
@@ -86,15 +87,15 @@ export function MainLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar — fixed, collapsed by default, expands on hover */}
+      {/* Sidebar */}
       <aside
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{ width: sidebarWidth }}
         className="fixed left-0 top-0 bottom-0 bg-card border-r border-border flex flex-col z-50 transition-[width] duration-200 ease-in-out overflow-hidden"
       >
-        {/* Logo */}
-        <div className={`mb-2 ${expanded ? 'p-6' : 'py-6 px-0 flex justify-center'}`}>
+        {/* Logo + Pin */}
+        <div className={`mb-2 relative ${expanded ? 'p-6' : 'py-6 px-0 flex justify-center'}`}>
           <Link to="/app/patrimoine" className="flex items-center gap-3 group">
             <div className="w-9 h-9 bg-primary rounded-lg shadow-lg shadow-primary/20 flex items-center justify-center transition-transform group-hover:scale-105 shrink-0">
               <Building2 size={20} className="text-primary-foreground" />
@@ -105,6 +106,21 @@ export function MainLayout() {
               </span>
             )}
           </Link>
+
+          {/* Pin/Unpin button — visible only when expanded */}
+          {expanded && (
+            <button
+              onClick={() => setPinned(!pinned)}
+              title={pinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
+              className={`absolute top-6 right-4 h-6 w-6 rounded-md flex items-center justify-center transition-all duration-150
+                ${pinned
+                  ? 'bg-primary/10 text-primary rotate-0'
+                  : 'text-muted-foreground/60 hover:text-muted-foreground hover:bg-accent -rotate-45'
+                }`}
+            >
+              {pinned ? <PinOff size={14} strokeWidth={2} /> : <Pin size={14} strokeWidth={2} />}
+            </button>
+          )}
         </div>
 
         {/* Navigation */}

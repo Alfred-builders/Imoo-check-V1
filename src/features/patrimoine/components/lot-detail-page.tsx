@@ -208,12 +208,19 @@ export function LotDetailPage() {
 
         <div className="flex items-center gap-2 shrink-0">
           {!lot.est_archive && !editing && (
-            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-              <Pencil className="h-3.5 w-3.5 mr-1.5" /> Modifier
+            <Button variant="outline" size="sm" className="gap-1.5 border-border hover:border-foreground/20 hover:bg-accent" onClick={() => setEditing(true)}>
+              <Pencil className="h-3.5 w-3.5" /> Modifier
             </Button>
           )}
-          <Button variant="outline" size="sm" className={lot.est_archive ? '' : 'text-destructive hover:text-destructive'} onClick={handleArchive}>
-            {lot.est_archive ? <ArchiveRestore className="h-3.5 w-3.5 mr-1.5" /> : <Archive className="h-3.5 w-3.5 mr-1.5" />}
+          <Button
+            variant="outline"
+            size="sm"
+            className={lot.est_archive
+              ? 'gap-1.5 border-border hover:border-foreground/20 hover:bg-accent'
+              : 'gap-1.5 border-destructive/30 text-destructive/80 hover:text-destructive hover:bg-destructive/5 hover:border-destructive/50'}
+            onClick={handleArchive}
+          >
+            {lot.est_archive ? <ArchiveRestore className="h-3.5 w-3.5" /> : <Archive className="h-3.5 w-3.5" />}
             {lot.est_archive ? 'Restaurer' : 'Archiver'}
           </Button>
         </div>
