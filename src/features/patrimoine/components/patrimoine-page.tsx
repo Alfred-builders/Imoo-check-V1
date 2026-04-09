@@ -6,7 +6,7 @@ import { Button } from 'src/components/ui/button'
 import { Skeleton } from 'src/components/ui/skeleton'
 import { useBatiments, useBatimentLots } from '../api'
 import { formatDate } from '../../../lib/formatters'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { CreateBuildingModal } from './create-building-modal'
 import { CreateLotModal } from './create-lot-modal'
 import { ImportCSVModal } from './import-csv-modal'
@@ -122,7 +122,14 @@ function matchFilter(val: string | number | boolean | null, op: string, target: 
 export function PatrimoinePage() {
   const [search, setSearch] = useState('')
   const [dynamicFilters, setDynamicFilters] = useState<ActiveFilter[]>([])
-  const [view, setView] = useState<'table' | 'carte'>('table')
+  const [view, setViewState] = useState<'table' | 'carte'>(() => {
+    const saved = sessionStorage.getItem('patrimoine_view')
+    return saved === 'carte' ? 'carte' : 'table'
+  })
+  function setView(v: 'table' | 'carte') {
+    setViewState(v)
+    sessionStorage.setItem('patrimoine_view', v)
+  }
   const [showCreateBuilding, setShowCreateBuilding] = useState(false)
   const [showCreateLot, setShowCreateLot] = useState(false)
   const [showImportCSV, setShowImportCSV] = useState(false)
@@ -133,13 +140,8 @@ export function PatrimoinePage() {
 
   const debouncedSearch = useDebounce(search, 300)
   const navigate = useNavigate()
-  const location = useLocation()
   const { visible: visibleCols, setVisible: setVisibleCols } = useColumnPreferences('patrimoine_batiments', BATIMENT_COLUMNS)
 
-  // Restore map view when navigating back from a building detail
-  useEffect(() => {
-    if (location.state?.from === 'carte') setView('carte')
-  }, [location.state])
 
   // Check if archive filter is active
   const hasArchiveFilter = dynamicFilters.some(f => f.field === 'est_archive')
@@ -388,7 +390,7 @@ function BatimentRow({ batiment, visibleCols, colWidths }: { batiment: Batiment;
     <div className="border-b border-border/50 last:border-b-0">
       <div
         className="flex items-center gap-4 px-4 py-2.5 hover:bg-accent/50 transition-colors cursor-pointer text-sm"
-        onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batiment.designation }], from: view } })}
+        onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batiment.designation }] } })}
       >
         <button
           onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}

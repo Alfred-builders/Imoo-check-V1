@@ -72,51 +72,46 @@ function NavItem({ to, icon: Icon, label, disabled, expanded }: { to: string; ic
 }
 
 /**
- * Build breadcrumbs from URL path + location state for context-aware navigation.
- * If location.state has breadcrumbs override, use that instead of URL-based.
+ * Build breadcrumbs: state-based for detail pages, URL-based for top-level.
+ * Only uses location.state.breadcrumbs when present (set by navigate calls from parent pages).
+ * Top-level pages (/app/patrimoine, /app/tiers, /app/parametres) use simple URL-based crumbs.
  */
 function useBreadcrumbs() {
   const location = useLocation()
   const state = location.state as Record<string, any> | null
 
-  // If the page passed explicit breadcrumbs via state, use them
+  // Detail pages pass explicit breadcrumbs via state — use them
   if (state?.breadcrumbs && Array.isArray(state.breadcrumbs)) {
     return state.breadcrumbs as { label: string; href?: string }[]
   }
 
-  // Default: derive from URL path
-  const segments = location.pathname.split('/').filter(Boolean)
-  const crumbs: { label: string; href?: string }[] = []
-  const labelMap: Record<string, string> = {
-    patrimoine: 'Parc immobilier',
-    batiments: 'Bâtiment',
-    lots: 'Lot',
-    tiers: 'Tiers',
-    parametres: 'Paramètres',
-    dashboard: 'Tableau de bord',
-    missions: 'Missions',
+  // Top-level pages: derive from URL
+  const path = location.pathname
+  const topLevelMap: Record<string, string> = {
+    '/app/patrimoine': 'Parc immobilier',
+    '/app/tiers': 'Tiers',
+    '/app/parametres': 'Paramètres',
+    '/app/dashboard': 'Tableau de bord',
+    '/app/missions': 'Missions',
   }
 
-  let path = ''
-  for (let i = 0; i < segments.length; i++) {
-    const seg = segments[i]
-    path += `/${seg}`
-    if (seg === 'app') continue
-
-    const label = labelMap[seg]
-    if (label) {
-      crumbs.push({ label, href: path })
-    }
-    // UUID segments — use the state-provided name or just skip adding another crumb
-    // The detail pages will provide their own title via state
+  // Exact match for top-level
+  if (topLevelMap[path]) {
+    return [{ label: topLevelMap[path] }]
   }
 
-  // If state has a pageTitle, replace the last crumb with it
-  if (state?.pageTitle && crumbs.length > 0) {
-    crumbs.push({ label: state.pageTitle })
+  // For detail pages WITHOUT state (direct URL access), build generic crumbs
+  if (path.startsWith('/app/patrimoine/batiments/')) {
+    return [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: 'Bâtiment' }]
+  }
+  if (path.startsWith('/app/patrimoine/lots/')) {
+    return [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: 'Lot' }]
+  }
+  if (path.startsWith('/app/tiers/')) {
+    return [{ label: 'Tiers', href: '/app/tiers' }, { label: 'Fiche tiers' }]
   }
 
-  return crumbs
+  return []
 }
 
 export function MainLayout() {
@@ -129,9 +124,8 @@ export function MainLayout() {
   const expanded = pinned || hovered
   const breadcrumbs = useBreadcrumbs()
 
-  // Show back arrow if we're deeper than a top-level page
-  const pathDepth = location.pathname.split('/').filter(Boolean).length
-  const showBack = pathDepth > 2 // more than /app/patrimoine
+  // Show back arrow on detail pages (not top-level)
+  const isDetailPage = /\/app\/(patrimoine\/(batiments|lots)\/|tiers\/[^/])/.test(location.pathname)
 
   async function handleLogout() {
     await logout()
@@ -150,29 +144,24 @@ export function MainLayout() {
         style={{ width: sidebarWidth }}
         className="fixed left-0 top-0 bottom-0 bg-card border-r border-border flex flex-col z-50 transition-[width] duration-200 ease-in-out overflow-hidden"
       >
-        {/* Top — Logo icon + Pin */}
         <div className={`h-14 flex items-center ${ICON_PL} pr-3 border-b border-border shrink-0`}>
           <Link to="/app/patrimoine" className="flex items-center gap-3 group">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
               <Building2 size={16} className="text-primary-foreground" strokeWidth={2} />
             </div>
-            {expanded && (
-              <span className="text-[15px] font-bold tracking-tight text-foreground whitespace-nowrap">IC</span>
-            )}
+            {expanded && <span className="text-[15px] font-bold tracking-tight text-foreground whitespace-nowrap">IC</span>}
           </Link>
           {expanded && (
             <button
               onClick={() => setPinned(!pinned)}
               title={pinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
-              className={`ml-auto h-7 w-7 rounded-md flex items-center justify-center transition-all duration-150 shrink-0
-                ${pinned ? 'bg-primary/10 text-primary' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-accent'}`}
+              className={`ml-auto h-7 w-7 rounded-md flex items-center justify-center transition-all duration-150 shrink-0 ${pinned ? 'bg-primary/10 text-primary' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-accent'}`}
             >
               {pinned ? <PanelLeftClose size={15} strokeWidth={1.5} /> : <PanelLeft size={15} strokeWidth={1.5} />}
             </button>
           )}
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-4 space-y-5">
           {navigation.map((group) => (
             <section key={group.group}>
@@ -190,15 +179,12 @@ export function MainLayout() {
           ))}
         </nav>
 
-        {/* Workspace switcher + User section */}
         <div className={`border-t border-border py-3 ${ICON_PL} pr-3 space-y-2`}>
           <WorkspaceSwitcher expanded={expanded} />
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[11px] shrink-0">{initials}</div>
             {expanded && (
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-foreground truncate">{user?.prenom} {user?.nom}</p>
-              </div>
+              <div className="flex-1 min-w-0"><p className="text-[13px] font-semibold text-foreground truncate">{user?.prenom} {user?.nom}</p></div>
             )}
           </div>
           {expanded && (
@@ -209,22 +195,16 @@ export function MainLayout() {
         </div>
       </aside>
 
-      {/* Main content area */}
+      {/* Main content */}
       <div style={{ marginLeft: sidebarWidth }} className="min-h-screen transition-[margin-left] duration-200 ease-in-out flex flex-col">
-        {/* Top header bar — back arrow + breadcrumb + notification */}
+        {/* Header */}
         <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 sticky top-0 z-40">
           <div className="flex items-center gap-2">
-            {/* Back arrow */}
-            {showBack && (
-              <button
-                onClick={() => navigate(-1)}
-                className="h-8 w-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                title="Retour"
-              >
+            {isDetailPage && (
+              <button onClick={() => navigate(-1)} className="h-8 w-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors" title="Retour">
                 <ArrowLeft size={16} strokeWidth={1.5} />
               </button>
             )}
-            {/* Breadcrumbs */}
             <nav className="flex items-center gap-1.5 text-[13px]">
               {breadcrumbs.map((b, i) => (
                 <span key={i} className="flex items-center gap-1.5">
@@ -244,16 +224,9 @@ export function MainLayout() {
           </button>
         </header>
 
-        {/* Page content */}
         <main className="flex-1">
           <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15, ease: 'easeOut' }}
-            >
+            <motion.div key={location.pathname} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.15, ease: 'easeOut' }}>
               <Outlet />
             </motion.div>
           </AnimatePresence>
@@ -269,11 +242,7 @@ interface WsItem { id: string; nom: string; type_workspace: string; logo_url: st
 function WorkspaceSwitcher({ expanded }: { expanded: boolean }) {
   const { workspace, switchWorkspace } = useAuth()
   const [open, setOpen] = useState(false)
-  const { data: workspaces } = useQuery<WsItem[]>({
-    queryKey: ['workspaces'],
-    queryFn: () => api<WsItem[]>('/auth/me/workspaces'),
-    staleTime: 5 * 60 * 1000,
-  })
+  const { data: workspaces } = useQuery<WsItem[]>({ queryKey: ['workspaces'], queryFn: () => api<WsItem[]>('/auth/me/workspaces'), staleTime: 5 * 60 * 1000 })
 
   if (!workspaces || workspaces.length <= 1) {
     if (!expanded) return null
@@ -286,11 +255,7 @@ function WorkspaceSwitcher({ expanded }: { expanded: boolean }) {
   }
 
   if (!expanded) {
-    return (
-      <button onClick={() => setOpen(!open)} className="w-8 h-8 rounded-md bg-accent/50 flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors" title={workspace?.nom}>
-        <ChevronsUpDown size={14} />
-      </button>
-    )
+    return <button onClick={() => setOpen(!open)} className="w-8 h-8 rounded-md bg-accent/50 flex items-center justify-center text-muted-foreground hover:bg-accent transition-colors" title={workspace?.nom}><ChevronsUpDown size={14} /></button>
   }
 
   return (
