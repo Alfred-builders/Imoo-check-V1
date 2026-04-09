@@ -20,11 +20,13 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') })
 
 const app = express()
 const PORT = parseInt(process.env.PORT || '3001', 10)
-const isProduction = process.env.NODE_ENV !== 'development'
+const isDev = process.env.NODE_ENV === 'development'
 
 // Middleware
 app.use(cors({
-  origin: isProduction ? process.env.FRONTEND_URL : 'http://localhost:5173',
+  origin: isDev
+    ? 'http://localhost:5173'
+    : (process.env.FRONTEND_URL || true),
   credentials: true,
 }))
 app.use(express.json())
@@ -53,8 +55,8 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: 'Erreur interne', code: 'INTERNAL_ERROR' })
 })
 
-// Serve frontend in production
-if (isProduction) {
+// Serve frontend (always in non-dev — Railway, staging, production)
+if (!isDev) {
   const distPath = path.resolve(__dirname, '..', 'dist')
   app.use(express.static(distPath))
   app.get('{*path}', (_req, res) => {
@@ -63,7 +65,7 @@ if (isProduction) {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[server] ImmoChecker running on port ${PORT} (${process.env.NODE_ENV || 'development'})`)
+  console.log(`[server] ImmoChecker running on port ${PORT} (${process.env.NODE_ENV || 'production'})`)
 })
 
 export default app
