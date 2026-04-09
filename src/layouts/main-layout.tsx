@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom'
-import { LayoutDashboard, ClipboardList, Building2, Users, Settings, LogOut, ChevronRight, Bell, PanelLeftClose, PanelLeft, ChevronsUpDown, Check } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, Building2, Users, Settings, LogOut, ChevronRight, Bell, PanelLeftClose, PanelLeft, ChevronsUpDown, Check, ArrowLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../hooks/use-auth'
 import { useQuery } from '@tanstack/react-query'
@@ -8,7 +8,7 @@ import { api } from '../lib/api-client'
 
 const SIDEBAR_COLLAPSED_W = 64
 const SIDEBAR_EXPANDED_W = 240
-const ICON_PL = 'pl-[22px]' // fixed left padding so icons stay aligned in both states
+const ICON_PL = 'pl-[22px]'
 
 const navigation = [
   {
@@ -32,18 +32,6 @@ const navigation = [
     ],
   },
 ]
-
-// Breadcrumb path mapping
-const pathLabels: Record<string, string> = {
-  app: '',
-  patrimoine: 'Parc immobilier',
-  batiments: 'Bâtiments',
-  lots: 'Lots',
-  tiers: 'Tiers',
-  parametres: 'Paramètres',
-  dashboard: 'Tableau de bord',
-  missions: 'Missions',
-}
 
 function NavItem({ to, icon: Icon, label, disabled, expanded }: { to: string; icon: React.ElementType; label: string; disabled?: boolean; expanded: boolean }) {
   const location = useLocation()
@@ -83,6 +71,54 @@ function NavItem({ to, icon: Icon, label, disabled, expanded }: { to: string; ic
   )
 }
 
+/**
+ * Build breadcrumbs from URL path + location state for context-aware navigation.
+ * If location.state has breadcrumbs override, use that instead of URL-based.
+ */
+function useBreadcrumbs() {
+  const location = useLocation()
+  const state = location.state as Record<string, any> | null
+
+  // If the page passed explicit breadcrumbs via state, use them
+  if (state?.breadcrumbs && Array.isArray(state.breadcrumbs)) {
+    return state.breadcrumbs as { label: string; href?: string }[]
+  }
+
+  // Default: derive from URL path
+  const segments = location.pathname.split('/').filter(Boolean)
+  const crumbs: { label: string; href?: string }[] = []
+  const labelMap: Record<string, string> = {
+    patrimoine: 'Parc immobilier',
+    batiments: 'Bâtiment',
+    lots: 'Lot',
+    tiers: 'Tiers',
+    parametres: 'Paramètres',
+    dashboard: 'Tableau de bord',
+    missions: 'Missions',
+  }
+
+  let path = ''
+  for (let i = 0; i < segments.length; i++) {
+    const seg = segments[i]
+    path += `/${seg}`
+    if (seg === 'app') continue
+
+    const label = labelMap[seg]
+    if (label) {
+      crumbs.push({ label, href: path })
+    }
+    // UUID segments — use the state-provided name or just skip adding another crumb
+    // The detail pages will provide their own title via state
+  }
+
+  // If state has a pageTitle, replace the last crumb with it
+  if (state?.pageTitle && crumbs.length > 0) {
+    crumbs.push({ label: state.pageTitle })
+  }
+
+  return crumbs
+}
+
 export function MainLayout() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -91,6 +127,11 @@ export function MainLayout() {
   const [pinned, setPinned] = useState(false)
 
   const expanded = pinned || hovered
+  const breadcrumbs = useBreadcrumbs()
+
+  // Show back arrow if we're deeper than a top-level page
+  const pathDepth = location.pathname.split('/').filter(Boolean).length
+  const showBack = pathDepth > 2 // more than /app/patrimoine
 
   async function handleLogout() {
     await logout()
@@ -99,16 +140,6 @@ export function MainLayout() {
 
   const initials = user ? `${user.prenom[0]}${user.nom[0]}`.toUpperCase() : '?'
   const sidebarWidth = expanded ? SIDEBAR_EXPANDED_W : SIDEBAR_COLLAPSED_W
-
-  // Build breadcrumb from path
-  const pathParts = location.pathname.split('/').filter(Boolean)
-  const breadcrumbs: { label: string; href?: string }[] = []
-  let href = ''
-  for (const part of pathParts) {
-    href += `/${part}`
-    const label = pathLabels[part]
-    if (label) breadcrumbs.push({ label, href })
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -126,9 +157,7 @@ export function MainLayout() {
               <Building2 size={16} className="text-primary-foreground" strokeWidth={2} />
             </div>
             {expanded && (
-              <span className="text-[15px] font-bold tracking-tight text-foreground whitespace-nowrap">
-                IC
-              </span>
+              <span className="text-[15px] font-bold tracking-tight text-foreground whitespace-nowrap">IC</span>
             )}
           </Link>
           {expanded && (
@@ -136,10 +165,7 @@ export function MainLayout() {
               onClick={() => setPinned(!pinned)}
               title={pinned ? 'Détacher la sidebar' : 'Épingler la sidebar'}
               className={`ml-auto h-7 w-7 rounded-md flex items-center justify-center transition-all duration-150 shrink-0
-                ${pinned
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-accent'
-                }`}
+                ${pinned ? 'bg-primary/10 text-primary' : 'text-muted-foreground/50 hover:text-muted-foreground hover:bg-accent'}`}
             >
               {pinned ? <PanelLeftClose size={15} strokeWidth={1.5} /> : <PanelLeft size={15} strokeWidth={1.5} />}
             </button>
@@ -152,9 +178,7 @@ export function MainLayout() {
             <section key={group.group}>
               {expanded && (
                 <div className={`${ICON_PL} mb-1.5`}>
-                  <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest whitespace-nowrap">
-                    {group.group}
-                  </h3>
+                  <h3 className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest whitespace-nowrap">{group.group}</h3>
                 </div>
               )}
               <div className="flex flex-col">
@@ -168,53 +192,52 @@ export function MainLayout() {
 
         {/* Workspace switcher + User section */}
         <div className={`border-t border-border py-3 ${ICON_PL} pr-3 space-y-2`}>
-          {/* Workspace switcher */}
           <WorkspaceSwitcher expanded={expanded} />
-
-          {/* User */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[11px] shrink-0">
-              {initials}
-            </div>
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[11px] shrink-0">{initials}</div>
             {expanded && (
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-foreground truncate">
-                  {user?.prenom} {user?.nom}
-                </p>
+                <p className="text-[13px] font-semibold text-foreground truncate">{user?.prenom} {user?.nom}</p>
               </div>
             )}
           </div>
           {expanded && (
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-1 py-1.5 text-[12px] text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-md transition-colors"
-            >
-              <LogOut size={14} strokeWidth={1.5} />
-              <span>Déconnexion</span>
+            <button onClick={handleLogout} className="w-full flex items-center gap-2 px-1 py-1.5 text-[12px] text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-md transition-colors">
+              <LogOut size={14} strokeWidth={1.5} /><span>Déconnexion</span>
             </button>
           )}
         </div>
       </aside>
 
       {/* Main content area */}
-      <div
-        style={{ marginLeft: sidebarWidth }}
-        className="min-h-screen transition-[margin-left] duration-200 ease-in-out flex flex-col"
-      >
-        {/* Top header bar — breadcrumb + notification */}
-        <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6 shrink-0 sticky top-0 z-40">
-          <nav className="flex items-center gap-1.5 text-[13px]">
-            {breadcrumbs.map((b, i) => (
-              <span key={i} className="flex items-center gap-1.5">
-                {i > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground/40" />}
-                {i < breadcrumbs.length - 1 ? (
-                  <Link to={b.href!} className="text-muted-foreground hover:text-foreground transition-colors">{b.label}</Link>
-                ) : (
-                  <span className="text-foreground font-medium">{b.label}</span>
-                )}
-              </span>
-            ))}
-          </nav>
+      <div style={{ marginLeft: sidebarWidth }} className="min-h-screen transition-[margin-left] duration-200 ease-in-out flex flex-col">
+        {/* Top header bar — back arrow + breadcrumb + notification */}
+        <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 shrink-0 sticky top-0 z-40">
+          <div className="flex items-center gap-2">
+            {/* Back arrow */}
+            {showBack && (
+              <button
+                onClick={() => navigate(-1)}
+                className="h-8 w-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                title="Retour"
+              >
+                <ArrowLeft size={16} strokeWidth={1.5} />
+              </button>
+            )}
+            {/* Breadcrumbs */}
+            <nav className="flex items-center gap-1.5 text-[13px]">
+              {breadcrumbs.map((b, i) => (
+                <span key={i} className="flex items-center gap-1.5">
+                  {i > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground/40" />}
+                  {i < breadcrumbs.length - 1 && b.href ? (
+                    <Link to={b.href} className="text-muted-foreground hover:text-foreground transition-colors">{b.label}</Link>
+                  ) : (
+                    <span className="text-foreground font-medium">{b.label}</span>
+                  )}
+                </span>
+              ))}
+            </nav>
+          </div>
           <button className="relative h-8 w-8 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
             <Bell size={18} strokeWidth={1.5} />
             <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />
@@ -253,21 +276,13 @@ function WorkspaceSwitcher({ expanded }: { expanded: boolean }) {
   })
 
   if (!workspaces || workspaces.length <= 1) {
-    // Single workspace — just show name
     if (!expanded) return null
-    return (
-      <div className="flex items-center gap-2 px-1 py-1">
-        <span className="text-[11px] text-muted-foreground truncate">{workspace?.nom}</span>
-      </div>
-    )
+    return <div className="flex items-center gap-2 px-1 py-1"><span className="text-[11px] text-muted-foreground truncate">{workspace?.nom}</span></div>
   }
 
   async function handleSwitch(wsId: string) {
     setOpen(false)
-    if (wsId !== workspace?.id) {
-      await switchWorkspace(wsId)
-      window.location.reload()
-    }
+    if (wsId !== workspace?.id) { await switchWorkspace(wsId); window.location.reload() }
   }
 
   if (!expanded) {
@@ -280,21 +295,14 @@ function WorkspaceSwitcher({ expanded }: { expanded: boolean }) {
 
   return (
     <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent transition-colors text-left"
-      >
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-accent transition-colors text-left">
         <span className="text-[12px] font-medium text-foreground truncate flex-1">{workspace?.nom}</span>
         <ChevronsUpDown size={12} className="text-muted-foreground shrink-0" />
       </button>
       {open && (
         <div className="absolute bottom-full left-0 right-0 mb-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden z-50">
           {workspaces.map((ws) => (
-            <button
-              key={ws.id}
-              onClick={() => handleSwitch(ws.id)}
-              className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent transition-colors text-[12px]"
-            >
+            <button key={ws.id} onClick={() => handleSwitch(ws.id)} className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-accent transition-colors text-[12px]">
               <span className="flex-1 truncate font-medium text-foreground">{ws.nom}</span>
               {ws.id === workspace?.id && <Check size={14} className="text-primary shrink-0" />}
             </button>

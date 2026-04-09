@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Archive, ArchiveRestore, Pencil, AlertTriangle, Building2, User, ChevronUp, ChevronDown, Home, Briefcase, ClipboardList } from 'lucide-react'
+import { Archive, ArchiveRestore, Pencil, AlertTriangle, Building2, User, ChevronUp, ChevronDown, Home, Briefcase, ClipboardList, Plus } from 'lucide-react'
 import { Button } from 'src/components/ui/button'
 import { Badge } from 'src/components/ui/badge'
 import { Skeleton } from 'src/components/ui/skeleton'
@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 's
 import { Textarea } from 'src/components/ui/textarea'
 import { FloatingSaveBar } from '../../../components/shared/floating-save-bar'
 import { ConfirmDialog } from '../../../components/shared/confirm-dialog'
+import { ResizeHandle, useResizableColumns } from '../../../components/shared/resizable-columns'
+import { CreateLotModal } from '../../patrimoine/components/create-lot-modal'
 import { useTiersDetail, useUpdateTiers } from '../api'
 import { toast } from 'sonner'
 
@@ -226,40 +228,14 @@ export function TiersDetailPage() {
         </div>
       </CollapsibleSection>
 
-      {/* Section: Lots liés (propriétaire + mandataire) */}
-      {totalLots > 0 && (
-        <CollapsibleSection title={`Lots liés (${totalLots})`} open={openSections.lots} onToggle={() => toggleSection('lots')}>
-          <div className="divide-y divide-border/50">
-            {lotsProprietaire.map(lot => (
-              <div key={lot.id} className="flex items-center justify-between px-5 py-3 hover:bg-accent/30 cursor-pointer transition-colors" onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}>
-                <div className="flex items-center gap-3">
-                  <Home className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{lot.designation}</p>
-                    <p className="text-xs text-muted-foreground">{lot.batiment_designation}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-amber-50 text-amber-700 border-amber-200 text-[10px]">Propriétaire</Badge>
-                  {lot.est_principal && <Badge className="bg-primary/5 text-primary border-primary/30 text-[9px]">Principal</Badge>}
-                </div>
-              </div>
-            ))}
-            {lotsMandataire.map(lot => (
-              <div key={lot.id} className="flex items-center justify-between px-5 py-3 hover:bg-accent/30 cursor-pointer transition-colors" onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}>
-                <div className="flex items-center gap-3">
-                  <Briefcase className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{lot.designation}</p>
-                    <p className="text-xs text-muted-foreground">{lot.batiment_designation}</p>
-                  </div>
-                </div>
-                <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-[10px]">Mandataire</Badge>
-              </div>
-            ))}
-          </div>
-        </CollapsibleSection>
-      )}
+      {/* Lots table — flat, with "Ajouter un lot" */}
+      <LotsTable
+        lotsProprietaire={lotsProprietaire}
+        lotsMandataire={lotsMandataire}
+        tiersId={tiers.id}
+        tiersName={displayName}
+        isArchived={tiers.est_archive}
+      />
 
       {/* Section: Organisations liées (for physique) / Membres (for morale) */}
       {tiers.type_personne === 'physique' && organisations.length > 0 && (
@@ -334,5 +310,100 @@ function InfoRow({ label, value, editing, children }: { label: string; value: Re
       <span className="text-sm text-muted-foreground">{label}</span>
       {editing ? <div>{children}</div> : <span className="text-sm font-medium text-foreground">{value}</span>}
     </div>
+  )
+}
+
+/* ── Lots Table (flat, with "Ajouter un lot") ── */
+function LotsTable({ lotsProprietaire, lotsMandataire, tiersId, tiersName, isArchived }: {
+  lotsProprietaire: Array<{ id: string; designation: string; type_bien: string; batiment_designation: string; est_principal: boolean }>
+  lotsMandataire: Array<{ id: string; designation: string; type_bien: string; batiment_designation: string }>
+  tiersId: string
+  tiersName: string
+  isArchived: boolean
+}) {
+  const navigate = useNavigate()
+  const [showCreateLot, setShowCreateLot] = useState(false)
+  const lotCols = useResizableColumns({ designation: 200, batiment: 180, type: 120, role: 120 })
+
+  const allLots = [
+    ...lotsProprietaire.map(l => ({ ...l, role: 'Propriétaire' as const })),
+    ...lotsMandataire.map(l => ({ ...l, role: 'Mandataire' as const, est_principal: false })),
+  ]
+
+  function goToLot(lotId: string, lotName: string) {
+    navigate(`/app/patrimoine/lots/${lotId}`, {
+      state: {
+        breadcrumbs: [
+          { label: 'Tiers', href: '/app/tiers' },
+          { label: tiersName, href: `/app/tiers/${tiersId}` },
+          { label: lotName },
+        ],
+      },
+    })
+  }
+
+  return (
+    <>
+      <div className="bg-card rounded-xl border border-border shadow-sm">
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-foreground">Lots ({allLots.length})</h2>
+          {!isArchived && (
+            <Button size="sm" onClick={() => setShowCreateLot(true)}>
+              <Plus className="h-3.5 w-3.5 mr-1.5" /> Ajouter un lot
+            </Button>
+          )}
+        </div>
+
+        {/* Table header */}
+        <div className="flex items-center gap-3 px-5 py-2.5 text-xs font-medium text-muted-foreground border-b border-border/50 select-none">
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.designation, minWidth: 40 }}>
+            Désignation
+            <ResizeHandle colId="designation" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.batiment, minWidth: 40 }}>
+            Bâtiment
+            <ResizeHandle colId="batiment" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="relative shrink-0" style={{ width: lotCols.colWidths.type, minWidth: 40 }}>
+            Type
+            <ResizeHandle colId="type" onResizeStart={lotCols.onResizeStart} onResize={lotCols.onResize} />
+          </div>
+          <div className="shrink-0" style={{ width: lotCols.colWidths.role, minWidth: 40 }}>
+            Rôle
+          </div>
+        </div>
+
+        {allLots.length > 0 ? (
+          <div className="divide-y divide-border/30">
+            {allLots.map(lot => (
+              <div
+                key={lot.id + lot.role}
+                className="flex items-center gap-3 px-5 py-3 hover:bg-accent/50 cursor-pointer transition-colors"
+                onClick={() => goToLot(lot.id, lot.designation)}
+              >
+                <div className="shrink-0 text-sm font-medium text-foreground truncate" style={{ width: lotCols.colWidths.designation }}>{lot.designation}</div>
+                <div className="shrink-0 text-sm text-muted-foreground truncate" style={{ width: lotCols.colWidths.batiment }}>{lot.batiment_designation}</div>
+                <div className="shrink-0" style={{ width: lotCols.colWidths.type }}>
+                  <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] capitalize">{lot.type_bien.replace('_', ' ')}</Badge>
+                </div>
+                <div className="shrink-0" style={{ width: lotCols.colWidths.role }}>
+                  <Badge className={lot.role === 'Mandataire' ? 'bg-blue-50 text-blue-700 border-blue-200 text-[10px]' : 'bg-amber-50 text-amber-700 border-amber-200 text-[10px]'}>
+                    {lot.role}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-8 text-center text-muted-foreground text-sm">Aucun lot lié</div>
+        )}
+      </div>
+
+      <CreateLotModal
+        open={showCreateLot}
+        onOpenChange={setShowCreateLot}
+        onCreated={(lotId) => navigate(`/app/patrimoine/lots/${lotId}`)}
+      />
+    </>
   )
 }

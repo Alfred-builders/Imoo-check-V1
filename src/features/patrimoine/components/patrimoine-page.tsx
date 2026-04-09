@@ -388,7 +388,7 @@ function BatimentRow({ batiment, visibleCols, colWidths }: { batiment: Batiment;
     <div className="border-b border-border/50 last:border-b-0">
       <div
         className="flex items-center gap-4 px-4 py-2.5 hover:bg-accent/50 transition-colors cursor-pointer text-sm"
-        onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`)}
+        onClick={() => navigate(`/app/patrimoine/batiments/${batiment.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batiment.designation }], from: view } })}
       >
         <button
           onClick={(e) => { e.stopPropagation(); setExpanded(!expanded) }}
@@ -431,12 +431,12 @@ function BatimentRow({ batiment, visibleCols, colWidths }: { batiment: Batiment;
         )}
       </div>
 
-      {expanded && <LotSubRows batimentId={batiment.id} />}
+      {expanded && <LotSubRows batimentId={batiment.id} batimentName={batiment.designation} />}
     </div>
   )
 }
 
-function LotSubRows({ batimentId }: { batimentId: string }) {
+function LotSubRows({ batimentId, batimentName }: { batimentId: string; batimentName: string }) {
   const { data: lots, isLoading } = useBatimentLots(batimentId)
   const navigate = useNavigate()
 
@@ -471,7 +471,7 @@ function LotSubRows({ batimentId }: { batimentId: string }) {
           <div
             key={lot.id}
             className="grid grid-cols-[1fr_100px_60px_80px_70px_140px] gap-3 pl-10 pr-4 py-2 hover:bg-accent/50 cursor-pointer transition-colors text-xs border-b border-border/30 last:border-b-0 items-center"
-            onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}
+            onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batimentName, href: `/app/patrimoine/batiments/${batimentId}` }, { label: lot.designation }] } })}
           >
             <div className="flex items-center gap-2 min-w-0 group">
               <Home className="h-3 w-3 text-muted-foreground/50 shrink-0" />

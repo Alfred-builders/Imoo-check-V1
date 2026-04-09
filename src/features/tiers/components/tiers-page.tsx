@@ -111,7 +111,10 @@ export function TiersPage() {
         )}
 
         {!isLoading && tiersList.map((tiers) => (
-          <TiersRow key={tiers.id} tiers={tiers} colWidths={colWidths} onClick={() => navigate(`/app/tiers/${tiers.id}`)} />
+          <TiersRow key={tiers.id} tiers={tiers} colWidths={colWidths} onClick={() => {
+            const name = tiers.type_personne === 'morale' ? (tiers.raison_sociale || tiers.nom) : `${tiers.prenom || ''} ${tiers.nom}`.trim()
+            navigate(`/app/tiers/${tiers.id}`, { state: { breadcrumbs: [{ label: 'Tiers', href: '/app/tiers' }, { label: name }] } })
+          }} />
         ))}
       </div>
     </div>

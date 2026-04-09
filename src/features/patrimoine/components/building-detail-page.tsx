@@ -320,7 +320,7 @@ export function BuildingDetailPage() {
         {lots && lots.length > 0 ? (
           <div className="divide-y divide-border/30">
             {lots.map((lot) => (
-              <div key={lot.id} className="flex items-center gap-3 px-5 py-3 hover:bg-accent/50 cursor-pointer transition-colors" onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`)}>
+              <div key={lot.id} className="flex items-center gap-3 px-5 py-3 hover:bg-accent/50 cursor-pointer transition-colors" onClick={() => navigate(`/app/patrimoine/lots/${lot.id}`, { state: { breadcrumbs: [{ label: 'Parc immobilier', href: '/app/patrimoine' }, { label: batiment.designation, href: `/app/patrimoine/batiments/${batiment.id}` }, { label: lot.designation }] } })}>
                 <div className="shrink-0 text-sm font-medium text-foreground truncate" style={{ width: lotCols.colWidths.designation }}>{lot.designation}</div>
                 <div className="shrink-0" style={{ width: lotCols.colWidths.type }}>
                   <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] capitalize">{lot.type_bien.replace('_', ' ')}</Badge>
